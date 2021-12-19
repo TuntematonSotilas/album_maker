@@ -1,9 +1,9 @@
 [package]
 version = "0.1.0"
-name = "{{project-name}}"
-repository = "https://github.com/seed-rs/seed-quickstart"
-authors = ["{{authors}}"]
-description = "App Description"
+name = "album_maker"
+repository = "https://github.com/TuntematonSotilas/album_maker"
+authors = ["TuntematonSotilas"]
+description = "Album maker"
 categories = ["category"]
 license = "MIT"
 readme = "./README.md"
