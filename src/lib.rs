@@ -31,9 +31,7 @@ struct Model {}
 enum Msg {}
 
 // `update` describes how to handle each `Msg`.
-fn update(_msg: Msg, _model: &mut Model, _: &mut impl Orders<Msg>) {
-    
-}
+fn update(_msg: Msg, _model: &mut Model, _: &mut impl Orders<Msg>) {}
 
 // ------ ------
 //     View

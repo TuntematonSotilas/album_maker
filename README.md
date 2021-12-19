@@ -34,3 +34,5 @@ Update Service
 ```sh
 koyeb service update amaker -a amaker --docker "tuntematonsotilas/gbt:amaker" --docker-private-registry-secret docker-hub-credentials
 ```
+
+Koyeb CLI needs an authentication for pivate DockerHub : [koyeb doc](https://www.koyeb.com/docs/apps/private-container-registry-secrets#dockerhub)
