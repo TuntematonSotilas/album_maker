@@ -3,7 +3,10 @@
 // but some rules are too "annoying" or are not applicable for your case.)
 #![allow(clippy::wildcard_imports)]
 
+use load_dotenv::load_dotenv;
 use seed::{prelude::*, *};
+
+load_dotenv!();
 
 // ------ ------
 //     Init
@@ -11,6 +14,9 @@ use seed::{prelude::*, *};
 
 // `init` describes what should happen when your app started.
 fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
+	let auth_domain = env!("AUTH_DOMAIN", "Cound not find AUTH_DOMAIN in .env");
+	let auth_client_id = env!("AUTH_CLIENT_ID", "Cound not find AUTH_CLIENT_ID in .env");
+	log!("{0}, {1}", auth_domain, auth_client_id);
     Model {}
 }
 

@@ -17,6 +17,7 @@ wasm-bindgen-test = "0.3.18"
 
 [dependencies]
 seed = "0.8.0"
+load-dotenv = "0.1.2"
 
 [profile.release]
 lto = true
