@@ -6,6 +6,10 @@
 use load_dotenv::load_dotenv;
 use seed::{prelude::*, *};
 
+use crate::models::user::User;
+
+mod models;
+
 load_dotenv!();
 
 // ------ ------
@@ -13,11 +17,12 @@ load_dotenv!();
 // ------ ------
 
 // `init` describes what should happen when your app started.
-fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
-	let auth_domain = env!("AUTH_DOMAIN", "Cound not find AUTH_DOMAIN in .env");
-	let auth_client_id = env!("AUTH_CLIENT_ID", "Cound not find AUTH_CLIENT_ID in .env");
-	log!("{0}, {1}", auth_domain, auth_client_id);
-    Model {}
+fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
+	orders.send_msg(Msg::Auth);
+    Model { 
+		user: None,
+		base_url: url
+	}
 }
 
 // ------ ------
@@ -25,19 +30,56 @@ fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
 // ------ ------
 
 // `Model` describes our app state.
-struct Model {}
+struct Model {
+	user: Option<User>,
+	base_url: Url,
+}
 
 // ------ ------
 //    Update
 // ------ ------
 
 // (Remove the line below once any of your `Msg` variants doesn't implement `Copy`.)
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 // `Msg` describes the different events you can modify state with.
-enum Msg {}
+enum Msg {
+	Auth,
+    AuthInitialized(Result<JsValue, JsValue>),
+}
 
 // `update` describes how to handle each `Msg`.
-fn update(_msg: Msg, _model: &mut Model, _: &mut impl Orders<Msg>) {}
+fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
+	match msg {
+		Msg::Auth => {
+			orders.perform_cmd(async { 
+				let auth_domain = env!("AUTH_DOMAIN", "Cound not find AUTH_DOMAIN in .env");
+				let auth_client_id = env!("AUTH_CLIENT_ID", "Cound not find AUTH_CLIENT_ID in .env");
+				Msg::AuthInitialized(
+					init_auth(auth_domain.to_owned(), auth_client_id.to_owned()).await
+				)
+			});
+		},
+		Msg::AuthInitialized(Ok(user)) => {
+            if not(user.is_undefined()) {
+                match serde_wasm_bindgen::from_value(user) {
+                    Ok(user) => {
+						log!("auth :", user);
+						model.user = Some(user)
+					},
+                    Err(error) => error!("User deserialization failed!", error),
+                }
+            }
+
+            let search = model.base_url.search_mut();
+            if search.remove("code").is_some() && search.remove("state").is_some() {        
+                model.base_url.go_and_replace();
+            }
+        },
+        Msg::AuthInitialized(Err(error)) => {
+            error!("Auth initialization failed!", error);
+        },
+	}
+}
 
 // ------ ------
 //     View
@@ -57,4 +99,10 @@ fn view(_model: &Model) -> Node<Msg> {
 pub fn start() {
     // Mount the `app` to the element with the `id` "app".
     App::start("app", init, update, view);
+}
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(catch)]
+    async fn init_auth(domain: String, client_id: String) -> Result<JsValue, JsValue>;
 }
