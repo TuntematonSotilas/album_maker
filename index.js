@@ -18,4 +18,23 @@ window.init_auth = async (domain, client_id) => {
     }
 }
 
+window.redirect_to_sign_up = async () => {
+    await auth0.loginWithRedirect({
+        redirect_uri: window.location.origin,
+        screen_hint: "signup"
+    });
+}
+
+window.redirect_to_log_in = async () => {
+    await auth0.loginWithRedirect({
+        redirect_uri: window.location.origin,
+    });
+}
+
+window.logout = () => {
+    auth0.logout({
+        returnTo: window.location.origin
+    });
+}
+
 init('/pkg/package_bg.wasm');

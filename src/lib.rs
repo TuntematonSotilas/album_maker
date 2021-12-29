@@ -18,7 +18,7 @@ load_dotenv!();
 
 // `init` describes what should happen when your app started.
 fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
-	orders.send_msg(Msg::Auth);
+	orders.send_msg(Msg::InitAuth);
     Model { 
 		user: None,
 		base_url: url
@@ -43,14 +43,20 @@ struct Model {
 #[derive(Clone)]
 // `Msg` describes the different events you can modify state with.
 enum Msg {
-	Auth,
+	InitAuth,
     AuthInitialized(Result<JsValue, JsValue>),
+	SignUp,
+    LogIn,
+    LogOut,
+    RedirectingToSignUp(Result<(), JsValue>),
+    RedirectingToLogIn(Result<(), JsValue>),
 }
 
 // `update` describes how to handle each `Msg`.
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
-		Msg::Auth => {
+		Msg::InitAuth => {
+			log!("InitAuth");
 			orders.perform_cmd(async { 
 				let auth_domain = env!("AUTH_DOMAIN", "Cound not find AUTH_DOMAIN in .env");
 				let auth_client_id = env!("AUTH_CLIENT_ID", "Cound not find AUTH_CLIENT_ID in .env");
@@ -78,6 +84,33 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::AuthInitialized(Err(error)) => {
             error!("Auth initialization failed!", error);
         },
+		Msg::SignUp => {
+            orders.perform_cmd(async { Msg::RedirectingToSignUp(
+                redirect_to_sign_up().await
+            )});
+        },
+        Msg::LogIn => {
+            orders.perform_cmd(async { Msg::RedirectingToLogIn(
+                redirect_to_log_in().await
+            )});
+        },
+        Msg::RedirectingToSignUp(result) => {
+            if let Err(error) = result {
+                error!("Redirect to sign up failed!", error);
+            }
+        },
+        Msg::RedirectingToLogIn(result) => {
+            if let Err(error) = result {
+                error!("Redirect to log in failed!", error);
+            }
+        }
+        Msg::LogOut => {
+            if let Err(error) = logout() {
+                error!("Cannot log out!", error);
+            } else {
+                model.user = None;
+            }
+        },
 	}
 }
 
@@ -87,7 +120,12 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 
 // `view` describes what to display.
 fn view(_model: &Model) -> Node<Msg> {
-    div![]
+    div![
+		a![
+            "Log in",
+            ev(Ev::Click, |_| Msg::LogIn),
+        ]
+	]
 }
 
 // ------ ------
@@ -105,4 +143,13 @@ pub fn start() {
 extern "C" {
     #[wasm_bindgen(catch)]
     async fn init_auth(domain: String, client_id: String) -> Result<JsValue, JsValue>;
+	
+	#[wasm_bindgen(catch)]
+	async fn redirect_to_sign_up() -> Result<(), JsValue>;
+
+	#[wasm_bindgen(catch)]
+	async fn redirect_to_log_in() -> Result<(), JsValue>;
+
+	#[wasm_bindgen(catch)]
+	fn logout() -> Result<(), JsValue>;
 }
