@@ -45,10 +45,8 @@ struct Model {
 enum Msg {
 	InitAuth,
     AuthInitialized(Result<JsValue, JsValue>),
-	SignUp,
     LogIn,
     LogOut,
-    RedirectingToSignUp(Result<(), JsValue>),
     RedirectingToLogIn(Result<(), JsValue>),
 }
 
@@ -56,7 +54,7 @@ enum Msg {
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
 		Msg::InitAuth => {
-			log!("InitAuth");
+			orders.skip(); // No need to rerender
 			orders.perform_cmd(async { 
 				let auth_domain = env!("AUTH_DOMAIN", "Cound not find AUTH_DOMAIN in .env");
 				let auth_client_id = env!("AUTH_CLIENT_ID", "Cound not find AUTH_CLIENT_ID in .env");
@@ -69,7 +67,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             if not(user.is_undefined()) {
                 match serde_wasm_bindgen::from_value(user) {
                     Ok(user) => {
-						log!("auth :", user);
 						model.user = Some(user)
 					},
                     Err(error) => error!("User deserialization failed!", error),
@@ -84,20 +81,10 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::AuthInitialized(Err(error)) => {
             error!("Auth initialization failed!", error);
         },
-		Msg::SignUp => {
-            orders.perform_cmd(async { Msg::RedirectingToSignUp(
-                redirect_to_sign_up().await
-            )});
-        },
         Msg::LogIn => {
             orders.perform_cmd(async { Msg::RedirectingToLogIn(
                 redirect_to_log_in().await
             )});
-        },
-        Msg::RedirectingToSignUp(result) => {
-            if let Err(error) = result {
-                error!("Redirect to sign up failed!", error);
-            }
         },
         Msg::RedirectingToLogIn(result) => {
             if let Err(error) = result {
@@ -119,12 +106,25 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 
 // `view` describes what to display.
-fn view(_model: &Model) -> Node<Msg> {
-    div![
-		a![
-            "Log in",
-            ev(Ev::Click, |_| Msg::LogIn),
-        ]
+fn view(model: &Model) -> Node<Msg> {
+	div![
+		if let Some(user) = &model.user { 
+			div![
+				format!("Hello {0}", user.name),
+				hr![],
+				a![
+					"Log out",
+					ev(Ev::Click, |_| Msg::LogOut),
+				]
+			]
+		} else {
+			div![
+				a![
+					"Log in",
+					ev(Ev::Click, |_| Msg::LogIn)
+				]
+			]
+		}
 	]
 }
 
@@ -143,13 +143,10 @@ pub fn start() {
 extern "C" {
     #[wasm_bindgen(catch)]
     async fn init_auth(domain: String, client_id: String) -> Result<JsValue, JsValue>;
-	
-	#[wasm_bindgen(catch)]
-	async fn redirect_to_sign_up() -> Result<(), JsValue>;
 
 	#[wasm_bindgen(catch)]
 	async fn redirect_to_log_in() -> Result<(), JsValue>;
-
+	
 	#[wasm_bindgen(catch)]
 	fn logout() -> Result<(), JsValue>;
 }
