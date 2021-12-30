@@ -1,9 +1,12 @@
 /* Fonts */
 @import url(https://fonts.googleapis.com/css2?family=Raleway&display=swap);
+@import url(https://fonts.googleapis.com/css2?family=Ultra&display=swap);
+@import url(https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&family=Ultra&display=swap);
 /* Componenent */
 @import url(header.css);
 
 body {
-    background-color: gainsboro;
+	margin: 0;
+    background-color: #e8f7ff;
 	font-family: Raleway;
 }

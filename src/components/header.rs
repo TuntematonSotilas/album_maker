@@ -5,6 +5,8 @@ use crate::models::user::User;
 
 load_dotenv!();
 
+const TITLE: &str = "Album maker";
+
 // ------ ------
 //     Model
 // ------ -----
@@ -29,8 +31,9 @@ impl Model {
 pub enum Msg {
 	InitAuth,
 	AuthInitialized(Result<JsValue, JsValue>),
-	LogIn,
 	RedirectingToLogIn(Result<(), JsValue>),
+	LogInOrOut,
+	LogIn,
 	LogOut,
 }
 
@@ -64,15 +67,21 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 		Msg::AuthInitialized(Err(error)) => {
             error!("Auth initialization failed!", error);
         },
-		Msg::LogIn => {
-            orders.perform_cmd(async { Msg::RedirectingToLogIn(
-                redirect_to_log_in().await
-            )});
-        },
 		Msg::RedirectingToLogIn(result) => {
             if let Err(error) = result {
                 error!("Redirect to log in failed!", error);
             }
+        },
+		Msg::LogInOrOut => {
+			match model.user.is_some() {
+				true => {orders.send_msg(Msg::LogOut);},
+				false => {orders.send_msg(Msg::LogIn);},
+			}
+		},
+		Msg::LogIn => {
+            orders.perform_cmd(async { Msg::RedirectingToLogIn(
+                redirect_to_log_in().await
+            )});
         },
 		Msg::LogOut => {
             if let Err(error) = logout() {
@@ -89,25 +98,23 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
 	div![
-		C!["header"],
-		span!["header"],
-		if let Some(user) = &model.user { 
-			div![
-				format!("Hello {0}", user.name),
-				hr![],
-				a![
-					"Log out",
-					ev(Ev::Click, |_| Msg::LogOut),
-				]
+		C!("header"),
+		div![C!("header__title"), 
+			TITLE
+		],
+		div![				
+			IF!(model.user.is_some() => div![
+				C!("header__name"), 
+				&model.user.as_ref().unwrap().name
+			]),
+			button![C!("header__btn"), 
+				match model.user.is_some() {
+					true => "LOGOUT",
+					false => "LOGIN",
+				},
+				ev(Ev::Click, |_| Msg::LogInOrOut),
 			]
-		} else {
-			div![
-				a![
-					"Log in",
-					ev(Ev::Click, |_| Msg::LogIn)
-				]
-			]
-		}
+		]
 	]
 }
 

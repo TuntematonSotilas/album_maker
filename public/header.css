@@ -1,3 +1,27 @@
 .header {
-	background-color: blueviolet;
+	background-color: #e6e6e6;
+	height: 3rem;
+	display: flex;
+	padding: 0.5rem;
+}
+
+.header__title {
+	font-family: Ultra;
+}
+
+.header__btn {
+	font-family: Ubuntu;
+	font-size: 1em;
+	border: none;
+	background-color: #827ffe;
+	border-radius: 0.1em;
+	width: 5rem;
+	height: 2.2rem;
+	color: #fff;
+	cursor: pointer;
+	transition: all 0.4s;
+}
+
+.header__btn:hover {
+	background-color: #403866;
 }
