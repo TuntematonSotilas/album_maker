@@ -1,0 +1,9 @@
+/* Fonts */
+@import url(https://fonts.googleapis.com/css2?family=Raleway&display=swap);
+/* Componenent */
+@import url(header.css);
+
+body {
+    background-color: gainsboro;
+	font-family: Raleway;
+}

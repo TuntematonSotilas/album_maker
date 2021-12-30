@@ -89,6 +89,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
 	div![
+		C!["header"],
 		span!["header"],
 		if let Some(user) = &model.user { 
 			div![
