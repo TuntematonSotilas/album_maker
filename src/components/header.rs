@@ -97,22 +97,38 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
-	div![
-		C!("header"),
-		div![C!("header__title"), 
-			TITLE
+	nav![C!("navbar"),
+		attrs!{ At::AriaLabel => "main navigation" },
+		div![C!("navbar-brand"),
+			a![C!("navbar-item"),
+				attrs!{ At::Href => "/" },
+				div![C!("header__title"), TITLE]
+			],
+			a![C!("navbar-burger"),
+				attrs!{ At::AriaLabel => "menu" },
+      			span![attrs!{ At::AriaHidden => "true" }],
+				span![attrs!{ At::AriaHidden => "true" }],
+				span![attrs!{ At::AriaHidden => "true" }],
+			],
 		],
-		div![				
-			IF!(model.user.is_some() => div![
-				C!("header__name"), 
-				&model.user.as_ref().unwrap().name
-			]),
-			button![C!("header__btn"), 
-				match model.user.is_some() {
-					true => "LOGOUT",
-					false => "LOGIN",
-				},
-				ev(Ev::Click, |_| Msg::LogInOrOut),
+		div![C!("navbar-menu"),
+			div![C!("navbar-end"),
+				IF!(model.user.is_some() => div![C!("navbar-item"),
+					&model.user.as_ref().unwrap().name
+				]),
+				div![C!("navbar-item"),
+					div![C!("buttons"),
+						a![C!("button is-primary"),
+							b![
+								match model.user.is_some() {
+									true => "LOGOUT",
+									false => "LOGIN",
+								}
+							],
+							ev(Ev::Click, |_| Msg::LogInOrOut),
+						]
+					]
+				]
 			]
 		]
 	]
