@@ -1,4 +1,21 @@
-.header__title {
+.htitle {
 	font-family: Ultra;
-	color: #52c883;
+	font-size: 3rem;
+	position: relative;
+	text-align: center;
+}
+
+.htitle div {
+	background: linear-gradient(to top, hsl(204, 86%, 53%) 0%, hsl(171, 100%, 41%) 60%);
+	background-clip: text;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	position: absolute; 
+    width: 100%;
+}
+
+.htitle:after {
+	text-shadow: 0.03em 0.07em 0 hsl(216.9, 12%, 42.4%);
+	color: transparent;
+	content: "Album maker";
 }

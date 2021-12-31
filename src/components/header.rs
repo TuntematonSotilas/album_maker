@@ -102,7 +102,9 @@ pub fn view(model: &Model) -> Node<Msg> {
 		div![C!("navbar-brand"),
 			a![C!("navbar-item"),
 				attrs!{ At::Href => "/" },
-				div![C!("header__title"), TITLE]
+				div![C!("htitle"), 
+					div![TITLE]
+				],
 			],
 			a![C!("navbar-burger"),
 				attrs!{ At::AriaLabel => "menu" },
