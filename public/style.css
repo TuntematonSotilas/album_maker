@@ -4,5 +4,8 @@
 /* Bulma */
 @import url(https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css);
 
+/* Icons */
+@import url(https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css);
+
 /* Componeents */
 @import url(header.css);

@@ -15,6 +15,7 @@ pub struct Model {
 	user: Option<User>,
 	base_url: Url,
 	is_menu_open: bool,
+	initial: Option<String>,
 }
 
 impl Model {
@@ -23,6 +24,7 @@ impl Model {
 			user: None, 
 			base_url: base_url,
 			is_menu_open: false,
+			initial: None,
 		}
 	}
 }
@@ -52,12 +54,13 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 				)
 			});
 		},
-		Msg::AuthInitialized(Ok(user)) => {
-            if not(user.is_undefined()) {
-                match serde_wasm_bindgen::from_value(user) {
-                    Ok(user) => {
-						log!(user);
-						model.user = Some(user)
+		Msg::AuthInitialized(Ok(value)) => {
+            if not(value.is_undefined()) {
+                match serde_wasm_bindgen::from_value(value) {
+                    Ok(value) => {
+						let user: User = value;
+						model.user = Some(user.to_owned());
+						model.initial = Some(user.to_owned().name.chars().next().unwrap_or_default().to_string());
 					},
                     Err(error) => error!("User deserialization failed!", error),
                 }
@@ -128,13 +131,26 @@ pub fn view(model: &Model) -> Node<Msg> {
 			],
 		],
 		div![C!["navbar-menu", menu_is_active],
+			a![C!("navbar-item"),
+		        "My albums"
+			],
+			a![C!("navbar-item"),
+				div![C!("buttons"),
+					div![C!("button is-primary"),
+						span![C!("icon"),
+							i![C!("ion-plus")]
+						],
+						span!["New album"],
+					],
+				],
+			],
 			div![C!("navbar-end"),
 				IF!(model.user.is_some() => div![C!("navbar-item"),
 					&model.user.as_ref().unwrap().name
 				]),
 				div![C!("navbar-item"),
 					div![C!("buttons"),
-						a![C!("button is-primary"),
+						a![C!("button is-light"),
 							b![
 								match model.user.is_some() {
 									true => "LOGOUT",
