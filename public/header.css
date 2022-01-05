@@ -1,12 +1,11 @@
 .htitle {
 	font-family: Ultra;
-	font-size: 3rem;
+	font-size: 1.5rem;
 	position: relative;
-	text-align: center;
 }
 
 .htitle div {
-	background: linear-gradient(to top, hsl(204, 86%, 53%) 0%, hsl(171, 100%, 41%) 60%);
+	background: linear-gradient(to top, #209CEE 0%, #00D1B2 60%);
 	background-clip: text;
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
@@ -15,7 +14,7 @@
 }
 
 .htitle:after {
-	text-shadow: 0.03em 0.07em 0 hsl(216.9, 12%, 42.4%);
+	text-shadow: 0.04em 0.04em 0 #5f6979;
 	color: transparent;
 	content: "Album maker";
 }

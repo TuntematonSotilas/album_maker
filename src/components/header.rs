@@ -14,13 +14,15 @@ const TITLE: &str = "Album maker";
 pub struct Model {
 	user: Option<User>,
 	base_url: Url,
+	is_menu_open: bool,
 }
 
 impl Model {
 	pub fn new(base_url: Url) -> Self {
 		Model { 
 			user: None, 
-			base_url: base_url
+			base_url: base_url,
+			is_menu_open: false,
 		}
 	}
 }
@@ -35,6 +37,7 @@ pub enum Msg {
 	LogInOrOut,
 	LogIn,
 	LogOut,
+	OpenOrCloseMenu,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -90,6 +93,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 model.user = None;
             }
         },
+		Msg::OpenOrCloseMenu => {
+			model.is_menu_open = !model.is_menu_open;
+		}
 	}
 }
 
@@ -97,6 +103,10 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
+	let menu_is_active = match &model.is_menu_open {
+		true => "is-active",
+		false => ""
+	};
 	nav![C!("navbar"),
 		attrs!{ At::AriaLabel => "main navigation" },
 		div![C!("navbar-brand"),
@@ -106,14 +116,18 @@ pub fn view(model: &Model) -> Node<Msg> {
 					div![TITLE]
 				],
 			],
-			a![C!("navbar-burger"),
-				attrs!{ At::AriaLabel => "menu" },
+			a![C!["navbar-burger", menu_is_active],
+				attrs!{ 
+					At::AriaLabel => "menu", 
+					At::AriaExpanded => &model.is_menu_open
+				},
       			span![attrs!{ At::AriaHidden => "true" }],
 				span![attrs!{ At::AriaHidden => "true" }],
 				span![attrs!{ At::AriaHidden => "true" }],
+				ev(Ev::Click, |_| Msg::OpenOrCloseMenu),
 			],
 		],
-		div![C!("navbar-menu"),
+		div![C!["navbar-menu", menu_is_active],
 			div![C!("navbar-end"),
 				IF!(model.user.is_some() => div![C!("navbar-item"),
 					&model.user.as_ref().unwrap().name
