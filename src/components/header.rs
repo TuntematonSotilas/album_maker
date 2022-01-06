@@ -153,6 +153,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 									attrs!{ 
 										At::Src => model.user.as_ref().unwrap().picture,
 										At::Alt => model.user.as_ref().unwrap().name,
+										At::Title => model.user.as_ref().unwrap().name,
 										At::ReferrerPolicy => "no-referrer",
 									}
 								]
