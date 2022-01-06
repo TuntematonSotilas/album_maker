@@ -15,7 +15,7 @@ pub struct Model {
 	user: Option<User>,
 	base_url: Url,
 	is_menu_open: bool,
-	initial: Option<String>,
+	user_initial: Option<String>,
 }
 
 impl Model {
@@ -24,7 +24,7 @@ impl Model {
 			user: None, 
 			base_url: base_url,
 			is_menu_open: false,
-			initial: None,
+			user_initial: None,
 		}
 	}
 }
@@ -60,7 +60,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     Ok(value) => {
 						let user: User = value;
 						model.user = Some(user.to_owned());
-						model.initial = Some(user.to_owned().name.chars().next().unwrap_or_default().to_string());
+						model.user_initial = Some(user.to_owned().name.chars().next().unwrap_or_default().to_string());
 					},
                     Err(error) => error!("User deserialization failed!", error),
                 }
@@ -145,11 +145,19 @@ pub fn view(model: &Model) -> Node<Msg> {
 				],
 			],
 			div![C!("navbar-end"),
-				IF!(model.user.is_some() => div![C!("navbar-item"),
-					&model.user.as_ref().unwrap().name
-				]),
 				div![C!("navbar-item"),
 					div![C!("buttons"),
+						IF!(model.user.is_some() => 
+							figure![C!("image is-24x24 htitle-avatar"),
+								img![C!("is-rounded"), 
+									attrs!{ 
+										At::Src => model.user.as_ref().unwrap().picture,
+										At::Alt => model.user.as_ref().unwrap().name,
+										At::ReferrerPolicy => "no-referrer",
+									}
+								]
+							]
+						),
 						a![C!("button is-light"),
 							b![
 								match model.user.is_some() {
