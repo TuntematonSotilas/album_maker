@@ -9,6 +9,9 @@ use crate::components::header;
 mod models;
 mod components;
 
+const MY_ALBUMS: &str = "my-albums";
+const NEW_ALBUM: &str = "new-album";
+
 // ------ ------
 //     Init
 // ------ ------
@@ -17,6 +20,22 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
     Model {
 		header: header::Model::new(url)
 	}
+}
+
+// ------ ------
+//     Urls
+// ------ ------
+struct_urls!();
+impl<'a> Urls<'a> {
+    fn home(self) -> Url {
+        self.base_url()
+    }
+	fn my_albums(self) -> Url {
+        self.base_url().add_path_part(MY_ALBUMS)
+    }
+	fn new_album(self) -> Url {
+        self.base_url().add_path_part(NEW_ALBUM)
+    }
 }
 
 // ------ ------
