@@ -11,7 +11,7 @@ const TITLE: &str = "Album maker";
 //     Model
 // ------ -----
 pub struct Model {
-	user: Option<User>,
+	pub user: Option<User>,
 	base_url: Url,
 	is_menu_open: bool,
 	user_initial: Option<String>,

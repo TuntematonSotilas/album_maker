@@ -74,10 +74,15 @@ fn view(model: &Model) -> Node<Msg> {
 	div![
 		header::view(&model.header).map_msg(Msg::Header),
 		div![C!("container"),
-			match &model.page {
-				models::page::Page::NewAlbum => new_album::view(&model.new_album),
-				models::page::Page::MyAlbums => empty!(),
-			}
+			match &model.header.user {
+				Some(_) => {
+					match &model.page {
+						models::page::Page::NewAlbum => new_album::view(&model.new_album),
+						models::page::Page::MyAlbums => empty!(),
+					}
+				},
+				None => not_logged::view(),
+			},
 		]
 	]
 }
