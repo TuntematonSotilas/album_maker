@@ -132,11 +132,11 @@ pub fn view(model: &Model) -> Node<Msg> {
 			],
 		],
 		div![C!["navbar-menu", menu_is_active],
-			a![C!("navbar-item"),
+			a![C!["navbar-item", "is-tab", IF!(matches!(model.page, Page::MyAlbums) => "is-active")],
 				attrs! { At::Href => MY_ALBUMS },
 		        "My albums"
 			],
-			a![C!["navbar-item", "is-tab", IF!(matches!(model.page, Page::NewAlbum) => "is-active"),],
+			a![C!("navbar-item"),
 				div![C!("buttons"),
 					a![C!("button is-primary"),
 						attrs!{ At::Href => NEW_ALBUM },
