@@ -1,7 +1,7 @@
 use seed::{self, prelude::*, *};
 use load_dotenv::load_dotenv;
 
-use crate::models::user::User;
+use crate::models::{user::User, urls::{NEW_ALBUM, MY_ALBUMS}};
 
 load_dotenv!();
 
@@ -132,11 +132,13 @@ pub fn view(model: &Model) -> Node<Msg> {
 		],
 		div![C!["navbar-menu", menu_is_active],
 			a![C!("navbar-item"),
+				attrs! { At::Href => MY_ALBUMS },
 		        "My albums"
 			],
 			a![C!("navbar-item"),
 				div![C!("buttons"),
-					div![C!("button is-primary"),
+					a![C!("button is-primary"),
+						attrs!{ At::Href => NEW_ALBUM },
 						span![C!("icon"),
 							i![C!("ion-plus")]
 						],
@@ -151,9 +153,9 @@ pub fn view(model: &Model) -> Node<Msg> {
 							figure![C!("image is-24x24 htitle-avatar"),
 								img![C!("is-rounded"), 
 									attrs!{ 
-										At::Src => model.user.as_ref().unwrap().picture,
-										At::Alt => model.user.as_ref().unwrap().name,
-										At::Title => model.user.as_ref().unwrap().name,
+										At::Src => model.user.to_owned().unwrap().picture,
+										At::Alt => model.user.to_owned().unwrap().name,
+										At::Title => model.user.to_owned().unwrap().name,
 										At::ReferrerPolicy => "no-referrer",
 									}
 								]
