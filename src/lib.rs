@@ -4,7 +4,7 @@
 #![allow(clippy::wildcard_imports)]
 
 use seed::{prelude::*, *};
-use crate::components::header;
+use crate::components::*;
 
 mod models;
 mod components;
@@ -21,6 +21,7 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
 	let page = models::page::Page::init(url.to_owned());
     Model {
 		header: header::Model::new(url.to_owned(), page.to_owned()),
+		new_album: new_album::Model::default(),
 		page: page.to_owned(),
 	}
 }
@@ -31,6 +32,7 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
 struct Model {
 	header: header::Model,
 	page: models::page::Page,
+	new_album: new_album::Model,
 }
 
 // ------ ------
@@ -38,6 +40,7 @@ struct Model {
 // ------ ------
 enum Msg {
 	Header(header::Msg),
+	NewAlbum(new_album::Msg),
 	InitAuth,
 	UrlChanged(subs::UrlChanged),
 }
@@ -50,6 +53,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 		Msg::Header(msg) => {
 			header::update(msg, &mut model.header, &mut orders.proxy(Msg::Header));
 		},
+		Msg::NewAlbum(msg) => {
+			new_album::update(msg, &mut model.new_album, &mut orders.proxy(Msg::NewAlbum));
+		},
 		Msg::UrlChanged(subs::UrlChanged(mut url)) => {
 			let page = match url.next_hash_path_part(){
 				Some(models::page::MY_ALBUMS) => models::page::Page::MyAlbums,
@@ -61,17 +67,16 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	}
 }
 
-
 // ------ ------
 //     View
 // ------ ------
 fn view(model: &Model) -> Node<Msg> {
 	div![
 		header::view(&model.header).map_msg(Msg::Header),
-		span![
+		div![C!("container"),
 			match &model.page {
-				models::page::Page::NewAlbum => models::page::NEW_ALBUM,
-				models::page::Page::MyAlbums => models::page::MY_ALBUMS,
+				models::page::Page::NewAlbum => new_album::view(&model.new_album),
+				models::page::Page::MyAlbums => empty!(),
 			}
 		]
 	]

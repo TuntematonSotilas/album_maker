@@ -20,7 +20,7 @@ pub struct Model {
 
 impl Model {
 	pub fn new(base_url: Url, page: Page) -> Self {
-		Model { 
+		Self { 
 			user: None, 
 			base_url: base_url,
 			is_menu_open: false,
@@ -136,7 +136,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 				attrs! { At::Href => MY_ALBUMS },
 		        "My albums"
 			],
-			a![C!("navbar-item"),
+			div![C!("navbar-item"),
 				div![C!("buttons"),
 					a![C!("button is-primary"),
 						attrs!{ At::Href => NEW_ALBUM },
