@@ -1,7 +1,7 @@
 use seed::{self, prelude::*, *};
 use load_dotenv::load_dotenv;
 
-use crate::models::{user::User, urls::{NEW_ALBUM, MY_ALBUMS}};
+use crate::models::{user::User, page::{NEW_ALBUM, MY_ALBUMS, Page}};
 
 load_dotenv!();
 
@@ -10,21 +10,22 @@ const TITLE: &str = "Album maker";
 // ------ ------
 //     Model
 // ------ -----
-#[derive(Default)]
 pub struct Model {
 	user: Option<User>,
 	base_url: Url,
 	is_menu_open: bool,
 	user_initial: Option<String>,
+	page: Page,
 }
 
 impl Model {
-	pub fn new(base_url: Url) -> Self {
+	pub fn new(base_url: Url, page: Page) -> Self {
 		Model { 
 			user: None, 
 			base_url: base_url,
 			is_menu_open: false,
 			user_initial: None,
+			page: page,
 		}
 	}
 }
@@ -135,7 +136,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 				attrs! { At::Href => MY_ALBUMS },
 		        "My albums"
 			],
-			a![C!("navbar-item"),
+			a![C!["navbar-item", "is-tab", IF!(matches!(model.page, Page::NewAlbum) => "is-active"),],
 				div![C!("buttons"),
 					a![C!("button is-primary"),
 						attrs!{ At::Href => NEW_ALBUM },
