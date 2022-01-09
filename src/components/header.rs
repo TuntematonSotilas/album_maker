@@ -1,7 +1,7 @@
 use seed::{self, prelude::*, *};
 use load_dotenv::load_dotenv;
 
-use crate::models::{user::User, page::{NEW_ALBUM, MY_ALBUMS, Page}};
+use crate::models::{user::User, page::{LK_NEW_ALBUM, LK_MY_ALBUMS, Page, TXT_NEW_ALBUM}};
 
 load_dotenv!();
 
@@ -133,17 +133,17 @@ pub fn view(model: &Model) -> Node<Msg> {
 		],
 		div![C!["navbar-menu", menu_is_active],
 			a![C!["navbar-item", "is-tab", IF!(matches!(model.page, Page::MyAlbums) => "is-active")],
-				attrs! { At::Href => MY_ALBUMS },
+				attrs! { At::Href => LK_MY_ALBUMS },
 		        "My albums"
 			],
 			div![C!("navbar-item"),
 				div![C!("buttons"),
-					a![C!("button is-primary"),
-						attrs!{ At::Href => NEW_ALBUM },
+					a![C!["button", "is-primary"],
+						attrs!{ At::Href => LK_NEW_ALBUM },
 						span![C!("icon"),
 							i![C!("ion-plus")]
 						],
-						span!["New album"],
+						span![TXT_NEW_ALBUM],
 					],
 				],
 			],
@@ -151,7 +151,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 				div![C!("navbar-item"),
 					div![C!("buttons"),
 						IF!(model.user.is_some() => 
-							figure![C!("image is-24x24 htitle-avatar"),
+							figure![C!["image", "is-24x24", "htitle-avatar"],
 								img![C!("is-rounded"), 
 									attrs!{ 
 										At::Src => model.user.to_owned().unwrap().picture,
@@ -162,7 +162,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 								]
 							]
 						),
-						a![C!("button is-light"),
+						a![C!["button", "is-light"],
 							b![
 								match model.user.is_some() {
 									true => "LOGOUT",

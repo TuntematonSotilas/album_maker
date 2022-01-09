@@ -58,8 +58,8 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 		},
 		Msg::UrlChanged(subs::UrlChanged(mut url)) => {
 			let page = match url.next_hash_path_part(){
-				Some(models::page::MY_ALBUMS) => models::page::Page::MyAlbums,
-				Some(models::page::NEW_ALBUM) => models::page::Page::NewAlbum,
+				Some(models::page::LK_MY_ALBUMS) => models::page::Page::MyAlbums,
+				Some(models::page::LK_NEW_ALBUM) => models::page::Page::NewAlbum,
 				_ => models::page::Page::MyAlbums,
 			};
 			model.page = page;
