@@ -73,7 +73,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 fn view(model: &Model) -> Node<Msg> {
 	div![
 		header::view(&model.header).map_msg(Msg::Header),
-		div![C!("container"),
+		div![C!("container m-1"),
 			match &model.header.user {
 				Some(_) => {
 					match &model.page {
