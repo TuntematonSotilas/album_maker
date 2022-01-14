@@ -16,7 +16,6 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
 	
 	orders
 		.subscribe(Msg::UrlChanged);
-		//.notify(subs::UrlChanged(url.to_owned()));
 
 
 	orders.send_msg(Msg::InitAuth);
@@ -55,7 +54,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
 		Msg::InitAuth => {
 			orders.send_msg(Msg::Header(header::Msg::InitAuth));
-			orders.send_msg(Msg::Fetch);
 		},
 		Msg::Header(msg) => {
 			header::update(msg, &mut model.header, &mut orders.proxy(Msg::Header));
