@@ -1,5 +1,5 @@
 #[derive(serde::Deserialize, Debug)]
-pub struct Apl {
+pub struct Album {
 	#[serde(rename(deserialize = "_id"))]
     pub id: Oid,
 	pub title: String,

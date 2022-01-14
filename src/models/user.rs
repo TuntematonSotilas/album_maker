@@ -8,5 +8,5 @@ pub struct User {
     updated_at: String,
     email: String,
     email_verified: bool,
-    sub: String,
+    pub sub: String,
 }
