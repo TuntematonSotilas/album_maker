@@ -1,7 +1,7 @@
 use seed::{self, prelude::*, *};
 use load_dotenv::load_dotenv;
 
-use crate::models::{user::User, page::{LK_NEW_ALBUM, LK_MY_ALBUMS, Page, TXT_NEW_ALBUM}};
+use crate::models::{user::User, page::{LK_NEW_ALBUM, LK_MY_ALBUMS, Page, TITLE_MY_ALBUMS, TITLE_NEW_ALBUM}};
 
 load_dotenv!();
 
@@ -134,7 +134,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 		div![C!["navbar-menu", menu_is_active],
 			a![C!["navbar-item", "is-tab", IF!(matches!(model.page, Page::MyAlbums) => "is-active")],
 				attrs! { At::Href => LK_MY_ALBUMS },
-		        "My albums"
+		        TITLE_MY_ALBUMS
 			],
 			div![C!("navbar-item"),
 				div![C!("buttons"),
@@ -143,7 +143,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 						span![C!("icon"),
 							i![C!("ion-plus")]
 						],
-						span![TXT_NEW_ALBUM],
+						span![TITLE_NEW_ALBUM],
 					],
 				],
 			],

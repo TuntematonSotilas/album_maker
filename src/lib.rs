@@ -21,6 +21,7 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
 	let page = models::page::Page::init(url.to_owned());
     Model {
 		header: header::Model::new(url.to_owned(), page.to_owned()),
+		my_albums: my_albums::Model::default(),
 		new_album: new_album::Model::default(),
 		page: page.to_owned(),
 	}
@@ -32,6 +33,7 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
 struct Model {
 	header: header::Model,
 	page: models::page::Page,
+	my_albums: my_albums::Model,
 	new_album: new_album::Model,
 }
 
@@ -40,7 +42,6 @@ struct Model {
 // ------ ------
 enum Msg {
 	Header(header::Msg),
-	NewAlbum(new_album::Msg),
 	InitAuth,
 	UrlChanged(subs::UrlChanged),
 }
@@ -52,9 +53,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 		},
 		Msg::Header(msg) => {
 			header::update(msg, &mut model.header, &mut orders.proxy(Msg::Header));
-		},
-		Msg::NewAlbum(msg) => {
-			new_album::update(msg, &mut model.new_album, &mut orders.proxy(Msg::NewAlbum));
 		},
 		Msg::UrlChanged(subs::UrlChanged(mut url)) => {
 			let page = match url.next_hash_path_part(){
@@ -73,12 +71,12 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 fn view(model: &Model) -> Node<Msg> {
 	div![
 		header::view(&model.header).map_msg(Msg::Header),
-		div![C!("container m-1"),
+		div![C!("container mt-5"),
 			match &model.header.user {
 				Some(_) => {
 					match &model.page {
 						models::page::Page::NewAlbum => new_album::view(&model.new_album),
-						models::page::Page::MyAlbums => empty!(),
+						models::page::Page::MyAlbums => my_albums::view(&model.my_albums),
 					}
 				},
 				None => not_logged::view(),

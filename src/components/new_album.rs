@@ -1,6 +1,6 @@
 use seed::{self, prelude::*, *};
 
-use crate::models::page::TXT_NEW_ALBUM;
+use crate::models::page::TITLE_NEW_ALBUM;
 
 // ------ ------
 //     Model
@@ -10,23 +10,12 @@ pub struct Model {
 }
 
 // ------ ------
-//    Update
-// ------ ------
-pub enum Msg {
-}
-
-pub fn update(msg: Msg, _model: &mut Model, _orders: &mut impl Orders<Msg>) {
-	match msg {
-	}
-}
-
-// ------ ------
 //     View
 // ------ ------
 pub fn view<Ms>(_model: &Model) -> Node<Ms> {
 	div![C!["columns", "is-centered"],
 		div![C!("box"),
-			h1![C!("title"), TXT_NEW_ALBUM],
+			h1![C!("title"), TITLE_NEW_ALBUM],
 			div![C!["field", "has-addons"],
 				div![C!("control"),
 					input![C!("input"),
