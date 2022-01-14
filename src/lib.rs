@@ -14,10 +14,11 @@ mod components;
 // ------ ------
 fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
 	
-	orders.subscribe(Msg::UrlChanged);
+	orders
+		.subscribe(Msg::UrlChanged);
 
 	orders.send_msg(Msg::InitAuth);
-
+	
 	let page = models::page::Page::init(url.to_owned());
     Model {
 		header: header::Model::new(url.to_owned(), page.to_owned()),
@@ -42,6 +43,7 @@ struct Model {
 // ------ ------
 enum Msg {
 	Header(header::Msg),
+	MyAlbums(my_albums::Msg),
 	InitAuth,
 	UrlChanged(subs::UrlChanged),
 }
@@ -54,13 +56,25 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 		Msg::Header(msg) => {
 			header::update(msg, &mut model.header, &mut orders.proxy(Msg::Header));
 		},
+		Msg::MyAlbums(msg) => {
+			my_albums::update(msg, &mut model.my_albums, &mut orders.proxy(Msg::MyAlbums));
+		},
 		Msg::UrlChanged(subs::UrlChanged(mut url)) => {
-			let page = match url.next_hash_path_part(){
+			let page = match url.next_path_part(){
 				Some(models::page::LK_MY_ALBUMS) => models::page::Page::MyAlbums,
 				Some(models::page::LK_NEW_ALBUM) => models::page::Page::NewAlbum,
 				_ => models::page::Page::MyAlbums,
 			};
-			model.page = page;
+			model.page = page.to_owned();
+
+			orders.send_msg(Msg::Header(header::Msg::SetPage(page.to_owned())));
+
+			match page.to_owned() {
+				models::page::Page::MyAlbums => {
+					orders.send_msg(Msg::MyAlbums(my_albums::Msg::Fetch));
+				},
+				_ => (),
+			}
 		}
 	}
 }

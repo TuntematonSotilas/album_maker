@@ -41,6 +41,7 @@ pub enum Msg {
 	LogIn,
 	LogOut,
 	OpenOrCloseMenu,
+	SetPage(Page),
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -99,6 +100,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         },
 		Msg::OpenOrCloseMenu => {
 			model.is_menu_open = !model.is_menu_open;
+		},
+		Msg::SetPage(page) => {
+			model.page = page;
 		}
 	}
 }
@@ -133,13 +137,13 @@ pub fn view(model: &Model) -> Node<Msg> {
 		],
 		div![C!["navbar-menu", menu_is_active],
 			a![C!["navbar-item", "is-tab", IF!(matches!(model.page, Page::MyAlbums) => "is-active")],
-				attrs! { At::Href => LK_MY_ALBUMS },
+				attrs! { At::Href => format!("/{}", LK_MY_ALBUMS) },
 		        TITLE_MY_ALBUMS
 			],
 			div![C!("navbar-item"),
 				div![C!("buttons"),
 					a![C!["button", "is-primary"],
-						attrs!{ At::Href => LK_NEW_ALBUM },
+						attrs!{ At::Href => format!("/{}", LK_NEW_ALBUM) },
 						span![C!("icon"),
 							i![C!("ion-plus")]
 						],
