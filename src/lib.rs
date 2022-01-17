@@ -56,6 +56,12 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			orders.send_msg(Msg::Header(header::Msg::InitAuth));
 		},
 		Msg::Header(msg) => {
+			match msg {
+				header::Msg::UserLoged => {
+					orders.send_msg(Msg::Fetch);
+				},
+				_ => (),
+			}
 			header::update(msg, &mut model.header, &mut orders.proxy(Msg::Header));
 		},
 		Msg::MyAlbums(msg) => {
@@ -74,11 +80,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			
 		},
 		Msg::Fetch => {
-			log!("Fetch");
-
 			if model.header.user.is_some() {
-				log!("user");
-
 				match model.page {
 					models::page::Page::MyAlbums => {
 						orders.send_msg(Msg::MyAlbums(

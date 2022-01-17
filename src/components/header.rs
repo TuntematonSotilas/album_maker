@@ -42,6 +42,7 @@ pub enum Msg {
 	LogOut,
 	OpenOrCloseMenu,
 	SetPage(Page),
+	UserLoged,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -63,6 +64,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 						let user: User = value;
 						model.user = Some(user.to_owned());
 						model.user_initial = Some(user.to_owned().name.chars().next().unwrap_or_default().to_string());
+						orders.send_msg(Msg::UserLoged);
 					},
                     Err(error) => error!("User deserialization failed!", error),
                 }
@@ -103,7 +105,8 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 		},
 		Msg::SetPage(page) => {
 			model.page = page;
-		}
+		},
+		Msg::UserLoged => (),
 	}
 }
 
