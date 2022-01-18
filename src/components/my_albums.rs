@@ -1,6 +1,6 @@
 use seed::{self, prelude::*, *};
 
-use crate::{models::{page::TITLE_MY_ALBUMS, vars::BASE_URI, album::Album, user::User}, components::forbidden};
+use crate::{models::{page::TITLE_MY_ALBUMS, vars::BASE_URI, album::Album, user::User}, components::error};
 
 // ------ ------
 //     Model
@@ -8,6 +8,7 @@ use crate::{models::{page::TITLE_MY_ALBUMS, vars::BASE_URI, album::Album, user::
 #[derive(Default)]
 pub struct Model {
 	is_forbidden: bool,
+	albums: Option<Vec<Album>>,
 }
 
 // ------ ------
@@ -60,9 +61,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			model.is_forbidden = true;
 		},
 		Msg::Received(albums) => {
-            // Sort
-            //model.albums = Some(albums);
-			log!(albums);
+            model.albums = Some(albums);
         }
 	}
 }
@@ -74,9 +73,15 @@ pub fn view<Ms>(model: &Model) -> Node<Ms> {
 	div![C!["columns", "is-centered"],
 		h1![C!("title"), TITLE_MY_ALBUMS],
 		
-		match model.is_forbidden {
-			true => forbidden::view(),
-			false => div!["al"],
+		match &model.is_forbidden {
+			true => error::view("Forbidden".to_string(), "ion-alert-circled".to_string()),
+			false => div![
+				if !&model.albums.is_some() || model.albums.as_ref().unwrap().is_empty() {
+					error::view("No data".to_string(), "ion-search".to_string()) 
+				} else {
+					span!["list"]
+				}
+			],
 		}
 	]
 }

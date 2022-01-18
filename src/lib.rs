@@ -107,7 +107,7 @@ fn view(model: &Model) -> Node<Msg> {
 						models::page::Page::MyAlbums => my_albums::view(&model.my_albums),
 					}
 				},
-				None => not_logged::view(),
+				None => error::view("Please log in to continue".to_string(), "ion-log-in".to_string()),
 			},
 		]
 	]
