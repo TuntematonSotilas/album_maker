@@ -71,17 +71,25 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 pub fn view<Ms>(model: &Model) -> Node<Ms> {
 	div![C!["columns", "is-centered"],
-		h1![C!("title"), TITLE_MY_ALBUMS],
-		
-		match &model.is_forbidden {
-			true => error::view("Forbidden".to_string(), "ion-alert-circled".to_string()),
-			false => div![
-				if !&model.albums.is_some() || model.albums.as_ref().unwrap().is_empty() {
-					error::view("No data".to_string(), "ion-search".to_string()) 
-				} else {
-					span!["list"]
-				}
-			],
-		}
+		nav![C!("panel is-link"),
+			p![C!("panel-heading"), TITLE_MY_ALBUMS],
+			
+			match &model.is_forbidden {
+				true => error::view("Forbidden".to_string(), "ion-alert-circled".to_string()),
+				false => div![
+					if !&model.albums.is_some() || model.albums.as_ref().unwrap().is_empty() {
+						error::view("No data".to_string(), "ion-search".to_string()) 
+					} else {
+						div![
+							model.albums.as_ref().unwrap().iter().map(|album| {
+								a![C!("panel-block"),
+									&album.title
+								]
+							})
+						]
+					}
+				],
+			}
+		]
 	]
 }
