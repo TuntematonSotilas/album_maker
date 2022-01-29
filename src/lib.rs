@@ -102,10 +102,14 @@ fn view(model: &Model) -> Node<Msg> {
 		div![C!("container mt-5"),
 			match &model.header.user {
 				Some(_) => {
-					match &model.page {
-						models::page::Page::NewAlbum => new_album::view(&model.new_album),
-						models::page::Page::MyAlbums => my_albums::view(&model.my_albums),
-					}
+					div![C!["columns", "is-centered"],
+						div![C!["column is-half"],
+							match &model.page {
+								models::page::Page::NewAlbum => new_album::view(&model.new_album),
+								models::page::Page::MyAlbums => my_albums::view(&model.my_albums),
+							}
+						]
+					]
 				},
 				None => error::view("Please log in to continue".to_string(), "ion-log-in".to_string()),
 			},
