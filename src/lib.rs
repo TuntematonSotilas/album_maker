@@ -24,7 +24,7 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
     Model {
 		header: header::Model::new(url.to_owned(), page.to_owned()),
 		my_albums: my_albums::Model::default(),
-		new_album: new_album::Model::default(),
+		new_album: new_album::Model::new(),
 		page: page.to_owned(),
 	}
 }
