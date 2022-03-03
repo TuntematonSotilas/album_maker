@@ -1,17 +1,19 @@
 use seed::{self, prelude::*, *};
 
-use crate::models::{page::TITLE_NEW_ALBUM, album::{Album, self}};
+use crate::models::{page::TITLE_NEW_ALBUM, album::Album, vars::BASE_URI};
 
 // ------ ------
 //     Model
 // ------ -----
 pub struct Model {
+	auth_header: String,
 	album: Album,
 }
 
 impl Model {
 	pub fn new() -> Self {
 		Self {
+			auth_header: String::new(),
 			album: Album::new()
 		}
 	}
@@ -21,21 +23,24 @@ impl Model {
 //    Update
 // ------ ------
 pub enum Msg {
+	SetAuth(String),
 	Submit,
     Submited,
     SubmitFailed(String),
+	TitleChanged(String),
 }
 
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
+		Msg::SetAuth(auth_header) => model.auth_header = auth_header,
 		Msg::Submit => {
             orders.skip(); // No need to rerender
-
-            // Created outside async block because of lifetime reasons
-            // (we can't use reference to `model.form` in async function).
-            let request = Request::new("/")
-                .method(Method::Post)
+			let uri = BASE_URI.to_owned() + "editalbum";
+			let auth = model.auth_header.to_owned();
+            let request = Request::new(uri)
+                .method(Method::Put)
+				.header(Header::authorization(auth))
                 .json(&model.album)
                 .expect("Serialization failed");
 
@@ -54,14 +59,15 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::SubmitFailed(reason) => {
             log!("Submit failed {0}", reason);
-        }
+        },
+		Msg::TitleChanged(title) => model.album.title = title,
 	}
 }
 
 // ------ ------
 //     View
 // ------ ------
-pub fn view<Ms>(_model: &Model) -> Node<Ms> {
+pub fn view(model: &Model) -> Node<Msg> {
 	
 	div! [C!("box"),
 		p![C!("title is-5 has-text-link"), TITLE_NEW_ALBUM],
@@ -72,12 +78,15 @@ pub fn view<Ms>(_model: &Model) -> Node<Ms> {
 						At::Type => "text", 
 						At::Name => "title",
 						At::Placeholder => "Title",
-					}
+						At::Value => model.album.title,
+					},
+					input_ev(Ev::Input, Msg::TitleChanged),
 				]
 			],
 			div![C!("control"),
 				a![C!["button", "is-primary"], 
-					"Save"
+					"Save",
+					ev(Ev::Click, |_| Msg::Submit),
 				]
 			]
 		],

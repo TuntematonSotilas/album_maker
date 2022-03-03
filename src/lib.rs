@@ -45,9 +45,11 @@ struct Model {
 enum Msg {
 	Header(header::Msg),
 	MyAlbums(my_albums::Msg),
+	NewAlbum(new_album::Msg),
 	InitAuth,
 	UrlChanged(subs::UrlChanged),
 	Fetch,
+	SetAuth,
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -58,7 +60,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 		Msg::Header(msg) => {
 			match msg {
 				header::Msg::UserLoged => {
-					orders.send_msg(Msg::Fetch);
+					orders.send_msg(Msg::SetAuth);
 				},
 				_ => (),
 			}
@@ -66,6 +68,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 		},
 		Msg::MyAlbums(msg) => {
 			my_albums::update(msg, &mut model.my_albums, &mut orders.proxy(Msg::MyAlbums));
+		},
+		Msg::NewAlbum(msg) => {
+			new_album::update(msg, &mut model.new_album, &mut orders.proxy(Msg::NewAlbum));
 		},
 		Msg::UrlChanged(subs::UrlChanged(mut url)) => {
 			let page = match url.next_path_part(){
@@ -80,15 +85,33 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			
 		},
 		Msg::Fetch => {
+			log!("Fetch");
 			if model.header.user.is_some() {
 				match model.page {
 					models::page::Page::MyAlbums => {
-						orders.send_msg(Msg::MyAlbums(
-							my_albums::Msg::Fetch(model.header.user.to_owned().unwrap())));
+						orders.send_msg(Msg::MyAlbums(my_albums::Msg::Fetch));
 					},
 					_ => (),
 				}
 			} 
+		},
+		Msg::SetAuth => {
+			log!("SetAuth");
+			if let Some(user) = &model.header.user {
+				let login = &user.sub;
+                let pwd = env!("API_SALT", "Cound not find API_SALT in .env");
+                let b64 = base64::encode(format!("{0}:{1}", login, pwd));
+                let auth = format!("Basic {0}", b64);
+				match model.page {
+					models::page::Page::MyAlbums => {
+						orders.send_msg(Msg::MyAlbums(my_albums::Msg::SetAuth(auth)));
+					},
+					models::page::Page::NewAlbum => {
+						orders.send_msg(Msg::NewAlbum(new_album::Msg::SetAuth(auth)));
+					},
+				}
+				orders.send_msg(Msg::Fetch);
+			}
 		}
 	}
 }
@@ -105,7 +128,7 @@ fn view(model: &Model) -> Node<Msg> {
 					div![C!["columns", "is-centered"],
 						div![C!["column is-half"],
 							match &model.page {
-								models::page::Page::NewAlbum => new_album::view(&model.new_album),
+								models::page::Page::NewAlbum => new_album::view(&model.new_album).map_msg(Msg::NewAlbum),
 								models::page::Page::MyAlbums => my_albums::view(&model.my_albums),
 							}
 						]

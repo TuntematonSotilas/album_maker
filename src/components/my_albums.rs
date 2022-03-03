@@ -1,12 +1,13 @@
 use seed::{self, prelude::*, *};
 
-use crate::{models::{page::TITLE_MY_ALBUMS, vars::BASE_URI, album::Album, user::User}, components::error};
+use crate::{models::{page::TITLE_MY_ALBUMS, vars::BASE_URI, album::Album}, components::error};
 
 // ------ ------
 //     Model
 // ------ -----
 #[derive(Default)]
 pub struct Model {
+	auth_header: String,
 	is_forbidden: bool,
 	albums: Option<Vec<Album>>,
 }
@@ -15,7 +16,8 @@ pub struct Model {
 //    Update
 // ------ ------
 pub enum Msg {
-	Fetch(User),
+	SetAuth(String),
+	Fetch,
 	Received(Vec<Album>),
 	Forbidden,
 	Error,
@@ -23,16 +25,13 @@ pub enum Msg {
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
-		Msg::Fetch(user) => {
+		Msg::SetAuth(auth_header) => model.auth_header = auth_header,
+		Msg::Fetch => {
+			let auth = model.auth_header.to_owned();
 			orders.skip(); // No need to rerender
 			orders.perform_cmd(async {
-                let login = user.sub;
-                let pwd = env!("API_SALT", "Cound not find API_SALT in .env");
                 let uri = BASE_URI.to_owned() + "myalbums";
-                let b64 = base64::encode(format!("{0}:{1}", login, pwd));
-                let auth = format!("Basic {0}", b64);
-
-                let response = Request::new(uri)
+				let response = Request::new(uri)
                     .header(Header::authorization(auth))
                     .fetch()
                     .await
