@@ -54,7 +54,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             });
 		},
 		Msg::Error => {
-			log!("Error");
+			error!("Error getting albums");
 		}
 		Msg::Forbidden => {
 			model.is_forbidden = true;

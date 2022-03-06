@@ -85,7 +85,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			
 		},
 		Msg::Fetch => {
-			log!("Fetch");
 			if model.header.user.is_some() {
 				match model.page {
 					models::page::Page::MyAlbums => {
@@ -96,7 +95,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			} 
 		},
 		Msg::SetAuth => {
-			log!("SetAuth");
 			if let Some(user) = &model.header.user {
 				let login = &user.sub;
                 let pwd = env!("API_SALT", "Cound not find API_SALT in .env");
