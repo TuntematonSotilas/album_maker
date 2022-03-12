@@ -3,6 +3,7 @@
 // but some rules are too "annoying" or are not applicable for your case.)
 #![allow(clippy::wildcard_imports)]
 
+use components::notification::NotifType;
 use seed::{prelude::*, *};
 use crate::components::*;
 
@@ -23,6 +24,7 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
 	let page = models::page::Page::init(url.to_owned());
     Model {
 		header: header::Model::new(url.to_owned(), page.to_owned()),
+		notification: notification::Model::default(),
 		my_albums: my_albums::Model::default(),
 		new_album: new_album::Model::new(),
 		page: page.to_owned(),
@@ -37,6 +39,7 @@ struct Model {
 	page: models::page::Page,
 	my_albums: my_albums::Model,
 	new_album: new_album::Model,
+	notification: notification::Model,
 }
 
 // ------ ------
@@ -50,6 +53,8 @@ enum Msg {
 	UrlChanged(subs::UrlChanged),
 	Fetch,
 	SetAuth,
+	Notification(notification::Msg),
+	ShowNotif(NotifType, String),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -66,10 +71,22 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			}
 			header::update(msg, &mut model.header, &mut orders.proxy(Msg::Header));
 		},
+		Msg::Notification(msg) => {
+			notification::update(msg, &mut model.notification, &mut orders.proxy(Msg::Notification));
+		},
+    	Msg::ShowNotif(notif_type, message) => {
+			orders.send_msg(Msg::Notification(notification::Msg::Show(notif_type, message)));
+		},
 		Msg::MyAlbums(msg) => {
 			my_albums::update(msg, &mut model.my_albums, &mut orders.proxy(Msg::MyAlbums));
 		},
 		Msg::NewAlbum(msg) => {
+			match msg {
+				new_album::Msg::ShowNotif(ref notif_type, ref message) => {
+					orders.send_msg(Msg::ShowNotif(notif_type.to_owned(), message.to_owned()));
+				},
+				_ => (),
+			}
 			new_album::update(msg, &mut model.new_album, &mut orders.proxy(Msg::NewAlbum));
 		},
 		Msg::UrlChanged(subs::UrlChanged(mut url)) => {
@@ -110,7 +127,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 				}
 				orders.send_msg(Msg::Fetch);
 			}
-		}
+		},
 	}
 }
 
@@ -119,6 +136,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 fn view(model: &Model) -> Node<Msg> {
 	div![
+		notification::view(&model.notification).map_msg(Msg::Notification),
 		header::view(&model.header).map_msg(Msg::Header),
 		div![C!("container mt-5"),
 			match &model.header.user {

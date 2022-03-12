@@ -2,6 +2,8 @@ use seed::{self, prelude::*, *};
 
 use crate::models::{page::TITLE_NEW_ALBUM, album::Album, vars::BASE_URI};
 
+use super::notification::NotifType;
+
 // ------ ------
 //     Model
 // ------ -----
@@ -25,9 +27,9 @@ impl Model {
 pub enum Msg {
 	SetAuth(String),
 	Submit,
-    Submited,
     SubmitFailed(String),
 	TitleChanged(String),
+	ShowNotif(NotifType, String),
 }
 
 
@@ -48,19 +50,17 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 let response = fetch(request).await.expect("HTTP request failed");
 
                 if response.status().is_ok() {
-                    Msg::Submited
+                    Msg::ShowNotif(NotifType::Success, "Album saved".to_owned())
                 } else {
                     Msg::SubmitFailed(response.status().text)
                 }
             });
         },
-		Msg::Submited => {
-            log!("Submit succeeded");
-        }
         Msg::SubmitFailed(reason) => {
             log!("Submit failed {0}", reason);
         },
 		Msg::TitleChanged(title) => model.album.title = title,
+		Msg::ShowNotif(_, _) => (),
 	}
 }
 
