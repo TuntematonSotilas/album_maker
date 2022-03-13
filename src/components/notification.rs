@@ -13,6 +13,7 @@ pub struct Model {
 #[derive(Clone, Copy)]
 pub enum NotifType {
 	Success,
+	Error,
 }
 
 impl Default for NotifType {
@@ -24,30 +25,35 @@ impl Default for NotifType {
 // ------ ------
 pub enum Msg {
 	Show(NotifType, String),
+	Hide,
 }
 
-pub fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
+pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
 		Msg::Show(notif_type, message) => {
-			log!("Show");
 			model.is_visible = true;
 			model.notif_type = notif_type;
 			model.message = message;
+			orders.perform_cmd(cmds::timeout(3000, || Msg::Hide));
 		},
+		Msg::Hide => model.is_visible = false,
 	}
 }
 
 pub fn view(model: &Model) -> Node<Msg> {
 	let c_visible = match &model.is_visible {
-		false => "is-hidden",
+		true => "notif-show",
 		_ => "",
 	};
 	let c_type = match &model.notif_type {
-		Sucess => "is-success",
-		_ => "is-info",
+		NotifType::Success => "is-success",
+		NotifType::Error => "is-danger",
 	};
-	div![C!["notification", c_type, c_visible],
-		button![C!("delete")],
-		&model.message,
-    ]
+	div![C!["columns", "is-centered", "notif", c_visible],
+		div![C!("column", "is-one-quarter"),
+			div![C!["notification", c_type],
+				&model.message,
+			],
+		],
+	]
 }

@@ -7,5 +7,6 @@
 /* Icons */
 @import url(https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css);
 
-/* Componeents */
+/* Components */
 @import url(header.css);
+@import url(notif.css);

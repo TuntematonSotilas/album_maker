@@ -117,14 +117,8 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 let pwd = env!("API_SALT", "Cound not find API_SALT in .env");
                 let b64 = base64::encode(format!("{0}:{1}", login, pwd));
                 let auth = format!("Basic {0}", b64);
-				match model.page {
-					models::page::Page::MyAlbums => {
-						orders.send_msg(Msg::MyAlbums(my_albums::Msg::SetAuth(auth)));
-					},
-					models::page::Page::NewAlbum => {
-						orders.send_msg(Msg::NewAlbum(new_album::Msg::SetAuth(auth)));
-					},
-				}
+				orders.send_msg(Msg::NewAlbum(new_album::Msg::SetAuth(auth.to_owned())));
+				orders.send_msg(Msg::MyAlbums(my_albums::Msg::SetAuth(auth.to_owned())));
 				orders.send_msg(Msg::Fetch);
 			}
 		},

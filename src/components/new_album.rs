@@ -27,7 +27,6 @@ impl Model {
 pub enum Msg {
 	SetAuth(String),
 	Submit,
-    SubmitFailed(String),
 	TitleChanged(String),
 	ShowNotif(NotifType, String),
 }
@@ -35,7 +34,9 @@ pub enum Msg {
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
-		Msg::SetAuth(auth_header) => model.auth_header = auth_header,
+		Msg::SetAuth(auth_header) => {
+			model.auth_header = auth_header;
+		},
 		Msg::Submit => {
             orders.skip(); // No need to rerender
 			let uri = BASE_URI.to_owned() + "editalbum";
@@ -52,12 +53,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 if response.status().is_ok() {
                     Msg::ShowNotif(NotifType::Success, "Album saved".to_owned())
                 } else {
-                    Msg::SubmitFailed(response.status().text)
+                    Msg::ShowNotif(NotifType::Error, "Error when saving".to_owned())
                 }
             });
-        },
-        Msg::SubmitFailed(reason) => {
-            log!("Submit failed {0}", reason);
         },
 		Msg::TitleChanged(title) => model.album.title = title,
 		Msg::ShowNotif(_, _) => (),

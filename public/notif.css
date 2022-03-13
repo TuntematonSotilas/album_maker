@@ -1,0 +1,28 @@
+.notif {
+	position: fixed;
+	z-index: 100;
+	width: 100%;
+	padding-top: 0.3rem;
+	visibility: hidden;
+}
+
+.notif .notification{
+	padding: 0.5rem 0.2rem 0.5rem 0rem !important;
+	text-align: center;
+}
+
+.notif-show {
+	visibility: visible;
+	animation: notif-fade-in 0.5s, notif-fade-out 0.5s 2.5s;
+}
+
+@keyframes notif-fade-in {
+	from {top: -5rem; opacity: 0;}
+	to {top: 0; opacity: 1;}
+}
+
+
+@keyframes notif-fade-out {
+	from {top: 0; opacity: 1;}
+	to {top: -5rem; opacity: 0;}
+}
