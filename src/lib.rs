@@ -17,13 +17,10 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
 	
 	orders
 		.subscribe(Msg::UrlChanged);
-
-
-	orders.send_msg(Msg::InitAuth);
 	
 	let page = models::page::Page::init(url.to_owned());
     Model {
-		header: header::Model::new(url.to_owned(), page.to_owned()),
+		header: header::Model::new(page.to_owned()),
 		notification: notification::Model::default(),
 		my_albums: my_albums::Model::default(),
 		new_album: new_album::Model::new(),
@@ -49,7 +46,6 @@ enum Msg {
 	Header(header::Msg),
 	MyAlbums(my_albums::Msg),
 	NewAlbum(new_album::Msg),
-	InitAuth,
 	UrlChanged(subs::UrlChanged),
 	Fetch,
 	SetAuth,
@@ -59,9 +55,6 @@ enum Msg {
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
-		Msg::InitAuth => {
-			orders.send_msg(Msg::Header(header::Msg::InitAuth));
-		},
 		Msg::Header(msg) => {
 			match msg {
 				header::Msg::UserLoged => {

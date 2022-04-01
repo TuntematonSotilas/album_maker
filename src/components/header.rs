@@ -12,19 +12,15 @@ const TITLE: &str = "Album maker";
 // ------ -----
 pub struct Model {
 	pub user: Option<User>,
-	base_url: Url,
 	is_menu_open: bool,
-	user_initial: Option<String>,
 	page: Page,
 }
 
 impl Model {
-	pub fn new(base_url: Url, page: Page) -> Self {
+	pub fn new(page: Page) -> Self {
 		Self { 
 			user: None, 
-			base_url: base_url,
 			is_menu_open: false,
-			user_initial: None,
 			page: page,
 		}
 	}
@@ -34,72 +30,14 @@ impl Model {
 //    Update
 // ------ ------
 pub enum Msg {
-	InitAuth,
-	AuthInitialized(Result<JsValue, JsValue>),
-	RedirectingToLogIn(Result<(), JsValue>),
-	LogInOrOut,
-	LogIn,
-	LogOut,
 	OpenOrCloseMenu,
 	SetPage(Page),
 	UserLoged,
+	LogInOrOut,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
-		Msg::InitAuth => {
-			orders.skip(); // No need to rerender
-			orders.perform_cmd(async { 
-				let auth_domain = env!("AUTH_DOMAIN", "Cound not find AUTH_DOMAIN in .env");
-				let auth_client_id = env!("AUTH_CLIENT_ID", "Cound not find AUTH_CLIENT_ID in .env");
-				Msg::AuthInitialized(
-					init_auth(auth_domain.to_owned(), auth_client_id.to_owned()).await
-				)
-			});
-		},
-		Msg::AuthInitialized(Ok(value)) => {
-            if not(value.is_undefined()) {
-                match serde_wasm_bindgen::from_value(value) {
-                    Ok(value) => {
-						let user: User = value;
-						model.user = Some(user.to_owned());
-						model.user_initial = Some(user.to_owned().name.chars().next().unwrap_or_default().to_string());
-						orders.send_msg(Msg::UserLoged);
-					},
-                    Err(error) => error!("User deserialization failed!", error),
-                }
-            }
-            let search = model.base_url.search_mut();
-            if search.remove("code").is_some() && search.remove("state").is_some() {        
-                model.base_url.go_and_replace();
-            }
-        },
-		Msg::AuthInitialized(Err(error)) => {
-            error!("Auth initialization failed!", error);
-        },
-		Msg::RedirectingToLogIn(result) => {
-            if let Err(error) = result {
-                error!("Redirect to log in failed!", error);
-            }
-        },
-		Msg::LogInOrOut => {
-			match model.user.is_some() {
-				true => {orders.send_msg(Msg::LogOut);},
-				false => {orders.send_msg(Msg::LogIn);},
-			}
-		},
-		Msg::LogIn => {
-            orders.perform_cmd(async { Msg::RedirectingToLogIn(
-                redirect_to_log_in().await
-            )});
-        },
-		Msg::LogOut => {
-            if let Err(error) = logout() {
-                error!("Cannot log out!", error);
-            } else {
-                model.user = None;
-            }
-        },
 		Msg::OpenOrCloseMenu => {
 			model.is_menu_open = !model.is_menu_open;
 		},
@@ -107,6 +45,14 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			model.page = page;
 		},
 		Msg::UserLoged => (),
+		Msg::LogInOrOut => {
+			model.user = Some(User {
+				name: "GB".to_string(),
+				picture : "GB".to_string(),
+				sub : "GB".to_string()
+			});
+			orders.send_msg(Msg::UserLoged);
+		},
 	}
 }
 
@@ -183,17 +129,4 @@ pub fn view(model: &Model) -> Node<Msg> {
 			]
 		]
 	]
-}
-
-// Mapping for JS functions
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(catch)]
-    async fn init_auth(domain: String, client_id: String) -> Result<JsValue, JsValue>;
-
-	#[wasm_bindgen(catch)]
-	async fn redirect_to_log_in() -> Result<(), JsValue>;
-	
-	#[wasm_bindgen(catch)]
-	fn logout() -> Result<(), JsValue>;
 }
