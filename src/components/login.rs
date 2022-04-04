@@ -1,13 +1,13 @@
 use seed::{self, prelude::*, *};
 
-use crate::models::{page::TITLE_NEW_ALBUM};
+use crate::models::page::TITLE_LOGIN;
 
 // ------ ------
 //     Model
 // ------ -----
 #[derive(Default)]
 pub struct Model {
-	login: String,
+	username: String,
 	password: String,
 	pwd: String,
 }
@@ -17,7 +17,7 @@ pub struct Model {
 // ------ ------
 pub enum Msg {
 	Submit,
-	LoginChanged(String),
+	UsernameChanged(String),
 	PwdChanged(String),
 }
 
@@ -44,7 +44,7 @@ pub fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
                 }
             });*/
         },
-		Msg::LoginChanged(login) => model.login = login,
+		Msg::UsernameChanged(username) => model.username = username,
 		Msg::PwdChanged(pwd) => model.pwd = pwd,
 	}
 }
@@ -53,40 +53,44 @@ pub fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
-	div! [C!("box"),
-		p![C!("title is-5 has-text-link"), TITLE_NEW_ALBUM],
-		div![C!("field"),
-			div![C!("control"),
-				input![C!("input"),
-					attrs!{
-						At::Type => "text", 
-						At::Name => "login",
-						At::Placeholder => "Login",
-						At::Value => model.login,
-					},
-					input_ev(Ev::Input, Msg::LoginChanged),
-				]
+	div![C!["columns", "is-centered"],
+		div![C!["column is-half"],
+			div! [C!("box"),
+				p![C!("title is-5 has-text-link"), TITLE_LOGIN],
+				div![C!("field"),
+					div![C!("control"),
+						input![C!("input"),
+							attrs!{
+								At::Type => "text", 
+								At::Name => "username",
+								At::Placeholder => "Username",
+								At::Value => model.username,
+							},
+							input_ev(Ev::Input, Msg::UsernameChanged),
+						]
+					],
+				],
+				div![C!("field"),
+					div![C!("control"),
+						input![C!("input"),
+							attrs!{
+								At::Type => "password", 
+								At::Name => "pwd",
+								At::Value => model.pwd,
+							},
+							input_ev(Ev::Input, Msg::PwdChanged),
+						]
+					]
+				],
+				div![C!("field"),
+					div![C!("control"),
+						a![C!["button", "is-primary"], 
+							"LOGIN",
+							ev(Ev::Click, |_| Msg::Submit),
+						]
+					]
+				],
 			],
-		],
-		div![C!("field"),
-			div![C!("control"),
-				input![C!("input"),
-					attrs!{
-						At::Type => "password", 
-						At::Name => "pwd",
-						At::Value => model.pwd,
-					},
-					input_ev(Ev::Input, Msg::PwdChanged),
-				]
-			]
-		],
-		div![C!("field"),
-			div![C!("control"),
-				a![C!["button", "is-primary"], 
-					"Save",
-					ev(Ev::Click, |_| Msg::Submit),
-				]
-			]
 		],
 	]
 }

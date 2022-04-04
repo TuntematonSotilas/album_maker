@@ -117,12 +117,10 @@ pub fn view(model: &Model) -> Node<Msg> {
 						),
 						a![C!["button", "is-light"],
 							attrs!{ At::Href => format!("/{}", LK_LOGIN) },
-							b![
-								match model.user.is_some() {
-									true => "LOGOUT",
-									false => "LOGIN",
-								}
-							],
+							match model.user.is_some() {
+								true => "Sign out",
+								false => "Sign in",
+							}
 							//ev(Ev::Click, |_| Msg::LogInOrOut),
 						]
 					]
