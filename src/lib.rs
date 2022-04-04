@@ -25,6 +25,7 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
 		my_albums: my_albums::Model::default(),
 		new_album: new_album::Model::new(),
 		page: page.to_owned(),
+		login: login::Model::default(),
 	}
 }
 
@@ -37,6 +38,7 @@ struct Model {
 	my_albums: my_albums::Model,
 	new_album: new_album::Model,
 	notification: notification::Model,
+	login: login::Model,
 }
 
 // ------ ------
@@ -46,6 +48,7 @@ enum Msg {
 	Header(header::Msg),
 	MyAlbums(my_albums::Msg),
 	NewAlbum(new_album::Msg),
+	Login(login::Msg),
 	UrlChanged(subs::UrlChanged),
 	Fetch,
 	SetAuth,
@@ -86,6 +89,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			let page = match url.next_path_part(){
 				Some(models::page::LK_MY_ALBUMS) => models::page::Page::MyAlbums,
 				Some(models::page::LK_NEW_ALBUM) => models::page::Page::NewAlbum,
+				Some(models::page::LK_LOGIN) => models::page::Page::Login,
 				_ => models::page::Page::MyAlbums,
 			};
 			model.page = page.to_owned();
@@ -115,6 +119,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 				orders.send_msg(Msg::Fetch);
 			}
 		},
+		Msg::Login(msg) => {
+			login::update(msg, &mut model.login, &mut orders.proxy(Msg::Login));
+		},
 	}
 }
 
@@ -126,19 +133,23 @@ fn view(model: &Model) -> Node<Msg> {
 		notification::view(&model.notification).map_msg(Msg::Notification),
 		header::view(&model.header).map_msg(Msg::Header),
 		div![C!("container mt-5"),
-			match &model.header.user {
-				Some(_) => {
-					div![C!["columns", "is-centered"],
-						div![C!["column is-half"],
-							match &model.page {
-								models::page::Page::NewAlbum => new_album::view(&model.new_album).map_msg(Msg::NewAlbum),
-								models::page::Page::MyAlbums => my_albums::view(&model.my_albums),
-							}
+			match &model.page {
+				models::page::Page::Login => login::view(&model.login).map_msg(Msg::Login),
+				_ => match &model.header.user {
+					Some(_) => {
+						div![C!["columns", "is-centered"],
+							div![C!["column is-half"],
+								match &model.page {
+									models::page::Page::NewAlbum => new_album::view(&model.new_album).map_msg(Msg::NewAlbum),
+									models::page::Page::MyAlbums => my_albums::view(&model.my_albums),
+									_ => empty!(),
+								}
+							]
 						]
-					]
+					},
+					None => error::view("Please log in to continue".to_string(), "ion-log-in".to_string()),
 				},
-				None => error::view("Please log in to continue".to_string(), "ion-log-in".to_string()),
-			},
+			}
 		]
 	]
 }

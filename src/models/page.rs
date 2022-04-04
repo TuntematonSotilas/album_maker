@@ -2,14 +2,17 @@ use seed::{prelude::*};
 
 pub const LK_MY_ALBUMS: &str = "my-albums";
 pub const LK_NEW_ALBUM: &str = "new-album";
+pub const LK_LOGIN: &str = "login";
 
 pub const TITLE_MY_ALBUMS: &str = "My Albums";
 pub const TITLE_NEW_ALBUM: &str = "New Album";
+pub const TITLE_LOGIN: &str = "Login";
 
 #[derive(Debug, Clone)]
 pub enum Page {
 	MyAlbums,
-	NewAlbum
+	NewAlbum,
+	Login,
 }
 
 impl Page {
@@ -18,6 +21,7 @@ impl Page {
             None => Self::MyAlbums,
 			Some(LK_MY_ALBUMS) => Self::MyAlbums,
             Some(LK_NEW_ALBUM) => Self::NewAlbum,
+			Some(LK_LOGIN) => Self::Login,
 			Some(_) => Self::MyAlbums,
         }
     }

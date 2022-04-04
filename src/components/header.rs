@@ -1,7 +1,7 @@
 use seed::{self, prelude::*, *};
 use load_dotenv::load_dotenv;
 
-use crate::models::{user::User, page::{LK_NEW_ALBUM, LK_MY_ALBUMS, Page, TITLE_MY_ALBUMS, TITLE_NEW_ALBUM}};
+use crate::models::{user::User, page::{LK_NEW_ALBUM, LK_MY_ALBUMS, Page, TITLE_MY_ALBUMS, TITLE_NEW_ALBUM, LK_LOGIN}};
 
 load_dotenv!();
 
@@ -116,13 +116,14 @@ pub fn view(model: &Model) -> Node<Msg> {
 							]
 						),
 						a![C!["button", "is-light"],
+							attrs!{ At::Href => format!("/{}", LK_LOGIN) },
 							b![
 								match model.user.is_some() {
 									true => "LOGOUT",
 									false => "LOGIN",
 								}
 							],
-							ev(Ev::Click, |_| Msg::LogInOrOut),
+							//ev(Ev::Click, |_| Msg::LogInOrOut),
 						]
 					]
 				]
