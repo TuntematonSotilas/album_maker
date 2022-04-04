@@ -1,6 +1,8 @@
 use seed::{self, prelude::*, *};
 
-use crate::models::page::TITLE_LOGIN;
+use crate::models::{page::TITLE_LOGIN, vars::BASE_URI};
+
+use super::notification::NotifType;
 
 // ------ ------
 //     Model
@@ -19,33 +21,36 @@ pub enum Msg {
 	Submit,
 	UsernameChanged(String),
 	PwdChanged(String),
+	ShowNotif(NotifType, String),
+	SetAuth(String),
 }
 
 
-pub fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
+pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
 		Msg::Submit => {
-            /*orders.skip(); // No need to rerender
-			let uri = BASE_URI.to_owned() + "editalbum";
-			let auth = model.auth_header.to_owned();
-            let request = Request::new(uri)
-                .method(Method::Put)
-				.header(Header::authorization(auth))
-                .json(&model.album)
+            orders.skip(); // No need to rerender
+			let uri = BASE_URI.to_owned() + "login";
+			let encoded = String::new();
+			let request = Request::new(uri)
+                .method(Method::Post)
+				.json(&encoded)
                 .expect("Serialization failed");
 
             orders.perform_cmd(async {
                 let response = fetch(request).await.expect("HTTP request failed");
 
                 if response.status().is_ok() {
-                    Msg::ShowNotif(NotifType::Success, "Album saved".to_owned())
+					Msg::SetAuth(encoded)
                 } else {
                     Msg::ShowNotif(NotifType::Error, "Error when saving".to_owned())
                 }
-            });*/
+            });
         },
 		Msg::UsernameChanged(username) => model.username = username,
 		Msg::PwdChanged(pwd) => model.pwd = pwd,
+		Msg::ShowNotif(_, _) => (),
+		Msg::SetAuth(_) => (),
 	}
 }
 

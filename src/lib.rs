@@ -20,6 +20,7 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
 	
 	let page = models::page::Page::init(url.to_owned());
     Model {
+		is_logged: false,
 		header: header::Model::new(page.to_owned()),
 		notification: notification::Model::default(),
 		my_albums: my_albums::Model::default(),
@@ -33,6 +34,7 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
 //     Model
 // ------ ------
 struct Model {
+	is_logged: bool,
 	header: header::Model,
 	page: models::page::Page,
 	my_albums: my_albums::Model,
@@ -59,12 +61,6 @@ enum Msg {
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
 		Msg::Header(msg) => {
-			match msg {
-				header::Msg::UserLoged => {
-					orders.send_msg(Msg::SetAuth);
-				},
-				_ => (),
-			}
 			header::update(msg, &mut model.header, &mut orders.proxy(Msg::Header));
 		},
 		Msg::Notification(msg) => {
@@ -99,7 +95,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			
 		},
 		Msg::Fetch => {
-			if model.header.user.is_some() {
+			if model.is_logged {
 				match model.page {
 					models::page::Page::MyAlbums => {
 						orders.send_msg(Msg::MyAlbums(my_albums::Msg::Fetch));
@@ -109,7 +105,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			} 
 		},
 		Msg::SetAuth => {
-			if let Some(user) = &model.header.user {
+			/*if let Some(user) = &model.header.user {
 				let login = &user.sub;
                 let pwd = env!("API_SALT", "Cound not find API_SALT in .env");
                 let b64 = base64::encode(format!("{0}:{1}", login, pwd));
@@ -117,7 +113,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 				orders.send_msg(Msg::NewAlbum(new_album::Msg::SetAuth(auth.to_owned())));
 				orders.send_msg(Msg::MyAlbums(my_albums::Msg::SetAuth(auth.to_owned())));
 				orders.send_msg(Msg::Fetch);
-			}
+			}*/
 		},
 		Msg::Login(msg) => {
 			login::update(msg, &mut model.login, &mut orders.proxy(Msg::Login));
@@ -135,8 +131,8 @@ fn view(model: &Model) -> Node<Msg> {
 		div![C!("container mt-5"),
 			match &model.page {
 				models::page::Page::Login => login::view(&model.login).map_msg(Msg::Login),
-				_ => match &model.header.user {
-					Some(_) => {
+				_ => match &model.is_logged {
+					true => {
 						div![C!["columns", "is-centered"],
 							div![C!["column is-half"],
 								match &model.page {
@@ -147,7 +143,7 @@ fn view(model: &Model) -> Node<Msg> {
 							]
 						]
 					},
-					None => error::view("Please log in to continue".to_string(), "ion-log-in".to_string()),
+					false => error::view("Please log in to continue".to_string(), "ion-log-in".to_string()),
 				},
 			}
 		]
