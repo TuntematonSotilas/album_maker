@@ -17,7 +17,6 @@ wasm-bindgen-test = "0.3.18"
 
 [dependencies]
 seed = "0.8.0"
-load-dotenv = "0.1.2"
 serde = "1.0.132"
 base64 = "0.13.0"
 

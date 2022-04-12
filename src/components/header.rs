@@ -1,9 +1,5 @@
 use seed::{self, prelude::*, *};
-use load_dotenv::load_dotenv;
-
 use crate::models::page::{LK_NEW_ALBUM, LK_MY_ALBUMS, Page, TITLE_MY_ALBUMS, TITLE_NEW_ALBUM, LK_LOGIN};
-
-load_dotenv!();
 
 const TITLE: &str = "Album maker";
 
