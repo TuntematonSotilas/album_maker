@@ -56,6 +56,7 @@ enum Msg {
 	SetAuth(String),
 	Notification(notification::Msg),
 	ShowNotif(NotifType, String),
+	SetIsLogged,
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -107,6 +108,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 		Msg::Login(msg) => {
 			match msg {
 				login::Msg::SetAuth(ref auth) => {
+					orders.send_msg(Msg::SetIsLogged);
 					orders.send_msg(Msg::SetAuth(auth.to_owned()));
 					orders.notify(subs::UrlRequested::new(Url::new()));
 				},
@@ -116,6 +118,10 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 				_ => (),
 			}
 			login::update(msg, &mut model.login, &mut orders.proxy(Msg::Login));
+		},
+		Msg::SetIsLogged => {
+			model.is_logged = true;
+			orders.send_msg(Msg::Header(header::Msg::SetIsLogged));
 		},
 		Msg::SetAuth(auth) => {
 			orders.send_msg(Msg::NewAlbum(new_album::Msg::SetAuth(auth.to_owned())));

@@ -28,6 +28,7 @@ impl Model {
 pub enum Msg {
 	OpenOrCloseMenu,
 	SetPage(Page),
+	SetIsLogged,
 }
 
 pub fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
@@ -37,6 +38,9 @@ pub fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
 		},
 		Msg::SetPage(page) => {
 			model.page = page;
+		},
+		Msg::SetIsLogged => {
+			model.is_logged = true;
 		},
 	}
 }
