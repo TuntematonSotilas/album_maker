@@ -1,5 +1,5 @@
 use seed::{self, prelude::*, *};
-use crate::models::page::{LK_NEW_ALBUM, LK_MY_ALBUMS, Page, TITLE_MY_ALBUMS, TITLE_NEW_ALBUM, LK_LOGIN};
+use crate::models::page::{LK_NEW_ALBUM, LK_MY_ALBUMS, Page, TITLE_MY_ALBUMS, TITLE_NEW_ALBUM};
 
 const TITLE: &str = "Album maker";
 
@@ -29,6 +29,7 @@ pub enum Msg {
 	OpenOrCloseMenu,
 	SetPage(Page),
 	SetIsLogged,
+	LogInOrOut,
 }
 
 pub fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
@@ -42,6 +43,7 @@ pub fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
 		Msg::SetIsLogged => {
 			model.is_logged = true;
 		},
+		Msg::LogInOrOut => (),
 	}
 }
 
@@ -93,11 +95,12 @@ pub fn view(model: &Model) -> Node<Msg> {
 				div![C!("navbar-item"),
 					div![C!("buttons"),
 						a![C!["button", "is-light"],
-							attrs!{ At::Href => format!("/{}", LK_LOGIN) },
+							//attrs!{ At::Href => format!("/{}", LK_LOGIN) },
 							match model.is_logged {
 								true => "Sign out",
 								false => "Sign in",
-							}
+							},
+							ev(Ev::Click, |_| Msg::LogInOrOut),
 						]
 					]
 				]

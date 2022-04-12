@@ -4,6 +4,7 @@
 #![allow(clippy::wildcard_imports)]
 
 use components::notification::NotifType;
+use models::page::LK_LOGIN;
 use seed::{prelude::*, *};
 use crate::components::*;
 
@@ -62,6 +63,21 @@ enum Msg {
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
 		Msg::Header(msg) => {
+			match msg {
+				header::Msg::LogInOrOut => {
+					match model.is_logged {
+						true => {
+							orders.send_msg(Msg::SetAuth("".to_owned()));
+							model.is_logged = false;
+						}
+						false => {
+							let url = Url::new().add_path_part(LK_LOGIN);
+							orders.notify(subs::UrlRequested::new(url));
+						},
+					}
+				},
+				_ => (),
+			};
 			header::update(msg, &mut model.header, &mut orders.proxy(Msg::Header));
 		},
 		Msg::Notification(msg) => {
