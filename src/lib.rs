@@ -53,7 +53,7 @@ enum Msg {
 	Login(login::Msg),
 	UrlChanged(subs::UrlChanged),
 	Fetch,
-	SetAuth,
+	SetAuth(String),
 	Notification(notification::Msg),
 	ShowNotif(NotifType, String),
 }
@@ -104,19 +104,24 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 				}
 			} 
 		},
-		Msg::SetAuth => {
-			/*if let Some(user) = &model.header.user {
-				let login = &user.sub;
-                let pwd = env!("API_SALT", "Cound not find API_SALT in .env");
-                let b64 = base64::encode(format!("{0}:{1}", login, pwd));
-                let auth = format!("Basic {0}", b64);
-				orders.send_msg(Msg::NewAlbum(new_album::Msg::SetAuth(auth.to_owned())));
-				orders.send_msg(Msg::MyAlbums(my_albums::Msg::SetAuth(auth.to_owned())));
-				orders.send_msg(Msg::Fetch);
-			}*/
-		},
 		Msg::Login(msg) => {
+			match msg {
+				login::Msg::SetAuth(ref auth) => {
+					orders.send_msg(Msg::SetAuth(auth.to_owned()));
+					orders.notify(subs::UrlRequested::new(Url::new()));
+				},
+				login::Msg::ShowNotif(ref notif_type, ref message) => {
+					orders.send_msg(Msg::ShowNotif(notif_type.to_owned(), message.to_owned()));
+				},
+				_ => (),
+			}
 			login::update(msg, &mut model.login, &mut orders.proxy(Msg::Login));
+		},
+		Msg::SetAuth(auth) => {
+			orders.send_msg(Msg::NewAlbum(new_album::Msg::SetAuth(auth.to_owned())));
+			orders.send_msg(Msg::MyAlbums(my_albums::Msg::SetAuth(auth.to_owned())));
+			//orders.send_msg(Msg::Fetch);
+			
 		},
 	}
 }

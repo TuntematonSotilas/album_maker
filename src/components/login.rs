@@ -11,7 +11,6 @@ use super::notification::NotifType;
 pub struct Model {
 	username: String,
 	password: String,
-	pwd: String,
 }
 
 // ------ ------
@@ -31,24 +30,24 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 		Msg::Submit => {
             orders.skip(); // No need to rerender
 			let uri = BASE_URI.to_owned() + "login";
-			let encoded = String::new();
+			let b64 = base64::encode(format!("{0}:{1}", model.username, model.password));
+            let auth = format!("Basic {0}", b64);
+
 			let request = Request::new(uri)
                 .method(Method::Post)
-				.json(&encoded)
-                .expect("Serialization failed");
+				.header(Header::authorization(auth.to_owned()));
 
-            orders.perform_cmd(async {
+            orders.perform_cmd(async move {
                 let response = fetch(request).await.expect("HTTP request failed");
-
                 if response.status().is_ok() {
-					Msg::SetAuth(encoded)
+					Msg::SetAuth(auth.to_owned())
                 } else {
-                    Msg::ShowNotif(NotifType::Error, "Error when saving".to_owned())
+                    Msg::ShowNotif(NotifType::Error, "Login error".to_owned())
                 }
             });
         },
 		Msg::UsernameChanged(username) => model.username = username,
-		Msg::PwdChanged(pwd) => model.pwd = pwd,
+		Msg::PwdChanged(password) => model.password = password,
 		Msg::ShowNotif(_, _) => (),
 		Msg::SetAuth(_) => (),
 	}
@@ -81,7 +80,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 							attrs!{
 								At::Type => "password", 
 								At::Name => "pwd",
-								At::Value => model.pwd,
+								At::Value => model.password,
 							},
 							input_ev(Ev::Input, Msg::PwdChanged),
 						]
