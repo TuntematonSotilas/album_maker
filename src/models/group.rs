@@ -3,13 +3,14 @@ use serde::{Serialize, Deserialize};
 use super::oid::Oid;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Album {
+
+pub struct Group {
 	#[serde(rename(deserialize = "_id"))]
     pub id: Oid,
 	pub title: String,
 }
 
-impl Album {
+impl Group {
 	pub fn new() -> Self {
 		Self {
 			id: Oid {
