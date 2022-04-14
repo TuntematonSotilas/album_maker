@@ -74,44 +74,58 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
 	
-	div! [C!("box"),
-		p![C!("title is-5 has-text-link"), TITLE_NEW_ALBUM],
-		div![C!["field", "has-addons"],
-			div![C!("control"),
-				input![C!("input"),
-					attrs!{
-						At::Type => "text", 
-						At::Name => "title",
-						At::Placeholder => "Title",
-						At::Value => model.album.title,
-					},
-					input_ev(Ev::Input, Msg::TitleChanged),
+	div! [C!("panel"),
+
+		div! [C!("box"),
+			p![C!("title is-5 has-text-link"), TITLE_NEW_ALBUM],
+			div![C!["field", "has-addons"],
+				div![C!("control"),
+					input![C!("input"),
+						attrs!{
+							At::Type => "text", 
+							At::Name => "title",
+							At::Placeholder => "Title",
+							At::Value => model.album.title,
+						},
+						input_ev(Ev::Input, Msg::TitleChanged),
+					]
+				],
+				div![C!("control"),
+					a![C!["button", "is-primary"], 
+						"Save",
+						ev(Ev::Click, |_| Msg::Submit),
+					]
 				]
 			],
-			div![C!("control"),
-				a![C!["button", "is-primary"], 
-					"Save",
-					ev(Ev::Click, |_| Msg::Submit),
-				]
-			]
-		],
-		div![C!("field"),
-			div![C!("control"),
-				a![C!["button", "is-link", "is-light", "is-small"],
-					span![C!("icon"),
-						i![C!("ion-plus")]
+			div![C!("field"),
+				div![C!("control"),
+					a![C!["button", "is-link", "is-light", "is-small"],
+						span![C!("icon"),
+							i![C!("ion-plus")]
+						],
+						span!["Add Group"],
+						ev(Ev::Click, |_| Msg::AddGroup),
 					],
-					span!["Add Group"],
-					ev(Ev::Click, |_| Msg::AddGroup),
-				],
-			]
+				]
+			],
 		],
-		
+
 		match &model.album.groups {
 			Some(groups) => div![
 				groups.iter().map(|group| {
-					div![C!("panel"),
-						&group.title
+					div![C!("panel-block"),
+						div![C!("field"),
+							div![C!("control"),
+								input![C!("input"),
+									attrs!{
+										At::Type => "text", 
+										At::Name => "title",
+										At::Placeholder => "Title",
+										At::Value => group.title,
+									},
+								]
+							]
+						]
 					]
 				})
 			],

@@ -29,10 +29,11 @@ pub enum Msg {
 	OpenOrCloseMenu,
 	SetPage(Page),
 	SetIsLogged,
+	ClickLogInOrOut,
 	LogInOrOut,
 }
 
-pub fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
+pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
 		Msg::OpenOrCloseMenu => {
 			model.is_menu_open = !model.is_menu_open;
@@ -42,6 +43,12 @@ pub fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
 		},
 		Msg::SetIsLogged => {
 			model.is_logged = true;
+		},
+		Msg::ClickLogInOrOut => {
+			if model.is_logged {
+				model.is_logged = false;
+			}
+			orders.send_msg(Msg::LogInOrOut);
 		},
 		Msg::LogInOrOut => (),
 	}
@@ -95,12 +102,11 @@ pub fn view(model: &Model) -> Node<Msg> {
 				div![C!("navbar-item"),
 					div![C!("buttons"),
 						a![C!["button", "is-light"],
-							//attrs!{ At::Href => format!("/{}", LK_LOGIN) },
 							match model.is_logged {
 								true => "Sign out",
 								false => "Sign in",
 							},
-							ev(Ev::Click, |_| Msg::LogInOrOut),
+							ev(Ev::Click, |_| Msg::ClickLogInOrOut),
 						]
 					]
 				]
