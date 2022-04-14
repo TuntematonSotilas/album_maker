@@ -1,6 +1,6 @@
 use seed::{self, prelude::*, *};
 
-use crate::models::{page::TITLE_NEW_ALBUM, album::Album, vars::BASE_URI};
+use crate::models::{page::TITLE_NEW_ALBUM, album::Album, vars::BASE_URI, group::Group};
 
 use super::notification::NotifType;
 
@@ -29,6 +29,7 @@ pub enum Msg {
 	Submit,
 	TitleChanged(String),
 	ShowNotif(NotifType, String),
+	AddGroup,
 }
 
 
@@ -59,6 +60,12 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         },
 		Msg::TitleChanged(title) => model.album.title = title,
 		Msg::ShowNotif(_, _) => (),
+		Msg::AddGroup => {
+			if let Some(groups) = &mut model.album.groups {
+				groups.push(Group::new());
+			}
+			
+		},
 	}
 }
 
@@ -95,8 +102,20 @@ pub fn view(model: &Model) -> Node<Msg> {
 						i![C!("ion-plus")]
 					],
 					span!["Add Group"],
+					ev(Ev::Click, |_| Msg::AddGroup),
 				],
 			]
 		],
+		
+		match &model.album.groups {
+			Some(groups) => div![
+				groups.iter().map(|group| {
+					div![C!("panel"),
+						&group.title
+					]
+				})
+			],
+			None => empty![]
+		}
 	]
 }

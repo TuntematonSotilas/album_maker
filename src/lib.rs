@@ -142,8 +142,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 		Msg::SetAuth(auth) => {
 			orders.send_msg(Msg::NewAlbum(new_album::Msg::SetAuth(auth.to_owned())));
 			orders.send_msg(Msg::MyAlbums(my_albums::Msg::SetAuth(auth.to_owned())));
-			//orders.send_msg(Msg::Fetch);
-			
 		},
 	}
 }

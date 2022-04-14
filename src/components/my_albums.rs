@@ -8,7 +8,6 @@ use crate::{models::{page::TITLE_MY_ALBUMS, vars::BASE_URI, album::Album}, compo
 #[derive(Default)]
 pub struct Model {
 	auth_header: String,
-	is_forbidden: bool,
 	albums: Option<Vec<Album>>,
 }
 
@@ -19,7 +18,6 @@ pub enum Msg {
 	SetAuth(String),
 	Fetch,
 	Received(Vec<Album>),
-	Forbidden,
 	Error,
 }
 
@@ -45,9 +43,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 							.expect("deserialization failed");
 						Msg::Received(albums)
 					},
-					403 => {
-						Msg::Forbidden
-					},
 					_ => Msg::Error,
 				}
 
@@ -55,9 +50,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 		},
 		Msg::Error => {
 			error!("Error getting albums");
-		}
-		Msg::Forbidden => {
-			model.is_forbidden = true;
 		},
 		Msg::Received(albums) => {
             model.albums = Some(albums);
@@ -69,22 +61,16 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view<Ms>(model: &Model) -> Node<Ms> {
-	
-	match &model.is_forbidden {
-		true => error::view("Forbidden".to_string(), "ion-alert-circled".to_string()),
-		false => {
-			if !&model.albums.is_some() || model.albums.as_ref().unwrap().is_empty() {
-				error::view("No data".to_string(), "ion-search".to_string()) 
-			} else {
-				div![C!("panel is-link"),
-					p![C!("panel-heading"), TITLE_MY_ALBUMS],
-					model.albums.as_ref().unwrap().iter().map(|album| {
-						a![C!("panel-block"),
-							&album.title
-						]
-					})
+	if !&model.albums.is_some() || model.albums.as_ref().unwrap().is_empty() {
+		error::view("No data".to_string(), "ion-search".to_string()) 
+	} else {
+		div![C!("panel is-link"),
+			p![C!("panel-heading"), TITLE_MY_ALBUMS],
+			model.albums.as_ref().unwrap().iter().map(|album| {
+				a![C!("panel-block"),
+					&album.title
 				]
-			}	
-		}
+			})
+		]
 	}
 }
