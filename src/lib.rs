@@ -153,19 +153,17 @@ fn view(model: &Model) -> Node<Msg> {
 	div![
 		notification::view(&model.notification).map_msg(Msg::Notification),
 		header::view(&model.header).map_msg(Msg::Header),
-		div![C!("container mt-5"),
+		div![C!["container", "mt-5"],
 			match &model.page {
 				models::page::Page::Login => login::view(&model.login).map_msg(Msg::Login),
 				_ => match &model.is_logged {
 					true => {
 						div![C!["columns", "is-centered"],
-							div![C!["column is-half"],
-								match &model.page {
-									models::page::Page::NewAlbum => new_album::view(&model.new_album).map_msg(Msg::NewAlbum),
-									models::page::Page::MyAlbums => my_albums::view(&model.my_albums),
-									_ => empty!(),
-								}
-							]
+							match &model.page {
+								models::page::Page::NewAlbum => new_album::view(&model.new_album).map_msg(Msg::NewAlbum),
+								models::page::Page::MyAlbums => my_albums::view(&model.my_albums),
+								_ => empty!(),
+							}
 						]
 					},
 					false => error::view("Please log in to continue".to_string(), "ion-log-in".to_string()),

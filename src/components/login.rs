@@ -58,7 +58,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
 	div![C!["columns", "is-centered"],
-		div![C!["column is-half"],
+		div![C!["column", "is-half"],
 			div! [C!("box"),
 				p![C!("title is-5 has-text-link"), TITLE_LOGIN],
 				div![C!("field"),
