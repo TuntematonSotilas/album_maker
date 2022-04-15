@@ -61,18 +61,27 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view<Ms>(model: &Model) -> Node<Ms> {
-	if !&model.albums.is_some() || model.albums.as_ref().unwrap().is_empty() {
-		error::view("No data".to_string(), "ion-search".to_string()) 
-	} else {
-		div![C!["column", "is-half"],
-			div![C!["panel", "is-link"],
-				p![C!("panel-heading"), TITLE_MY_ALBUMS],
-				model.albums.as_ref().unwrap().iter().map(|album| {
-					a![C!("panel-block"),
-						&album.title
-					]
-				})
-			]
-		]
-	}
+	div![C!("column is-centered"),
+		div![C!("row"),
+			progress![
+				C!["progress","is-small","is-primary"],
+				attrs!{ At::Max => 100 }
+
+			],
+		],
+		div![C!["row", "is-half"],
+			if !&model.albums.is_some() || model.albums.as_ref().unwrap().is_empty() {
+				error::view("No data".to_string(), "ion-search".to_string()) 
+			} else {
+				div![C!["panel", "is-link"],
+					p![C!("panel-heading"), TITLE_MY_ALBUMS],
+					model.albums.as_ref().unwrap().iter().map(|album| {
+						a![C!("panel-block"),
+							&album.title
+						]
+					})
+				]
+			}
+		],
+	]
 }
