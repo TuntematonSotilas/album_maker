@@ -77,7 +77,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
 	
-	div![
+	div![C!["column", "is-centered", "is-half"],
 		div! [C!("panel"),
 			div! [C!("box"),
 				p![C!["title" ,"is-5", "has-text-link"], TITLE_NEW_ALBUM],
@@ -87,7 +87,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 							attrs!{
 								At::Type => "text", 
 								At::Name => "title",
-								At::Placeholder => "Title",
+								At::Placeholder => "Album name",
 								At::Value => model.album.title,
 							},
 							input_ev(Ev::Input, Msg::TitleChanged),
@@ -111,18 +111,16 @@ pub fn view(model: &Model) -> Node<Msg> {
 						],
 					]
 				],
+				match &model.album.groups {
+					Some(groups) => div![
+						groups.iter().map(|group| {
+							group::view(group)
+						})
+					],
+					None => empty![]
+				}
 			],
 		],
-		div![C!("panel"),
-			match &model.album.groups {
-				Some(groups) => div![
-					groups.iter().map(|group| {
-						group::view(group)
-					})
-				],
-				None => empty![]
-			}
-		]
 	]
 	
 }

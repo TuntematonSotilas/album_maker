@@ -10,7 +10,7 @@ pub fn view<Ms>(group: &Group) -> Node<Ms> {
 					attrs!{
 						At::Type => "text", 
 						At::Name => "title",
-						At::Placeholder => "Title",
+						At::Placeholder => "Group name",
 						At::Value => group.title,
 					},
 				]

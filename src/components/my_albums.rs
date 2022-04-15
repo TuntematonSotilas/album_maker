@@ -61,7 +61,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view<Ms>(model: &Model) -> Node<Ms> {
-	div![C!["column", "is-centered", "is-half" ],
+	div![C!["column", "is-centered", "is-half"],
 		div![C!["panel", "is-link"],
 			p![C!("panel-heading"), TITLE_MY_ALBUMS],
 			if !&model.albums.is_some() || model.albums.as_ref().unwrap().is_empty() {
