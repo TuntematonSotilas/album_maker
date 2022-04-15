@@ -61,15 +61,15 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view<Ms>(model: &Model) -> Node<Ms> {
-	div![C!("column is-centered"),
+	div![C!["column", "is-centered", "is-half" ],
 		div![C!("row"),
 			progress![
-				C!["progress","is-small","is-primary"],
+				C!["progress","is-small","table-progress"],
 				attrs!{ At::Max => 100 }
 
 			],
 		],
-		div![C!["row", "is-half"],
+		div![C!["row"],
 			if !&model.albums.is_some() || model.albums.as_ref().unwrap().is_empty() {
 				error::view("No data".to_string(), "ion-search".to_string()) 
 			} else {
