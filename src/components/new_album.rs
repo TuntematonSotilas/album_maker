@@ -1,6 +1,9 @@
 use seed::{self, prelude::*, *};
 
-use crate::models::{page::TITLE_NEW_ALBUM, album::Album, vars::BASE_URI, group::Group};
+use crate::{
+	models::{page::TITLE_NEW_ALBUM, album::Album, vars::BASE_URI, group::Group},
+	components::group,
+};
 
 use super::notification::NotifType;
 
@@ -114,20 +117,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 			match &model.album.groups {
 				Some(groups) => div![
 					groups.iter().map(|group| {
-						div![C!("panel-block"),
-							div![C!("field"),
-								div![C!("control"),
-									input![C!("input"),
-										attrs!{
-											At::Type => "text", 
-											At::Name => "title",
-											At::Placeholder => "Title",
-											At::Value => group.title,
-										},
-									]
-								]
-							]
-						]
+						group::view(group)
 					})
 				],
 				None => empty![]
