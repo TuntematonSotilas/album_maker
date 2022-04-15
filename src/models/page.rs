@@ -18,7 +18,7 @@ pub enum Page {
 impl Page {
     pub fn init(mut url: Url) -> Self {
         match url.next_path_part() {
-            None => Self::MyAlbums,
+            None => Self::Login,
 			Some(LK_MY_ALBUMS) => Self::MyAlbums,
             Some(LK_NEW_ALBUM) => Self::NewAlbum,
 			Some(LK_LOGIN) => Self::Login,
