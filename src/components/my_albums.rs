@@ -1,6 +1,6 @@
 use seed::{self, prelude::*, *};
 
-use crate::{models::{page::TITLE_MY_ALBUMS, vars::BASE_URI, album::Album}, components::error};
+use crate::{models::{page::TITLE_MY_ALBUMS, vars::BASE_URI, album::Album}};
 
 // ------ ------
 //     Model
@@ -62,26 +62,28 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 pub fn view<Ms>(model: &Model) -> Node<Ms> {
 	div![C!["column", "is-centered", "is-half" ],
-		div![C!("row"),
-			progress![
-				C!["progress","is-small","table-progress"],
-				attrs!{ At::Max => 100 }
-
-			],
-		],
-		div![C!["row"],
+		div![C!["panel", "is-link"],
+			p![C!("panel-heading"), TITLE_MY_ALBUMS],
 			if !&model.albums.is_some() || model.albums.as_ref().unwrap().is_empty() {
-				error::view("No data".to_string(), "ion-search".to_string()) 
+				div![
+					(0..4).map(|_| {
+						p![C!("panel-block"),
+							progress![
+								C!["progress","is-small","table-progress"],
+								attrs!{ At::Max => 100 }
+							],
+						]
+					})
+				]
 			} else {
-				div![C!["panel", "is-link"],
-					p![C!("panel-heading"), TITLE_MY_ALBUMS],
+				div![
 					model.albums.as_ref().unwrap().iter().map(|album| {
-						a![C!("panel-block"),
+						p![C!("panel-block"),
 							&album.title
 						]
 					})
 				]
 			}
-		],
+		]
 	]
 }
