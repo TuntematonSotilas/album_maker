@@ -14,12 +14,16 @@ mod components;
 // ------ ------
 //     Init
 // ------ ------
-fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
+fn init(_url: Url, orders: &mut impl Orders<Msg>) -> Model {
 	
 	orders
 		.subscribe(Msg::UrlChanged);
 	
-	let page = models::page::Page::init(url.to_owned());
+	let login_url = Url::new().add_path_part(LK_LOGIN);
+	orders.notify(subs::UrlRequested::new(login_url));
+	
+	let page = models::page::Page::Login; 
+	
     Model {
 		is_logged: false,
 		header: header::Model::new(page.to_owned()),
