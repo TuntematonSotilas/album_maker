@@ -13,13 +13,15 @@ use super::notification::NotifType;
 pub struct Model {
 	auth_header: String,
 	album: Album,
+	group: group::Model,
 }
 
 impl Model {
 	pub fn new() -> Self {
 		Self {
 			auth_header: String::new(),
-			album: Album::new()
+			album: Album::new(),
+			group: group::Model::new(),
 		}
 	}
 }
@@ -33,6 +35,7 @@ pub enum Msg {
 	TitleChanged(String),
 	ShowNotif(NotifType, String),
 	AddGroup,
+	Group(group::Msg),
 }
 
 
@@ -69,6 +72,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			}
 			
 		},
+		Msg::Group(msg) => {
+			group::update(msg, &mut model.group, &mut orders.proxy(Msg::Group));
+		}
 	}
 }
 

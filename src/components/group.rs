@@ -24,8 +24,7 @@ pub enum Msg {
 	SetTitle(String),
 }
 
-
-pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
+pub fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
 	match msg {
 		Msg::SetTitle(title) => model.group.title = title,
 	}
