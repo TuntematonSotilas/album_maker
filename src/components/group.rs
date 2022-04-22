@@ -1,4 +1,5 @@
 use seed::{self, prelude::*, *};
+use uuid::Uuid;
 
 use crate::models::group::Group;
 
@@ -21,21 +22,23 @@ impl Model {
 //    Update
 // ------ ------
 pub enum Msg {
-	TitleChanged(String),
+	TitleChanged(String, Group),
 	UpdateGroup(Group),
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
-		Msg::TitleChanged(title) => {
-			model.group.title = title;
+		Msg::TitleChanged(input, group) => {
+			model.group.id = group.id;
+			model.group.title = input;
 			orders.send_msg(Msg::UpdateGroup(model.group.to_owned()));
 		},
 		Msg::UpdateGroup(Group) => (),
 	}
 }
 
-pub fn view(group: &Group) -> Node<Msg> {
+pub fn view(group: Group) -> Node<Msg> {
+	
 	div![C!("panel-block"),
 		div![C!("field"),
 			div![C!("control"),
@@ -46,7 +49,7 @@ pub fn view(group: &Group) -> Node<Msg> {
 						At::Placeholder => "Group name",
 						At::Value => group.title,
 					},
-					input_ev(Ev::Input, Msg::TitleChanged),
+					input_ev(Ev::Input, move |input| Msg::TitleChanged(input, group)),
 				]
 			]
 		]
