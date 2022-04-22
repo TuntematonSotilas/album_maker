@@ -21,16 +21,21 @@ impl Model {
 //    Update
 // ------ ------
 pub enum Msg {
-	SetTitle(String),
+	TitleChanged(String),
+	UpdateGroup(Group),
 }
 
-pub fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
+pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
-		Msg::SetTitle(title) => model.group.title = title,
+		Msg::TitleChanged(title) => {
+			model.group.title = title;
+			orders.send_msg(Msg::UpdateGroup(model.group.to_owned()));
+		},
+		Msg::UpdateGroup(Group) => (),
 	}
 }
 
-pub fn view<Ms>(group: &Group) -> Node<Ms> {
+pub fn view(group: &Group) -> Node<Msg> {
 	div![C!("panel-block"),
 		div![C!("field"),
 			div![C!("control"),
@@ -41,6 +46,7 @@ pub fn view<Ms>(group: &Group) -> Node<Ms> {
 						At::Placeholder => "Group name",
 						At::Value => group.title,
 					},
+					input_ev(Ev::Input, Msg::TitleChanged),
 				]
 			]
 		]

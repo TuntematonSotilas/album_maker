@@ -70,10 +70,16 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			if let Some(groups) = &mut model.album.groups {
 				groups.push(Group::new());
 			}
-			
 		},
 		Msg::Group(msg) => {
+			match msg {
+				group::Msg::UpdateGroup(ref group) => {
+					log!(group.to_owned())
+				},
+				_ => (),
+			}
 			group::update(msg, &mut model.group, &mut orders.proxy(Msg::Group));
+			
 		}
 	}
 }
@@ -120,7 +126,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 				match &model.album.groups {
 					Some(groups) => div![
 						groups.iter().map(|group| {
-							group::view(group)
+							group::view(group).map_msg(Msg::Group)
 						})
 					],
 					None => empty![]

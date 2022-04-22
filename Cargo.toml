@@ -19,6 +19,7 @@ wasm-bindgen-test = "0.3.18"
 seed = "0.8.0"
 serde = "1.0.132"
 base64 = "0.13.0"
+uuid = { version = "1.0.0", features = ["v4", "serde"] }
 
 [profile.release]
 lto = true

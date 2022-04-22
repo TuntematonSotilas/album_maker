@@ -1,21 +1,16 @@
 use serde::{Serialize, Deserialize};
-
-use super::oid::Oid;
+use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-
 pub struct Group {
-	#[serde(rename(deserialize = "_id"))]
-    pub id: Oid,
+    pub id: Uuid,
 	pub title: String,
 }
 
 impl Group {
 	pub fn new() -> Self {
 		Self {
-			id: Oid {
-				value: String::new()
-			},
+			id: Uuid::new_v4(),
 			title: String::new()
 		}
 	}
