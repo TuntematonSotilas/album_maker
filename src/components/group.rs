@@ -1,5 +1,4 @@
 use seed::{self, prelude::*, *};
-use uuid::Uuid;
 
 use crate::models::group::Group;
 
@@ -33,7 +32,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			model.group.title = input;
 			orders.send_msg(Msg::UpdateGroup(model.group.to_owned()));
 		},
-		Msg::UpdateGroup(Group) => (),
+		Msg::UpdateGroup(_) => (),
 	}
 }
 

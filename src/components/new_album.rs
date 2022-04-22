@@ -80,8 +80,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 							group.title = group_upd.to_owned().title;
 						}
 					}
-					log!(group_upd.to_owned());
-					
 				},
 				_ => (),
 			}
