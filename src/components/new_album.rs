@@ -1,7 +1,7 @@
 use seed::{self, prelude::*, *};
 
 use crate::{
-	models::{page::TITLE_NEW_ALBUM, album::Album, vars::BASE_URI, group::Group},
+	models::{page::TITLE_NEW_ALBUM, album::Album, vars::BASE_URI, group::Group, oid::Oid},
 	components::group,
 };
 
@@ -32,6 +32,7 @@ impl Model {
 pub enum Msg {
 	SetAuth(String),
 	Submit,
+	Success(Response),
 	TitleChanged(String),
 	ShowNotif(NotifType, String),
 	AddGroup,
@@ -58,12 +59,25 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 let response = fetch(request).await.expect("HTTP request failed");
 
                 if response.status().is_ok() {
-                    Msg::ShowNotif(NotifType::Success, "Album saved".to_owned())
+					Msg::Success(response)
                 } else {
                     Msg::ShowNotif(NotifType::Error, "Error when saving".to_owned())
                 }
             });
         },
+		Msg::Success(response) => {
+			let r = response;
+			//let res_oid = r.json::<Oid>();
+
+			orders.perform_cmd(async {
+				//let res_oid = res_oid.await;
+				/*if let Ok(oid) = res_oid {
+					
+				}*/
+				//model.album.id = Some(true);
+        	    //orders.send_msg(Msg::ShowNotif(NotifType::Success, "Album saved".to_owned()));
+			});
+		},
 		Msg::TitleChanged(title) => model.album.title = title,
 		Msg::ShowNotif(_, _) => (),
 		Msg::AddGroup => {
