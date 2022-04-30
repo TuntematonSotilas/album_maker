@@ -50,7 +50,6 @@ pub fn view(model: &Model) -> Node<Msg> {
 		NotifType::Error => "is-danger",
 	};
 	div![C!["notification", "notif", c_type, c_visible],
-		&model.message,
-		"aaaa"
+		&model.message
 	]
 }
