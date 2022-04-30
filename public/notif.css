@@ -1,14 +1,19 @@
 .notif {
 	position: fixed;
 	z-index: 100;
-	width: 100%;
-	padding-top: 0.3rem;
+	width: 20rem;
+	margin-left: 40%;
+	margin-top: 0.5rem;
+	padding: 0.4rem;
 	visibility: hidden;
+	text-align: center;
 }
 
-.notif .notification{
-	padding: 0.5rem 0.2rem 0.5rem 0rem !important;
-	text-align: center;
+@media screen and (max-width: 640px) {
+	.notif {
+		width: 80%;
+		margin-left: 10%;
+	}	
 }
 
 .notif-show {

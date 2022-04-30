@@ -49,11 +49,8 @@ pub fn view(model: &Model) -> Node<Msg> {
 		NotifType::Success => "is-success",
 		NotifType::Error => "is-danger",
 	};
-	div![C!["columns", "is-centered", "notif", c_visible],
-		div![C!["column", "is-one-quarter"],
-			div![C!["notification", c_type],
-				&model.message,
-			],
-		],
+	div![C!["notification", "notif", c_type, c_visible],
+		&model.message,
+		"aaaa"
 	]
 }
