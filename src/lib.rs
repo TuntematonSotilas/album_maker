@@ -168,7 +168,7 @@ fn view(model: &Model) -> Node<Msg> {
 						div![C!["columns", "is-centered"],
 							match &model.page {
 								models::page::Page::NewAlbum => new_album::view(&model.new_album).map_msg(Msg::NewAlbum),
-								models::page::Page::MyAlbums => my_albums::view(&model.my_albums),
+								models::page::Page::MyAlbums => my_albums::view(&model.my_albums).map_msg(Msg::MyAlbums),
 								_ => empty!(),
 							}
 						]

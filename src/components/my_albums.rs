@@ -19,6 +19,7 @@ pub enum Msg {
 	InitComp,
 	Received(Vec<Album>),
 	Error,
+	Delete,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -53,14 +54,17 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 		},
 		Msg::Received(albums) => {
             model.albums = Some(albums);
-        }
+        },
+		Msg::Delete => {
+			log!("delete")
+		}
 	}
 }
 
 // ------ ------
 //     View
 // ------ ------
-pub fn view<Ms>(model: &Model) -> Node<Ms> {
+pub fn view(model: &Model) -> Node<Msg> {
 	div![C!["column", "is-centered", "is-half"],
 		div![C!["panel", "is-link"],
 			p![C!("panel-heading"), TITLE_MY_ALBUMS],
@@ -79,7 +83,14 @@ pub fn view<Ms>(model: &Model) -> Node<Ms> {
 				div![
 					model.albums.as_ref().unwrap().iter().map(|album| {
 						p![C!("panel-block"),
-							&album.title
+							div![C!["container", "level"],
+								span![C!("level-left"),
+									&album.title,
+								],
+								button![C!["level-right", "delete"],
+									ev(Ev::Click, |_| Msg::Delete),
+								]
+							]
 						]
 					})
 				]
