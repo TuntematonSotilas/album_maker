@@ -16,7 +16,7 @@ pub struct Model {
 // ------ ------
 pub enum Msg {
 	SetAuth(String),
-	Fetch,
+	InitComp,
 	Received(Vec<Album>),
 	Error,
 }
@@ -24,7 +24,7 @@ pub enum Msg {
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
 		Msg::SetAuth(auth_header) => model.auth_header = auth_header,
-		Msg::Fetch => {
+		Msg::InitComp => {
 			let auth = model.auth_header.to_owned();
 			orders.skip(); // No need to rerender
 			orders.perform_cmd(async {

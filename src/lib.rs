@@ -57,7 +57,7 @@ enum Msg {
 	NewAlbum(new_album::Msg),
 	Login(login::Msg),
 	UrlChanged(subs::UrlChanged),
-	Fetch,
+	InitComp,
 	SetAuth(String),
 	Notification(notification::Msg),
 	ShowNotif(NotifType, String),
@@ -112,14 +112,17 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			model.page = page.to_owned();
 
 			orders.send_msg(Msg::Header(header::Msg::SetPage(page.to_owned())));
-			orders.send_msg(Msg::Fetch);
+			orders.send_msg(Msg::InitComp);
 			
 		},
-		Msg::Fetch => {
+		Msg::InitComp => {
 			if model.is_logged {
 				match model.page {
 					models::page::Page::MyAlbums => {
-						orders.send_msg(Msg::MyAlbums(my_albums::Msg::Fetch));
+						orders.send_msg(Msg::MyAlbums(my_albums::Msg::InitComp));
+					},
+					models::page::Page::NewAlbum => {
+						orders.send_msg(Msg::NewAlbum(new_album::Msg::InitComp));
 					},
 					_ => (),
 				}

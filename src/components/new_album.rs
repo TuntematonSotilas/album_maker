@@ -31,6 +31,7 @@ impl Model {
 // ------ ------
 pub enum Msg {
 	SetAuth(String),
+	InitComp,
 	Submit,
 	Success(Oid),
 	TitleChanged(String),
@@ -44,6 +45,10 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 	match msg {
 		Msg::SetAuth(auth_header) => {
 			model.auth_header = auth_header;
+		},
+		Msg::InitComp => {
+			model.album = Album::new();
+			model.group = group::Model::new();
 		},
 		Msg::Submit => {
             orders.skip(); // No need to rerender
