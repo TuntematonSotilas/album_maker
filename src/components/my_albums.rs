@@ -82,12 +82,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 								div![C!("column"), 
 									button![C!("delete"), ev(Ev::Click, |_| Msg::Delete),]
 								]
-							],
-							// div![
-							// 	C!["container", "level"],
-							// 	span![C!("level-left"), &album.title,],
-							// 	button![C!["level-right", "delete"], ev(Ev::Click, |_| Msg::Delete),]
-							// ]
+							]
 						]
 					})]
 				} else {
