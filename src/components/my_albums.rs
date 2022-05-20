@@ -67,30 +67,34 @@ pub fn view(model: &Model) -> Node<Msg> {
     div![
         C!["column", "is-centered", "is-half"],
         div![
-            C!["panel", "is-link"],
-            p![C!("panel-heading"), TITLE_MY_ALBUMS],
-            if model.albums.is_some() {
-                div![model.albums.as_ref().unwrap().iter().map(|album| {
-                    p![
-                        C!("panel-block"),
-                        div![
-                            C!["container", "level"],
-                            span![C!("level-left"), &album.title,],
-                            button![C!["level-right", "delete"], ev(Ev::Click, |_| Msg::Delete),]
-                        ]
-                    ]
-                })]
-            } else {
-                div![(0..4).map(|_| {
-                    p![
-                        C!("panel-block"),
-                        progress![
-                            C!["progress", "is-small", "table-progress"],
-                            attrs! { At::Max => 100 }
-                        ],
-                    ]
-                })]
-            }
+            C!["panel"],
+			div![
+                C!("box"),
+				p![C!["title", "is-5", "has-text-link"], TITLE_MY_ALBUMS],
+			
+				if model.albums.is_some() {
+					div![model.albums.as_ref().unwrap().iter().map(|album| {
+						p![
+							C!("panel-block"),
+							div![
+								C!["container", "level"],
+								span![C!("level-left"), &album.title,],
+								button![C!["level-right", "delete"], ev(Ev::Click, |_| Msg::Delete),]
+							]
+						]
+					})]
+				} else {
+					div![(0..4).map(|_| {
+						p![
+							C!("panel-block"),
+							progress![
+								C!["progress", "is-small", "table-progress"],
+								attrs! { At::Max => 100 }
+							],
+						]
+					})]
+				}
+			]
         ]
     ]
 }
