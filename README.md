@@ -33,7 +33,7 @@ koyeb app init amaker --docker "tuntematonsotilas/gbt:amaker" --ports 80:http --
 Update Service
 ```sh
 koyeb services list
-koyeb services update XXX --docker "tuntematonsotilas/gbt:amaker" --docker-private-registry-secret docker-hub-credentials
+koyeb services update 1b68cac4 --docker "tuntematonsotilas/gbt:amaker" --docker-private-registry-secret docker-hub-credentials
 ```
 
 Koyeb CLI needs an authentication for pivate DockerHub : [koyeb doc](https://www.koyeb.com/docs/apps/private-container-registry-secrets#dockerhub)
