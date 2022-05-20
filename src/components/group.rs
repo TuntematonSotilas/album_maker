@@ -38,7 +38,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 
 pub fn view(group: Group) -> Node<Msg> {
     div![
-        C!("panel-block"),
+        C!("box"),
         div![
             C!("field"),
             div![

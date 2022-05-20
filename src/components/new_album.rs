@@ -108,53 +108,46 @@ pub fn view(model: &Model) -> Node<Msg> {
     div![
         C!["column", "is-centered", "is-half"],
         div![
-            C!("panel"),
-            div![
-                C!("box"),
-                p![C!["title", "is-5", "has-text-link"], TITLE_NEW_ALBUM],
-                div![
-                    C!["field", "has-addons"],
-                    div![
-                        C!("control"),
-                        input![
-                            C!("input"),
-                            attrs! {
-                                At::Type => "text",
-                                At::Name => "title",
-                                At::Placeholder => "Album name",
-                                At::Value => model.album.title,
-                            },
-                            input_ev(Ev::Input, Msg::TitleChanged),
-                        ]
-                    ],
-                    div![
-                        C!("control"),
-                        a![
-                            C!["button", "is-primary"],
-                            "Save",
-                            ev(Ev::Click, |_| Msg::Submit),
-                        ]
-                    ]
-                ],
-                div![
-                    C!("field"),
-                    div![
-                        C!("control"),
-                        a![
-                            C!["button", "is-link", "is-light", "is-small"],
-                            span![C!("icon"), i![C!("ion-plus")]],
-                            span!["Add Group"],
-                            ev(Ev::Click, |_| Msg::AddGroup),
-                        ],
-                    ]
-                ],
-                match &model.album.groups {
-                    Some(groups) => div![groups
-                        .iter()
-                        .map(|group| { group::view(group.clone()).map_msg(Msg::Group) })],
-                    None => empty![],
-                }
-            ],
-        ],
+			C!("box"),
+			p![C!["title", "is-5", "has-text-link"], TITLE_NEW_ALBUM],
+			div![
+				C!["field", "has-addons"],
+				div![
+					C!("control"),
+					input![
+						C!("input"),
+						attrs! {
+							At::Type => "text",
+							At::Name => "title",
+							At::Placeholder => "Album name",
+							At::Value => model.album.title,
+						},
+						input_ev(Ev::Input, Msg::TitleChanged),
+					]
+				],
+				div![
+					C!("control"),
+					a![
+						C!["button", "is-primary"],
+						"Save",
+						ev(Ev::Click, |_| Msg::Submit),
+					]
+				]
+			]
+		],
+		div![C!["container", "is-centered"],
+			button![
+				C!["button", "is-link", "is-light", "is-small"],
+				span![C!("icon"), i![C!("ion-plus")]],
+				span!["Add Group"],
+				ev(Ev::Click, |_| Msg::AddGroup),
+			],
+		],	
+		match &model.album.groups {
+			Some(groups) => div![groups
+				.iter()
+				.map(|group| { group::view(group.clone()).map_msg(Msg::Group) })],
+			None => empty![],
+		}
     ]
 }
