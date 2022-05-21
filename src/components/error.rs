@@ -10,7 +10,7 @@ pub fn view<Ms>(msg: String, icon: String) -> Node<Ms> {
                 div![C!["icon", "is-size-1", "has-text-info"], i![C!(icon)]],
             ],
             div![
-                C!["is-flex", "is-justify-content-center"],
+                C!["is-flex", "is-justify-content-center", "has-text-centered"],
                 h1![C!("title"), msg,],
             ],
         ],

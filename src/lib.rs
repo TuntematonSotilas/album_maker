@@ -154,13 +154,13 @@ fn view(model: &Model) -> Node<Msg> {
         notification::view(&model.notification).map_msg(Msg::Notification),
         header::view(&model.header).map_msg(Msg::Header),
         div![
-            C!["container", "m-1"],
+            C!["container"],
             match &model.page {
                 models::page::Page::Login => login::view(&model.login).map_msg(Msg::Login),
                 _ => match &model.is_logged {
                     true => {
                         div![
-                            C!["columns", "is-centered"],
+                            C!["columns", "is-centered", "m-1"],
                             match &model.page {
                                 models::page::Page::NewAlbum =>
                                     new_album::view(&model.new_album).map_msg(Msg::NewAlbum),
