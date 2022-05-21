@@ -1,0 +1,15 @@
+.spiner {
+	font-size: 10em;
+	margin-top: 50vh;
+	margin-left: 50vw;	
+	animation: spiner-rotate 3s linear infinite;
+	
+}
+@keyframes spiner-rotate {
+	0% { 
+	  transform: rotate(0); 
+	}
+	100% { 
+	  transform: rotate(360deg);
+	}
+   }

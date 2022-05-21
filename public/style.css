@@ -8,6 +8,7 @@
 @import url(https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css);
 
 /* Components */
+@import url(spiner.css);
 @import url(header.css);
 @import url(notif.css);
 @import url(progress.css);
