@@ -40,6 +40,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::SetPage(page) => {
             model.page = page;
+			if model.is_menu_open {
+				model.is_menu_open = false;
+			}
         }
         Msg::SetIsLogged => {
             model.is_logged = true;
