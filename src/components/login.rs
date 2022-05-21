@@ -97,10 +97,11 @@ pub fn view(model: &Model) -> Node<Msg> {
                     C!("field"),
                     div![
                         C!("control"),
-                        a![
+                        button![
                             C!["button", "is-primary"],
-                            "LOGIN",
-                            ev(Ev::Click, |_| Msg::Submit),
+							"LOGIN",
+                            attrs! {At::Type => "Submit"},
+							ev(Ev::Click, |_| Msg::Submit),
                         ]
                     ]
                 ],
