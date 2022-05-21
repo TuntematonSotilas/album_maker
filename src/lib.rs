@@ -69,9 +69,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 if model.is_logged {
                     orders.send_msg(Msg::SetAuth("".to_string()));
                     model.is_logged = false;
-				}
-				let url = Url::new().add_path_part(LK_LOGIN);
-				orders.notify(subs::UrlRequested::new(url));
+                }
+                let url = Url::new().add_path_part(LK_LOGIN);
+                orders.notify(subs::UrlRequested::new(url));
             }
             header::update(msg, &mut model.header, &mut orders.proxy(Msg::Header));
         }

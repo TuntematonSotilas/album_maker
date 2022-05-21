@@ -99,9 +99,9 @@ pub fn view(model: &Model) -> Node<Msg> {
                         C!("control"),
                         button![
                             C!["button", "is-primary"],
-							"LOGIN",
+                            "LOGIN",
                             attrs! {At::Type => "Submit"},
-							ev(Ev::Click, |_| Msg::Submit),
+                            ev(Ev::Click, |_| Msg::Submit),
                         ]
                     ]
                 ],
