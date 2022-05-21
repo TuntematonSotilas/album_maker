@@ -30,9 +30,12 @@ Initialize the App
 ```sh
 koyeb app init amaker --docker "tuntematonsotilas/gbt:amaker" --ports 80:http --routes /:80 --docker-private-registry-secret docker-hub-credentials
 ```
-Update Service
+Get Services
 ```sh
 koyeb services list
+```
+Update Service
+```sh
 koyeb services update 1b68cac4 --docker "tuntematonsotilas/gbt:amaker" --docker-private-registry-secret docker-hub-credentials
 ```
 
