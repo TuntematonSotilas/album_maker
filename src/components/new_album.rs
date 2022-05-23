@@ -135,20 +135,20 @@ pub fn view(model: &Model) -> Node<Msg> {
                 ]
             ]
         ],
-        div![
-            C!["container", "is-centered"],
-            button![
-                C!["button", "is-link", "is-light", "is-small"],
-                span![C!("icon"), i![C!("ion-plus")]],
-                span!["Add Group"],
-                ev(Ev::Click, |_| Msg::AddGroup),
-            ],
-        ],
         match &model.album.groups {
             Some(groups) => div![groups
                 .iter()
                 .map(|group| { group::view(group.clone()).map_msg(Msg::Group) })],
             None => empty![],
-        }
+        },
+		div![
+            C!["mt-5"],
+            button![
+                C!["button", "is-link", "is-light", "is-small"],
+                span![C!("icon"), i![C!("ion-plus")]],
+                span!["Add group"],
+                ev(Ev::Click, |_| Msg::AddGroup),
+            ],
+        ],
     ]
 }

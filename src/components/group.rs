@@ -54,6 +54,12 @@ pub fn view(group: Group) -> Node<Msg> {
                     input_ev(Ev::Input, move |input| Msg::TitleChanged(input, group)),
                 ]
             ]
-        ]
+        ],
+		button![
+			C!["button", "is-link", "is-light", "is-small"],
+			span![C!("icon"), i![C!("ion-upload")]],
+			span!["Add picture"],
+			//ev(Ev::Click, |_| Msg::AddGroup),
+		],
     ]
 }
