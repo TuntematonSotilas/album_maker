@@ -2,7 +2,7 @@ use seed::{self, prelude::*, *};
 
 use crate::{
     components::group,
-    models::{album::Album, group::Group, oid::Oid, page::TITLE_NEW_ALBUM, vars::BASE_URI},
+    models::{album::Album, group::Group, page::TITLE_NEW_ALBUM, vars::BASE_URI},
 };
 
 use super::notification::NotifType;
@@ -33,7 +33,7 @@ pub enum Msg {
     SetAuth(String),
     InitComp,
     Submit,
-    Success(Oid),
+    Success(String),
     TitleChanged(String),
     ShowNotif(NotifType, String),
     AddGroup,
@@ -63,9 +63,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 let response = fetch(request).await.expect("HTTP request failed");
 
                 if response.status().is_ok() {
-                    let res_oid = response.json::<Oid>().await;
-                    if let Ok(oid) = res_oid {
-                        Msg::Success(oid)
+                    let res_id = response.json::<String>().await;
+                    if let Ok(id) = res_id {
+                        Msg::Success(id)
                     } else {
                         Msg::ShowNotif(NotifType::Error, "Error when saving".to_string())
                     }
@@ -74,8 +74,8 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 }
             });
         }
-        Msg::Success(oid) => {
-            model.album.id = oid;
+        Msg::Success(id) => {
+            model.album.id = id;
             orders.send_msg(Msg::ShowNotif(
                 NotifType::Success,
                 "Album saved".to_string(),

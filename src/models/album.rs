@@ -1,11 +1,11 @@
 use serde::{Deserialize, Serialize};
 
-use super::{group::Group, oid::Oid};
+use super::group::Group;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Album {
     #[serde(rename(deserialize = "_id"))]
-    pub id: Oid,
+    pub id: String,
     pub title: String,
     pub groups: Option<Vec<Group>>,
 }
@@ -13,9 +13,7 @@ pub struct Album {
 impl Album {
     pub const fn new() -> Self {
         Self {
-            id: Oid {
-                value: String::new(),
-            },
+            id: String::new(),
             title: String::new(),
             groups: Some(Vec::new()),
         }
