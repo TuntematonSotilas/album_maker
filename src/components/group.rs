@@ -55,6 +55,16 @@ pub fn view(group: Group) -> Node<Msg> {
                 ]
             ]
         ],
+		div![
+			C!["columns", "m-2"],
+			(0..4).map(|_| {
+			figure![
+				C!["image", "is-96x96"],
+					img![ 
+						attrs! { At::Src => "https://bulma.io/images/placeholders/96x96.png" }
+					]
+				]
+		})], 
 		button![
 			C!["button", "is-link", "is-light", "is-small"],
 			span![C!("icon"), i![C!("ion-upload")]],
