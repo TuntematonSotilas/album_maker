@@ -38,7 +38,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 
 pub fn view(group: Group) -> Node<Msg> {
     div![
-        C!("box"),
+        C!("box group"),
         div![
             C!("field"),
             div![
@@ -56,12 +56,12 @@ pub fn view(group: Group) -> Node<Msg> {
             ]
         ],
 		div![
-			C!["columns", "m-2"],
+			C!["columns", "mt-2"],
 			(0..4).map(|_| {
 			figure![
-				C!["image", "is-96x96"],
+				C!["image", "image is-128x128", "m-1", "has-background-light", "picture"],
 					img![ 
-						attrs! { At::Src => "https://bulma.io/images/placeholders/96x96.png" }
+						attrs! { At::Src => "" }
 					]
 				]
 		})], 

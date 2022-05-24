@@ -1,0 +1,15 @@
+.group {
+	transform-origin: top;
+	animation: group-fade-in 0.3s;
+}
+
+@keyframes group-fade-in {
+	from {
+		transform: scaleY(0); 
+		opacity: 0;
+	}
+	to {
+		transform: scaleY(1); 
+		opacity: 1;
+	}
+}
