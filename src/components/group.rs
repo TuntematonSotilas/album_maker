@@ -56,25 +56,29 @@ pub fn view(group: Group) -> Node<Msg> {
             ]
         ],
         div![
-            C!["columns", "mt-2"],
-            (0..4).map(|_| {
-                figure![
-                    C![
-                        "image",
-                        "image is-128x128",
-                        "m-1",
-                        "has-background-light",
-                        "picture"
-                    ],
-                    img![attrs! { At::Src => "" }]
-                ]
-            })
-        ],
-        button![
-            C!["button", "is-link", "is-light", "is-small"],
-            span![C!("icon"), i![C!("ion-upload")]],
-            span!["Add picture"],
-            //ev(Ev::Click, |_| Msg::AddGroup),
-        ],
+            C!("field"),
+            div![
+                C!("control"),
+				div![
+					C!["file", "is-centered", "is-medium", "is-success", "is-boxed"],
+					label![C!("file-label"),
+						input![C!("file-input"),
+							attrs! { At::Type => "file", At::Name => "resume" },
+						],
+						span![
+							C!("file-cta"),
+							span![
+								C!("file-icon"),
+								i![C!["ion-upload"]]
+							],
+							span![
+								C!("file-label"),
+								"Add picture"
+							]
+						]
+					]
+				]
+			]
+		]
     ]
 }
