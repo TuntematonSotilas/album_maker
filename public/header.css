@@ -1,25 +1,9 @@
 .htitle {
-	font-family: Ultra;
+	font-family: Lobster;
 	font-size: 1.5rem;
-	position: relative;
-}
-
-.htitle div {
-	background: linear-gradient(to top, #209CEE 0%, #00D1B2 60%);
+	background: -webkit-linear-gradient(-86deg, #209CEE 0%, #00D1B2 60%);
 	background-clip: text;
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	position: absolute; 
-    width: 100%;
-}
-
-.htitle:after {
-	text-shadow: 0.04em 0.04em 0 #5f6979;
-	color: transparent;
-	content: "Album maker";
-}
-
-.htitle-avatar {
-	margin-right: 0.5rem;
-	margin-bottom: 0.5rem;
+	-webkit-text-stroke: 0.1em transparent;
+	color: white;
+	padding: 0.1em;
 }
