@@ -55,21 +55,26 @@ pub fn view(group: Group) -> Node<Msg> {
                 ]
             ]
         ],
-		div![
-			C!["columns", "mt-2"],
-			(0..4).map(|_| {
-			figure![
-				C!["image", "image is-128x128", "m-1", "has-background-light", "picture"],
-					img![ 
-						attrs! { At::Src => "" }
-					]
-				]
-		})], 
-		button![
-			C!["button", "is-link", "is-light", "is-small"],
-			span![C!("icon"), i![C!("ion-upload")]],
-			span!["Add picture"],
-			//ev(Ev::Click, |_| Msg::AddGroup),
-		],
+        div![
+            C!["columns", "mt-2"],
+            (0..4).map(|_| {
+                figure![
+                    C![
+                        "image",
+                        "image is-128x128",
+                        "m-1",
+                        "has-background-light",
+                        "picture"
+                    ],
+                    img![attrs! { At::Src => "" }]
+                ]
+            })
+        ],
+        button![
+            C!["button", "is-link", "is-light", "is-small"],
+            span![C!("icon"), i![C!("ion-upload")]],
+            span!["Add picture"],
+            //ev(Ev::Click, |_| Msg::AddGroup),
+        ],
     ]
 }

@@ -141,7 +141,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                 .map(|group| { group::view(group.clone()).map_msg(Msg::Group) })],
             None => empty![],
         },
-		div![
+        div![
             C!["mt-5"],
             button![
                 C!["button", "is-link", "is-light", "is-small"],
