@@ -59,26 +59,22 @@ pub fn view(group: Group) -> Node<Msg> {
             C!("field"),
             div![
                 C!("control"),
-				div![
-					C!["file", "is-centered", "is-medium", "is-success", "is-boxed"],
-					label![C!("file-label"),
-						input![C!("file-input"),
-							attrs! { At::Type => "file", At::Name => "resume" },
-						],
-						span![
-							C!("file-cta"),
-							span![
-								C!("file-icon"),
-								i![C!["ion-upload"]]
-							],
-							span![
-								C!("file-label"),
-								"Add picture"
-							]
-						]
-					]
-				]
-			]
-		]
+                div![
+                    C!["file", "is-centered", "is-medium", "is-success", "is-boxed"],
+                    label![
+                        C!("file-label"),
+                        input![
+                            C!("file-input"),
+                            attrs! { At::Type => "file", At::Name => "resume" },
+                        ],
+                        span![
+                            C!("file-cta"),
+                            span![C!("file-icon"), i![C!["ion-upload"]]],
+                            span![C!("file-label"), "Add picture"]
+                        ]
+                    ]
+                ]
+            ]
+        ]
     ]
 }
