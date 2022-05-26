@@ -39,12 +39,16 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::UpdateGroup(_) => (),
 		Msg::Upload(msg) => {
+			/*if let upload::Msg::Success(ref picture, ref group_id) = msg {
+                log!("add picture {0} in group {1}", picture, group_id);
+            }*/
             upload::update(msg, &mut model.upload, &mut orders.proxy(Msg::Upload));
         }
     }
 }
 
 pub fn view(group: Group) -> Node<Msg> {
+	let gr = group.clone();
     div![
         C!("box group"),
         div![
@@ -63,6 +67,6 @@ pub fn view(group: Group) -> Node<Msg> {
                 ]
             ]
         ],
-        upload::view().map_msg(Msg::Upload),
+        upload::view(gr.id).map_msg(Msg::Upload),
     ]
 }
