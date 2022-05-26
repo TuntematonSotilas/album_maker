@@ -2,17 +2,21 @@ use seed::{self, prelude::*, *};
 
 use crate::models::group::Group;
 
+use super::upload;
+
 // ------ ------
 //     Model
 // ------ -----
 pub struct Model {
     group: Group,
+	upload: upload::Model,
 }
 
 impl Model {
     pub fn new() -> Self {
         Self {
             group: Group::new(),
+			upload: upload::Model::default(),
         }
     }
 }
@@ -23,6 +27,7 @@ impl Model {
 pub enum Msg {
     TitleChanged(String, Group),
     UpdateGroup(Group),
+	Upload(upload::Msg),
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -33,6 +38,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.send_msg(Msg::UpdateGroup(model.group.clone()));
         }
         Msg::UpdateGroup(_) => (),
+		Msg::Upload(msg) => {
+            upload::update(msg, &mut model.upload, &mut orders.proxy(Msg::Upload));
+        }
     }
 }
 
@@ -55,26 +63,6 @@ pub fn view(group: Group) -> Node<Msg> {
                 ]
             ]
         ],
-        div![
-            C!("field"),
-            div![
-                C!("control"),
-                div![
-                    C!["file", "is-centered", "is-medium", "is-success", "is-boxed"],
-                    label![
-                        C!("file-label"),
-                        input![
-                            C!("file-input"),
-                            attrs! { At::Type => "file", At::Name => "resume" },
-                        ],
-                        span![
-                            C!("file-cta"),
-                            span![C!("file-icon"), i![C!["ion-upload"]]],
-                            span![C!("file-label"), "Add picture"]
-                        ]
-                    ]
-                ]
-            ]
-        ]
+        upload::view().map_msg(Msg::Upload),
     ]
 }

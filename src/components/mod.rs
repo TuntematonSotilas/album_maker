@@ -5,3 +5,4 @@ pub mod login;
 pub mod my_albums;
 pub mod new_album;
 pub mod notification;
+pub mod upload;

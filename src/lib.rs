@@ -8,9 +8,12 @@ use crate::components::*;
 use components::notification::NotifType;
 use models::page::LK_LOGIN;
 use seed::{prelude::*, *};
+use load_dotenv::load_dotenv;
 
 mod components;
 mod models;
+
+load_dotenv!();
 
 // ------ ------
 //     Init
