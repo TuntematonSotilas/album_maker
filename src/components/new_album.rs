@@ -92,7 +92,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             if let group::Msg::UpdateGroup(ref group_upd) = msg {
                 if let Some(groups) = &mut model.album.groups {
                     if let Some(group) = groups.iter_mut().find(|g| g.id == group_upd.id) {
-                        group.title = group_upd.clone().title;
+                        let grp = group_upd.clone();
+						group.title = grp.title;
+						group.pictures = grp.pictures;
                     }
                 }
             }

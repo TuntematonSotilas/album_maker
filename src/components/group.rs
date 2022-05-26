@@ -40,9 +40,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::UpdateGroup(_) => (),
 		Msg::Upload(msg) => {
 			if let upload::Msg::Success(ref picture, group_id) = msg {
-                log!("add picture {0} in group {1}", picture, group_id);
-				if let Some(pictures) = &mut model.group.pictures {
-                    pictures.push(picture.to_owned());
+                if let Some(pictures) = &mut model.group.pictures {
+                    log!("add picture {0} in group {1}", picture, group_id);
+					pictures.push(picture.to_owned());
                     orders.send_msg(Msg::UpdateGroup(model.group.clone()));
                 }
             }
