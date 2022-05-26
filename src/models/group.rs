@@ -7,7 +7,7 @@ use super::picture::Picture;
 pub struct Group {
     pub id: Uuid,
     pub title: String,
-	pictures: Option<Vec<Picture>>,
+	pub pictures: Option<Vec<Picture>>,
 }
 
 impl Group {

@@ -52,13 +52,12 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 .method(Method::Post)
                 .body(JsValue::from(form_data));
 			
-			orders.perform_cmd(async {
-				//let gr = group_id.to_owned();
+			orders.perform_cmd(async move {
 				let response = fetch(request).await.expect("HTTP request failed");
 				if response.status().is_ok() {
 					let res_pic = response.json::<Picture>().await;
 					if let Ok(picture) = res_pic {
-						Msg::Success(picture, Uuid::from(group_id))
+						Msg::Success(picture, group_id)
 					} else {
 						Msg::Error
 					}
