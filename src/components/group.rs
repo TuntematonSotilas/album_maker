@@ -68,7 +68,7 @@ pub fn view(group: Group) -> Node<Msg> {
             div![
                 C!("control"),
                 input![
-                    C!("input"),
+                    C!["input", IF!(group.title.is_empty() => "is-danger")],
                     attrs! {
                         At::Type => "text",
                         At::Name => "title",

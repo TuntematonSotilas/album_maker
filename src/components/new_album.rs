@@ -98,6 +98,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 							group.pictures = grp.pictures;
 						}
 					}
+					orders.render();
 				},
 				group::Msg::ShowNotif(notif_type, ref message) => {
 					orders.send_msg(Msg::ShowNotif(notif_type, message.to_owned()));
@@ -113,6 +114,13 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
+
+	let mut has_grp_err = false;
+	if let Some(groups) = &model.album.groups {
+		has_grp_err = groups.iter().any(|g| g.title.is_empty());
+	}
+	let is_not_valid = model.album.title.is_empty() || has_grp_err;
+	
     div![
         C!["column", "is-centered", "is-half"],
         div![
@@ -123,7 +131,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                 div![
                     C!("control"),
                     input![
-                        C!("input"),
+						C!["input", IF!(model.album.title.is_empty() => "is-danger")],
                         attrs! {
                             At::Type => "text",
                             At::Name => "title",
@@ -135,10 +143,11 @@ pub fn view(model: &Model) -> Node<Msg> {
                 ],
                 div![
                     C!("control"),
-                    a![
+                    button![
                         C!["button", "is-primary"],
                         "Save",
                         ev(Ev::Click, |_| Msg::Submit),
+						attrs! { At::Disabled => is_not_valid.as_at_value() },
                     ]
                 ]
             ]
