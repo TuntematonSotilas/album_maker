@@ -89,15 +89,21 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
         }
         Msg::Group(msg) => {
-            if let group::Msg::UpdateGroup(ref group_upd) = msg {
-                if let Some(groups) = &mut model.album.groups {
-                    if let Some(group) = groups.iter_mut().find(|g| g.id == group_upd.id) {
-                        let grp = group_upd.clone();
-						group.title = grp.title;
-						group.pictures = grp.pictures;
-                    }
-                }
-            }
+            match msg {
+				group::Msg::UpdateGroup(ref group_upd) => {
+					if let Some(groups) = &mut model.album.groups {
+						if let Some(group) = groups.iter_mut().find(|g| g.id == group_upd.id) {
+							let grp = group_upd.clone();
+							group.title = grp.title;
+							group.pictures = grp.pictures;
+						}
+					}
+				},
+				group::Msg::ShowNotif(notif_type, ref message) => {
+					orders.send_msg(Msg::ShowNotif(notif_type, message.to_owned()));
+				},
+				_ => ()
+			}
             group::update(msg, &mut model.group, &mut orders.proxy(Msg::Group));
         }
     }

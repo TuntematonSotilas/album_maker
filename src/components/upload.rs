@@ -5,12 +5,15 @@ use load_dotenv::load_dotenv;
 
 use crate::models::{vars::UPLOAD_URI, picture::Picture};
 
+use super::notification::NotifType;
+
 // ------ ------
 //     Model
 // ------ -----
 #[derive(Default)]
 pub struct Model {
 	group_id: Uuid,
+	has_error: bool,
 }
 
 // ------ ------
@@ -21,6 +24,7 @@ pub enum Msg {
 	SendUpload(FormData),
 	Success(Picture, Uuid),
 	Error,
+	ShowNotif(NotifType, String),
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -65,12 +69,17 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 					Msg::Error
 				}
 			});
+
+			if model.has_error {
+				orders.send_msg(Msg::ShowNotif(NotifType::Error, "Error when uploading".to_string()));
+			}
 			
 		}
 		Msg::Success(_, _) => (),
 		Msg::Error => {
-			error!("Error upload")
-		}
+			model.has_error = true
+		},
+		Msg::ShowNotif(_, _) => (),
 	}
 
 }

@@ -2,7 +2,7 @@ use seed::{self, prelude::*, *};
 
 use crate::models::group::Group;
 
-use super::upload;
+use super::{upload, notification::NotifType};
 
 // ------ ------
 //     Model
@@ -26,8 +26,9 @@ impl Model {
 // ------ ------
 pub enum Msg {
     TitleChanged(String, Group),
-    UpdateGroup(Group),
-	Upload(upload::Msg),
+    Upload(upload::Msg),
+	UpdateGroup(Group),
+	ShowNotif(NotifType, String),
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -36,18 +37,25 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.group.id = group.id;
             model.group.title = input;
             orders.send_msg(Msg::UpdateGroup(model.group.clone()));
-        }
-        Msg::UpdateGroup(_) => (),
-		Msg::Upload(msg) => {
-			if let upload::Msg::Success(ref picture, group_id) = msg {
-                if let Some(pictures) = &mut model.group.pictures {
-                    log!("add picture {0} in group {1}", picture, group_id);
-					pictures.push(picture.to_owned());
-                    orders.send_msg(Msg::UpdateGroup(model.group.clone()));
-                }
+        },
+        Msg::Upload(msg) => {
+			match msg {
+				upload::Msg::Success(ref picture, group_id) => {
+					if let Some(pictures) = &mut model.group.pictures {
+						log!("add picture {0} in group {1}", picture, group_id);
+						pictures.push(picture.to_owned());
+						orders.send_msg(Msg::UpdateGroup(model.group.clone()));
+					}
+				},
+				upload::Msg::ShowNotif(notif_type, ref message) => {
+					orders.send_msg(Msg::ShowNotif(notif_type, message.to_owned()));
+				},
+				_ => ()
             }
             upload::update(msg, &mut model.upload, &mut orders.proxy(Msg::Upload));
-        }
+        },
+		Msg::UpdateGroup(_) => (),
+		Msg::ShowNotif(_, _) => ()
     }
 }
 
