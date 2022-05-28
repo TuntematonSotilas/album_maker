@@ -99,17 +99,12 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::Group(msg) => {
             if let group::Msg::UpdateGroup(ref group_upd) = msg {
-				log!("UpdateGroup");
-                if let Some(groups) = &mut model.album.groups {
-					log!("Some Group - group_upd.id", group_upd.id);
-					log!("Some Group - groups", groups);
-					
-                    if let Some(group) = groups.iter_mut().find(|g| g.id == group_upd.id) {
+				if let Some(groups) = &mut model.album.groups {
+				    if let Some(group) = groups.iter_mut().find(|g| g.id == group_upd.id) {
                         let grp = group_upd.clone();
                         group.title = grp.title;
                         group.pictures = grp.pictures;
-						log!("UpdateGroup : {0} - nb pics : {1}", grp.id, group.clone().pictures.unwrap().len());
-                    }
+				    }
                 }
             }
             group::update(msg, &mut model.group, &mut orders.proxy(Msg::Group));
