@@ -9,6 +9,7 @@ use crate::models::group::Group;
 pub struct Model {
     group: Group,
     upload: upload::Model,
+	count_fake_pictures: u32,
 }
 
 impl Model {
@@ -16,6 +17,7 @@ impl Model {
         Self {
             group: Group::new(),
             upload: upload::Model::default(),
+			count_fake_pictures: 0,
         }
     }
 }
@@ -37,12 +39,19 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.send_msg(Msg::UpdateGroup(model.group.clone()));
         }
         Msg::Upload(msg) => {
-            if let upload::Msg::Success(ref picture, group_id) = msg {
-                if let Some(pictures) = &mut model.group.pictures {
-                    log!("add picture {0} in group {1}", picture, group_id);
-                    pictures.push(picture.clone());
-                    orders.send_msg(Msg::UpdateGroup(model.group.clone()));
-                }
+            match msg {
+				upload::Msg::Success(ref picture, group_id) => {
+                	if let Some(pictures) = &mut model.group.pictures {
+                    	log!("add picture {0} in group {1}", picture, group_id);
+                    	pictures.push(picture.clone());
+                    	orders.send_msg(Msg::UpdateGroup(model.group.clone()));
+                	}
+				},
+				upload::Msg::RenderFakePictures(count) => {
+					log!(count);
+					model.count_fake_pictures = count;
+				},
+				_ => ()
             }
             upload::update(msg, &mut model.upload, &mut orders.proxy(Msg::Upload));
         }
@@ -50,7 +59,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     }
 }
 
-pub fn view(group: Group) -> Node<Msg> {
+pub fn view(model: &Model, group: Group) -> Node<Msg> {
     let gr = group.clone();
     div![
         C!("box group"),
@@ -70,6 +79,33 @@ pub fn view(group: Group) -> Node<Msg> {
                 ]
             ]
         ],
+		div![
+			C!["columns", "m-1"],
+			(0..model.count_fake_pictures).map(|_| {
+			figure![
+				C!["image", "is-128x128", "m-1"],
+				progress![
+					C!["progress", "picture-progress"],
+					attrs! { At::Max => 100 }
+				],
+			]
+		})],
+		/*[0..model.count_fake_pictures].iter().map(|_| {
+
+		}),*/
+		/*match gr.pictures {
+            Some(pictures) => div![pictures
+                .iter()
+                .map(|picture| { 
+					figure![
+						C!["image", "is-128x128"],
+						img![
+							attrs! { At::Src => picture.url }
+						]
+					]
+				 })],
+            None => empty![],
+        },*/
         upload::view(gr.id).map_msg(Msg::Upload),
     ]
 }

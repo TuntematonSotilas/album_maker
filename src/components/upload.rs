@@ -18,6 +18,7 @@ pub struct Model {
 // ------ ------
 pub enum Msg {
     FilesChanged(Option<FileList>, Uuid),
+	RenderFakePictures(u32),
     SendUpload(FormData),
     Success(Picture, Uuid),
     Error,
@@ -28,7 +29,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::FilesChanged(files_opt, group_id) => {
             model.group_id = group_id;
             if let Some(files) = files_opt {
-                for i in 0..files.length() {
+				let count = files.length();
+				orders.send_msg(Msg::RenderFakePictures(count));
+                for i in 0..count {
                     if let Some(file) = files.get(i) {
                         if let Ok(form_data) = FormData::new() {
                             load_dotenv!();
@@ -45,6 +48,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 }
             }
         }
+		Msg::RenderFakePictures(_) => (),
         Msg::SendUpload(form_data) => {
             orders.skip(); // No need to rerender
             let group_id = model.group_id;

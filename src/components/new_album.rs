@@ -151,7 +151,7 @@ pub fn view(model: &Model) -> Node<Msg> {
         match &model.album.groups {
             Some(groups) => div![groups
                 .iter()
-                .map(|group| { group::view(group.clone()).map_msg(Msg::Group) })],
+                .map(|group| { group::view(&model.group, group.clone()).map_msg(Msg::Group) })],
             None => empty![],
         },
         div![
