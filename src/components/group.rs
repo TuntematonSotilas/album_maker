@@ -90,9 +90,6 @@ pub fn view(model: &Model, group: Group) -> Node<Msg> {
 				],
 			]
 		})],
-		/*[0..model.count_fake_pictures].iter().map(|_| {
-
-		}),*/
 		/*match gr.pictures {
             Some(pictures) => div![pictures
                 .iter()
