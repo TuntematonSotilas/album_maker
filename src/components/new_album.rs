@@ -24,6 +24,15 @@ impl Model {
             group: group::Model::new(),
         }
     }
+	pub fn is_not_valid(&self) -> bool {
+		if self.album.title.is_empty() {
+			return true;
+		}
+		if let Some(groups) = &self.album.groups {
+			return groups.iter().any(|g| g.title.is_empty());
+		}
+		return false;
+	}
 }
 
 // ------ ------
@@ -108,12 +117,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
-    let mut has_grp_err = false;
-    if let Some(groups) = &model.album.groups {
-        has_grp_err = groups.iter().any(|g| g.title.is_empty());
-    }
-    let is_not_valid = model.album.title.is_empty() || has_grp_err;
-
     div![
         C!["column", "is-centered", "is-half"],
         div![
@@ -140,7 +143,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                         C!["button", "is-primary"],
                         "Save",
                         ev(Ev::Click, |_| Msg::Submit),
-                        attrs! { At::Disabled => is_not_valid.as_at_value() },
+                        attrs! { At::Disabled => model.is_not_valid().as_at_value() },
                     ]
                 ]
             ]
