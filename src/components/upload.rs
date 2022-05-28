@@ -1,33 +1,39 @@
 use load_dotenv::load_dotenv;
 use seed::{self, prelude::*, *};
-use uuid::Uuid;
 use web_sys::{self, FileList, FormData};
 
-use crate::models::{picture::Picture, vars::UPLOAD_URI};
+use crate::models::{picture::Picture, vars::UPLOAD_URI, group::Group};
 
 // ------ ------
 //     Model
 // ------ -----
-#[derive(Default)]
 pub struct Model {
-    group_id: Uuid,
+    group: Group,
+}
+
+impl Model {
+    pub fn new() -> Self {
+        Self {
+            group: Group::new(),
+        }
+    }
 }
 
 // ------ ------
 //    Update
 // ------ ------
 pub enum Msg {
-    FilesChanged(Option<FileList>, Uuid),
+    FilesChanged(Option<FileList>, Group),
 	RenderFakePictures(u32),
     SendUpload(FormData),
-    Success(Picture, Uuid),
+    Success(Picture, Group),
     Error,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::FilesChanged(files_opt, group_id) => {
-            model.group_id = group_id;
+        Msg::FilesChanged(files_opt, group) => {
+            model.group = group;
             if let Some(files) = files_opt {
 				let count = files.length();
 				orders.send_msg(Msg::RenderFakePictures(count));
@@ -50,8 +56,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
 		Msg::RenderFakePictures(_) => (),
         Msg::SendUpload(form_data) => {
-            orders.skip(); // No need to rerender
-            let group_id = model.group_id;
+            let group = model.group.clone();
             let uri = UPLOAD_URI.to_string();
             let request = Request::new(uri)
                 .method(Method::Post)
@@ -62,7 +67,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 if response.status().is_ok() {
                     let res_pic = response.json::<Picture>().await;
                     if let Ok(picture) = res_pic {
-                        Msg::Success(picture, group_id)
+                        Msg::Success(picture, group)
                     } else {
                         Msg::Error
                     }
@@ -78,7 +83,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     }
 }
 
-pub fn view(group_id: Uuid) -> Node<Msg> {
+pub fn view(group: Group) -> Node<Msg> {
     div![
         C!("field"),
         div![
@@ -103,7 +108,7 @@ pub fn view(group_id: Uuid) -> Node<Msg> {
                                 })
                                 .and_then(|file_input| file_input.files());
 
-                            Msg::FilesChanged(files, group_id)
+                            Msg::FilesChanged(files, group)
                         })
                     ],
                     span![

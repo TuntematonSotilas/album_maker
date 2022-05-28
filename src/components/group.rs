@@ -16,7 +16,7 @@ impl Model {
     pub fn new() -> Self {
         Self {
             group: Group::new(),
-            upload: upload::Model::default(),
+            upload: upload::Model::new(),
 			count_fake_pictures: 0,
         }
     }
@@ -40,15 +40,15 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::Upload(msg) => {
             match msg {
-				upload::Msg::Success(ref picture, group_id) => {
-                	if let Some(pictures) = &mut model.group.pictures {
-                    	log!("add picture {0} in group {1}", picture, group_id);
+				upload::Msg::Success(ref picture, ref group) => {
+					let mut gr = group.clone();
+                	if let Some(pictures) = &mut gr.pictures {
                     	pictures.push(picture.clone());
-                    	orders.send_msg(Msg::UpdateGroup(model.group.clone()));
+						
+						orders.send_msg(Msg::UpdateGroup(gr));
                 	}
 				},
 				upload::Msg::RenderFakePictures(count) => {
-					log!(count);
 					model.count_fake_pictures = count;
 				},
 				_ => ()
@@ -90,7 +90,7 @@ pub fn view(model: &Model, group: Group) -> Node<Msg> {
 				],
 			]
 		})],
-		/*match gr.pictures {
+		match gr.clone().pictures {
             Some(pictures) => div![pictures
                 .iter()
                 .map(|picture| { 
@@ -102,7 +102,7 @@ pub fn view(model: &Model, group: Group) -> Node<Msg> {
 					]
 				 })],
             None => empty![],
-        },*/
-        upload::view(gr.id).map_msg(Msg::Upload),
+        },
+        upload::view(gr).map_msg(Msg::Upload),
     ]
 }
