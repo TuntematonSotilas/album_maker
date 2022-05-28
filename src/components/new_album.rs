@@ -89,22 +89,16 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
         }
         Msg::Group(msg) => {
-            match msg {
-				group::Msg::UpdateGroup(ref group_upd) => {
-					if let Some(groups) = &mut model.album.groups {
-						if let Some(group) = groups.iter_mut().find(|g| g.id == group_upd.id) {
-							let grp = group_upd.clone();
-							group.title = grp.title;
-							group.pictures = grp.pictures;
-						}
-					}
-					orders.render();
-				},
-				group::Msg::ShowNotif(notif_type, ref message) => {
-					orders.send_msg(Msg::ShowNotif(notif_type, message.to_owned()));
-				},
-				_ => ()
-			}
+            if let group::Msg::UpdateGroup(ref group_upd) = msg {
+                if let Some(groups) = &mut model.album.groups {
+                    if let Some(group) = groups.iter_mut().find(|g| g.id == group_upd.id) {
+                        let grp = group_upd.clone();
+                        group.title = grp.title;
+                        group.pictures = grp.pictures;
+                        orders.render();
+                    }
+                }
+            }
             group::update(msg, &mut model.group, &mut orders.proxy(Msg::Group));
         }
     }
@@ -114,13 +108,12 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
+    let mut has_grp_err = false;
+    if let Some(groups) = &model.album.groups {
+        has_grp_err = groups.iter().any(|g| g.title.is_empty());
+    }
+    let is_not_valid = model.album.title.is_empty() || has_grp_err;
 
-	let mut has_grp_err = false;
-	if let Some(groups) = &model.album.groups {
-		has_grp_err = groups.iter().any(|g| g.title.is_empty());
-	}
-	let is_not_valid = model.album.title.is_empty() || has_grp_err;
-	
     div![
         C!["column", "is-centered", "is-half"],
         div![
@@ -131,7 +124,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                 div![
                     C!("control"),
                     input![
-						C!["input", IF!(model.album.title.is_empty() => "is-danger")],
+                        C!["input", IF!(model.album.title.is_empty() => "is-danger")],
                         attrs! {
                             At::Type => "text",
                             At::Name => "title",
@@ -147,7 +140,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                         C!["button", "is-primary"],
                         "Save",
                         ev(Ev::Click, |_| Msg::Submit),
-						attrs! { At::Disabled => is_not_valid.as_at_value() },
+                        attrs! { At::Disabled => is_not_valid.as_at_value() },
                     ]
                 ]
             ]

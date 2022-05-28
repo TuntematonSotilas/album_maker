@@ -1,22 +1,21 @@
 use seed::{self, prelude::*, *};
 
+use super::upload;
 use crate::models::group::Group;
-
-use super::{upload, notification::NotifType};
 
 // ------ ------
 //     Model
 // ------ -----
 pub struct Model {
     group: Group,
-	upload: upload::Model,
+    upload: upload::Model,
 }
 
 impl Model {
     pub fn new() -> Self {
         Self {
             group: Group::new(),
-			upload: upload::Model::default(),
+            upload: upload::Model::default(),
         }
     }
 }
@@ -27,8 +26,7 @@ impl Model {
 pub enum Msg {
     TitleChanged(String, Group),
     Upload(upload::Msg),
-	UpdateGroup(Group),
-	ShowNotif(NotifType, String),
+    UpdateGroup(Group),
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -37,30 +35,23 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.group.id = group.id;
             model.group.title = input;
             orders.send_msg(Msg::UpdateGroup(model.group.clone()));
-        },
+        }
         Msg::Upload(msg) => {
-			match msg {
-				upload::Msg::Success(ref picture, group_id) => {
-					if let Some(pictures) = &mut model.group.pictures {
-						log!("add picture {0} in group {1}", picture, group_id);
-						pictures.push(picture.to_owned());
-						orders.send_msg(Msg::UpdateGroup(model.group.clone()));
-					}
-				},
-				upload::Msg::ShowNotif(notif_type, ref message) => {
-					orders.send_msg(Msg::ShowNotif(notif_type, message.to_owned()));
-				},
-				_ => ()
+            if let upload::Msg::Success(ref picture, group_id) = msg {
+                if let Some(pictures) = &mut model.group.pictures {
+                    log!("add picture {0} in group {1}", picture, group_id);
+                    pictures.push(picture.clone());
+                    orders.send_msg(Msg::UpdateGroup(model.group.clone()));
+                }
             }
             upload::update(msg, &mut model.upload, &mut orders.proxy(Msg::Upload));
-        },
-		Msg::UpdateGroup(_) => (),
-		Msg::ShowNotif(_, _) => ()
+        }
+        Msg::UpdateGroup(_) => (),
     }
 }
 
 pub fn view(group: Group) -> Node<Msg> {
-	let gr = group.clone();
+    let gr = group.clone();
     div![
         C!("box group"),
         div![

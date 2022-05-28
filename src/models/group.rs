@@ -7,7 +7,7 @@ use super::picture::Picture;
 pub struct Group {
     pub id: Uuid,
     pub title: String,
-	pub pictures: Option<Vec<Picture>>,
+    pub pictures: Option<Vec<Picture>>,
 }
 
 impl Group {
@@ -15,7 +15,7 @@ impl Group {
         Self {
             id: Uuid::new_v4(),
             title: String::new(),
-			pictures: Some(Vec::new()),
+            pictures: Some(Vec::new()),
         }
     }
 }
