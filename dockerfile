@@ -4,6 +4,7 @@ COPY Cargo.toml ./
 COPY Makefile.toml ./ 
 COPY src/ src/
 COPY public/ public/
+COPY .env .env
 RUN cargo install cargo-make
 RUN cargo install wasm-pack --version 0.10.2
 RUN cargo make build_release
