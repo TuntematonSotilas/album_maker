@@ -24,7 +24,7 @@ impl Model {
 // ------ ------
 pub enum Msg {
     FilesChanged(Option<FileList>, Group),
-    RenderFakePictures(u32),
+    RenderFakePictures(u32, Group),
     SendUpload(FormData),
     Success(Picture, Group),
     Error,
@@ -34,9 +34,10 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::FilesChanged(files_opt, group) => {
             model.group = group;
+			let gr = model.group.clone();
             if let Some(files) = files_opt {
                 let count = files.length();
-                orders.send_msg(Msg::RenderFakePictures(count));
+                orders.send_msg(Msg::RenderFakePictures(count, gr));
                 for i in 0..count {
                     if let Some(file) = files.get(i) {
                         if let Ok(form_data) = FormData::new() {
@@ -75,7 +76,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 }
             });
         }
-        Msg::RenderFakePictures(_) | Msg::Success(_, _) => (),
+        Msg::RenderFakePictures(_, _) | Msg::Success(_, _) => (),
         Msg::Error => {
             error!("Error when uploading");
         }

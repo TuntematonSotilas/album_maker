@@ -104,6 +104,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                         let grp = group_upd.clone();
                         group.title = grp.title;
                         group.pictures = grp.pictures;
+						group.count_fake_pictures = grp.count_fake_pictures;
                     }
                 }
             }
@@ -150,7 +151,7 @@ pub fn view(model: &Model) -> Node<Msg> {
         match &model.album.groups {
             Some(groups) => div![groups
                 .iter()
-                .map(|group| { group::view(&model.group, group.clone()).map_msg(Msg::Group) })],
+                .map(|group| { group::view(group.clone()).map_msg(Msg::Group) })],
             None => empty![],
         },
         div![

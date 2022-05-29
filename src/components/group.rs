@@ -7,17 +7,13 @@ use crate::models::group::Group;
 //     Model
 // ------ -----
 pub struct Model {
-    group: Group,
     upload: upload::Model,
-    count_fake_pictures: u32,
 }
 
 impl Model {
     pub fn new() -> Self {
         Self {
-            group: Group::new(),
             upload: upload::Model::new(),
-            count_fake_pictures: 0,
         }
     }
 }
@@ -33,23 +29,23 @@ pub enum Msg {
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::TitleChanged(input, group) => {
-            model.group.id = group.id;
-            model.group.title = input;
-            orders.send_msg(Msg::UpdateGroup(model.group.clone()));
+        Msg::TitleChanged(input, mut group) => {
+			group.title = input;
+            orders.send_msg(Msg::UpdateGroup(group.clone()));
         }
         Msg::Upload(msg) => {
             match msg {
                 upload::Msg::Success(ref picture, ref group) => {
-                    let mut gr = group.clone();
+					let mut gr = group.clone();
                     if let Some(pictures) = &mut gr.pictures {
                         pictures.push(picture.clone());
-
                         orders.send_msg(Msg::UpdateGroup(gr));
                     }
                 }
-                upload::Msg::RenderFakePictures(count) => {
-                    model.count_fake_pictures = count;
+                upload::Msg::RenderFakePictures(count, ref group) => {
+					let mut gr = group.clone();
+                    gr.count_fake_pictures = count;
+					orders.send_msg(Msg::UpdateGroup(gr));
                 }
                 _ => (),
             }
@@ -59,7 +55,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     }
 }
 
-pub fn view(model: &Model, group: Group) -> Node<Msg> {
+pub fn view(group: Group) -> Node<Msg> {
     let gr = group.clone();
     div![
         C!("box group"),
@@ -81,7 +77,7 @@ pub fn view(model: &Model, group: Group) -> Node<Msg> {
         ],
         div![
             C!["columns", "m-1"],
-            (0..model.count_fake_pictures).map(|_| {
+            (0..gr.count_fake_pictures).map(|_| {
                 figure![
                     C!["image", "is-128x128", "m-1"],
                     progress![
