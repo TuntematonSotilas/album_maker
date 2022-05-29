@@ -1,7 +1,8 @@
 use seed::{self, prelude::*, *};
+use uuid::Uuid;
 
 use super::upload;
-use crate::models::group::Group;
+use crate::models::{group::Group, picture::Picture};
 
 // ------ ------
 //     Model
@@ -21,7 +22,6 @@ impl Model {
 #[derive(Clone, Copy)]
 pub enum GroupUpdateType {
     Title,
-    Pictures,
 	CountFakePictures,
 }
 
@@ -32,6 +32,7 @@ pub enum Msg {
     TitleChanged(String, Group),
     Upload(upload::Msg),
     UpdateGroup(Group, GroupUpdateType),
+	AddPicture(Picture, Uuid),
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -42,12 +43,8 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::Upload(msg) => {
             match msg {
-                upload::Msg::Success(ref picture, ref group) => {
-					let mut gr = group.clone();
-                    if let Some(pictures) = &mut gr.pictures {
-                        pictures.push(picture.clone());
-                        orders.send_msg(Msg::UpdateGroup(gr, GroupUpdateType::Pictures));
-                    }
+                upload::Msg::Success(ref picture, ref group_id) => {
+					orders.send_msg(Msg::AddPicture(picture.to_owned(), group_id.to_owned()));
                 }
                 upload::Msg::RenderFakePictures(count, ref group) => {
 					let mut gr = group.clone();
@@ -58,7 +55,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
             upload::update(msg, &mut model.upload, &mut orders.proxy(Msg::Upload));
         }
-        Msg::UpdateGroup(_, _) => (),
+        Msg::UpdateGroup(_, _) | Msg::AddPicture(_, _)=> (),
     }
 }
 

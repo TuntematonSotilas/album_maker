@@ -1,5 +1,6 @@
 use load_dotenv::load_dotenv;
 use seed::{self, prelude::*, *};
+use uuid::Uuid;
 use web_sys::{self, FileList, FormData};
 
 use crate::models::{group::Group, picture::Picture, vars::UPLOAD_URI};
@@ -26,7 +27,7 @@ pub enum Msg {
     FilesChanged(Option<FileList>, Group),
     RenderFakePictures(u32, Group),
     SendUpload(FormData),
-    Success(Picture, Group),
+    Success(Picture, Uuid),
     Error,
 }
 
@@ -56,7 +57,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
         }
         Msg::SendUpload(form_data) => {
-            let group = model.group.clone();
+            let group_id = model.group.id;
             let uri = UPLOAD_URI.to_string();
             let request = Request::new(uri)
                 .method(Method::Post)
@@ -67,7 +68,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 if response.status().is_ok() {
                     let res_pic = response.json::<Picture>().await;
                     if let Ok(picture) = res_pic {
-                        Msg::Success(picture, group)
+						Msg::Success(picture, group_id)
                     } else {
                         Msg::Error
                     }
