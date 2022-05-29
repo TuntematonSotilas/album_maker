@@ -5,7 +5,7 @@ use crate::{
     models::{album::Album, group::Group, page::TITLE_NEW_ALBUM, vars::BASE_URI},
 };
 
-use super::notification::NotifType;
+use super::{notification::NotifType, group::GroupUpdateType};
 
 // ------ ------
 //     Model
@@ -98,13 +98,19 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
         }
         Msg::Group(msg) => {
-            if let group::Msg::UpdateGroup(ref group_upd) = msg {
+            if let group::Msg::UpdateGroup(ref group_upd, update_type) = msg {
                 if let Some(groups) = &mut model.album.groups {
                     if let Some(group) = groups.iter_mut().find(|g| g.id == group_upd.id) {
                         let grp = group_upd.clone();
-                        group.title = grp.title;
-                        group.pictures = grp.pictures;
-						group.count_fake_pictures = grp.count_fake_pictures;
+						match update_type {
+							GroupUpdateType::CountFakePictures => group.count_fake_pictures = grp.count_fake_pictures,
+							GroupUpdateType::Pictures => {
+								group.pictures = grp.pictures;
+								group.count_fake_pictures -= group.count_fake_pictures;
+							}
+							GroupUpdateType::Title => group.title = grp.title,
+						}
+						
                     }
                 }
             }

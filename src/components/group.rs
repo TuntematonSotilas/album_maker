@@ -18,20 +18,27 @@ impl Model {
     }
 }
 
+#[derive(Clone, Copy)]
+pub enum GroupUpdateType {
+    Title,
+    Pictures,
+	CountFakePictures,
+}
+
 // ------ ------
 //    Update
 // ------ ------
 pub enum Msg {
     TitleChanged(String, Group),
     Upload(upload::Msg),
-    UpdateGroup(Group),
+    UpdateGroup(Group, GroupUpdateType),
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::TitleChanged(input, mut group) => {
 			group.title = input;
-            orders.send_msg(Msg::UpdateGroup(group.clone()));
+            orders.send_msg(Msg::UpdateGroup(group.clone(), GroupUpdateType::Title));
         }
         Msg::Upload(msg) => {
             match msg {
@@ -39,19 +46,19 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 					let mut gr = group.clone();
                     if let Some(pictures) = &mut gr.pictures {
                         pictures.push(picture.clone());
-                        orders.send_msg(Msg::UpdateGroup(gr));
+                        orders.send_msg(Msg::UpdateGroup(gr, GroupUpdateType::Pictures));
                     }
                 }
                 upload::Msg::RenderFakePictures(count, ref group) => {
 					let mut gr = group.clone();
                     gr.count_fake_pictures = count;
-					orders.send_msg(Msg::UpdateGroup(gr));
+					orders.send_msg(Msg::UpdateGroup(gr, GroupUpdateType::CountFakePictures));
                 }
                 _ => (),
             }
             upload::update(msg, &mut model.upload, &mut orders.proxy(Msg::Upload));
         }
-        Msg::UpdateGroup(_) => (),
+        Msg::UpdateGroup(_, _) => (),
     }
 }
 
@@ -76,7 +83,15 @@ pub fn view(group: Group) -> Node<Msg> {
             ]
         ],
         div![
-            C!["columns", "m-1"],
+			match gr.clone().pictures {
+				Some(pictures) => div![pictures.iter().map(|picture| {
+					figure![
+						C!["image", "is-128x128"],
+						img![attrs! { At::Src => picture.url }]
+					]
+				})],
+				None => empty![],
+			},
             (0..gr.count_fake_pictures).map(|_| {
                 figure![
                     C!["image", "is-128x128", "m-1"],
@@ -85,17 +100,9 @@ pub fn view(group: Group) -> Node<Msg> {
                         attrs! { At::Max => 100 }
                     ],
                 ]
-            })
+            }),
         ],
-        match gr.clone().pictures {
-            Some(pictures) => div![pictures.iter().map(|picture| {
-                figure![
-                    C!["image", "is-128x128"],
-                    img![attrs! { At::Src => picture.url }]
-                ]
-            })],
-            None => empty![],
-        },
+       
         upload::view(gr).map_msg(Msg::Upload),
     ]
 }
