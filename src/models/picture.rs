@@ -4,5 +4,5 @@ use serde::{Deserialize, Serialize};
 pub struct Picture {
     pub asset_id: String,
     pub public_id: String,
-	pub format: String,
+    pub format: String,
 }

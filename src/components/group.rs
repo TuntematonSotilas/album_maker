@@ -84,14 +84,12 @@ pub fn view(group: Group) -> Node<Msg> {
                 Some(pictures) => div![pictures.iter().map(|picture| {
                     figure![
                         C!["image", "is-128x128"],
-                        img![
-							attrs! { At::Src => 
-								THUMB_URI.to_string() +
-								picture.public_id.as_str() + 
-								"." + 
-								picture.format.as_str() 
-							}
-						]
+                        img![attrs! { At::Src =>
+                            THUMB_URI.to_string() +
+                            picture.public_id.as_str() +
+                            "." +
+                            picture.format.as_str()
+                        }]
                     ]
                 })],
                 None => empty![],
