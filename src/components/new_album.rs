@@ -5,7 +5,7 @@ use crate::{
     models::{album::Album, group::Group, page::TITLE_NEW_ALBUM, vars::BASE_URI},
 };
 
-use super::{notification::NotifType, group::GroupUpdateType};
+use super::{group::UpdateType, notification::NotifType};
 
 // ------ ------
 //     Model
@@ -99,29 +99,30 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::Group(msg) => {
             match msg {
-				group::Msg::UpdateGroup(ref group_update, update_type) => {
-					if let Some(groups) = &mut model.album.groups {
-						if let Some(group) = groups.iter_mut().find(|g| g.id == group_update.id) {
-							let grp_upd = group_update.clone();
-							match update_type {
-								GroupUpdateType::CountFakePictures => group.count_fake_pictures = grp_upd.count_fake_pictures,
-								GroupUpdateType::Title => group.title = grp_upd.title,
-							}
-							
-						}
-					}
-				},
-				group::Msg::AddPicture(ref picture, ref group_id) => {
-					if let Some(groups) = &mut model.album.groups {
-						if let Some(group) = groups.iter_mut().find(|g| g.id == group_id.to_owned()) {
-							if let Some(pictures) = &mut group.pictures {
-								pictures.push(picture.to_owned());
-								group.count_fake_pictures -= 1;
-							}			
-						}
-					}
-				},
-				_  => (),
+                group::Msg::UpdateGroup(ref group_update, update_type) => {
+                    if let Some(groups) = &mut model.album.groups {
+                        if let Some(group) = groups.iter_mut().find(|g| g.id == group_update.id) {
+                            let grp_upd = group_update.clone();
+                            match update_type {
+                                UpdateType::CountFakePictures => {
+                                    group.count_fake_pictures = grp_upd.count_fake_pictures;
+                                }
+                                UpdateType::Title => group.title = grp_upd.title,
+                            }
+                        }
+                    }
+                }
+                group::Msg::AddPicture(ref picture, group_id) => {
+                    if let Some(groups) = &mut model.album.groups {
+                        if let Some(group) = groups.iter_mut().find(|g| g.id == group_id) {
+                            if let Some(pictures) = &mut group.pictures {
+                                pictures.push(picture.clone());
+                                group.count_fake_pictures -= 1;
+                            }
+                        }
+                    }
+                }
+                _ => (),
             }
             group::update(msg, &mut model.group, &mut orders.proxy(Msg::Group));
         }

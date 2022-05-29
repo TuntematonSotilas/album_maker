@@ -35,7 +35,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::FilesChanged(files_opt, group) => {
             model.group = group;
-			let gr = model.group.clone();
+            let gr = model.group.clone();
             if let Some(files) = files_opt {
                 let count = files.length();
                 orders.send_msg(Msg::RenderFakePictures(count, gr));
@@ -68,7 +68,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 if response.status().is_ok() {
                     let res_pic = response.json::<Picture>().await;
                     if let Ok(picture) = res_pic {
-						Msg::Success(picture, group_id)
+                        Msg::Success(picture, group_id)
                     } else {
                         Msg::Error
                     }
