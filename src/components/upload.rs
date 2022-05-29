@@ -2,7 +2,7 @@ use load_dotenv::load_dotenv;
 use seed::{self, prelude::*, *};
 use web_sys::{self, FileList, FormData};
 
-use crate::models::{picture::Picture, vars::UPLOAD_URI, group::Group};
+use crate::models::{group::Group, picture::Picture, vars::UPLOAD_URI};
 
 // ------ ------
 //     Model
@@ -24,7 +24,7 @@ impl Model {
 // ------ ------
 pub enum Msg {
     FilesChanged(Option<FileList>, Group),
-	RenderFakePictures(u32),
+    RenderFakePictures(u32),
     SendUpload(FormData),
     Success(Picture, Group),
     Error,
@@ -35,8 +35,8 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::FilesChanged(files_opt, group) => {
             model.group = group;
             if let Some(files) = files_opt {
-				let count = files.length();
-				orders.send_msg(Msg::RenderFakePictures(count));
+                let count = files.length();
+                orders.send_msg(Msg::RenderFakePictures(count));
                 for i in 0..count {
                     if let Some(file) = files.get(i) {
                         if let Ok(form_data) = FormData::new() {
@@ -54,7 +54,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 }
             }
         }
-		Msg::RenderFakePictures(_) => (),
         Msg::SendUpload(form_data) => {
             let group = model.group.clone();
             let uri = UPLOAD_URI.to_string();
@@ -76,7 +75,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 }
             });
         }
-        Msg::Success(_, _) => (),
+        Msg::RenderFakePictures(_) | Msg::Success(_, _) => (),
         Msg::Error => {
             error!("Error when uploading");
         }

@@ -24,15 +24,15 @@ impl Model {
             group: group::Model::new(),
         }
     }
-	pub fn is_not_valid(&self) -> bool {
-		if self.album.title.is_empty() {
-			return true;
-		}
-		if let Some(groups) = &self.album.groups {
-			return groups.iter().any(|g| g.title.is_empty());
-		}
-		return false;
-	}
+    pub fn is_not_valid(&self) -> bool {
+        if self.album.title.is_empty() {
+            return true;
+        }
+        if let Some(groups) = &self.album.groups {
+            return groups.iter().any(|g| g.title.is_empty());
+        }
+        false
+    }
 }
 
 // ------ ------
@@ -99,12 +99,12 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::Group(msg) => {
             if let group::Msg::UpdateGroup(ref group_upd) = msg {
-				if let Some(groups) = &mut model.album.groups {
-				    if let Some(group) = groups.iter_mut().find(|g| g.id == group_upd.id) {
+                if let Some(groups) = &mut model.album.groups {
+                    if let Some(group) = groups.iter_mut().find(|g| g.id == group_upd.id) {
                         let grp = group_upd.clone();
                         group.title = grp.title;
                         group.pictures = grp.pictures;
-				    }
+                    }
                 }
             }
             group::update(msg, &mut model.group, &mut orders.proxy(Msg::Group));
