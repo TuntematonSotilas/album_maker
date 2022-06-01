@@ -3,42 +3,25 @@ use seed::{self, prelude::*, *};
 use uuid::Uuid;
 use web_sys::{self, FileList, FormData};
 
-use crate::models::{group::Group, picture::Picture, vars::UPLOAD_URI};
-
-// ------ ------
-//     Model
-// ------ -----
-pub struct Model {
-    group: Group,
-}
-
-impl Model {
-    pub fn new() -> Self {
-        Self {
-            group: Group::new(),
-        }
-    }
-}
+use crate::models::{picture::Picture, vars::UPLOAD_URI};
 
 // ------ ------
 //    Update
 // ------ ------
 pub enum Msg {
-    FilesChanged(Option<FileList>, Group),
-    RenderFakePictures(u32, Group),
-    SendUpload(FormData),
+    FilesChanged(Option<FileList>, Uuid),
+    RenderFakePictures(u32, Uuid),
+    SendUpload(FormData, Uuid),
     Success(Picture, Uuid),
     Error,
 }
 
-pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
+pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::FilesChanged(files_opt, group) => {
-            model.group = group;
-            let gr = model.group.clone();
+        Msg::FilesChanged(files_opt, group_id) => {
             if let Some(files) = files_opt {
                 let count = files.length();
-                orders.send_msg(Msg::RenderFakePictures(count, gr));
+                orders.send_msg(Msg::RenderFakePictures(count, group_id));
                 for i in 0..count {
                     if let Some(file) = files.get(i) {
                         if let Ok(form_data) = FormData::new() {
@@ -49,15 +32,14 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                                     .append_with_str("upload_preset", upload_preset)
                                     .is_ok()
                             {
-                                orders.send_msg(Msg::SendUpload(form_data));
+                                orders.send_msg(Msg::SendUpload(form_data, group_id));
                             }
                         }
                     }
                 }
             }
         }
-        Msg::SendUpload(form_data) => {
-            let group_id = model.group.id;
+        Msg::SendUpload(form_data, group_id) => {
             let uri = UPLOAD_URI.to_string();
             let request = Request::new(uri)
                 .method(Method::Post)
@@ -84,7 +66,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     }
 }
 
-pub fn view(group: Group) -> Node<Msg> {
+pub fn view(group_id: Uuid) -> Node<Msg> {
     div![
         C!("field"),
         div![
@@ -109,7 +91,7 @@ pub fn view(group: Group) -> Node<Msg> {
                                 })
                                 .and_then(|file_input| file_input.files());
 
-                            Msg::FilesChanged(files, group)
+                            Msg::FilesChanged(files, group_id)
                         })
                     ],
                     span![

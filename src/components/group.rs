@@ -1,29 +1,11 @@
 use seed::{self, prelude::*, *};
-use uuid::Uuid;
 
 use super::upload;
-use crate::models::{group::Group, picture::Picture, vars::THUMB_URI};
-
-// ------ ------
-//     Model
-// ------ -----
-pub struct Model {
-    upload: upload::Model,
-}
-
-impl Model {
-    pub fn new() -> Self {
-        Self {
-            upload: upload::Model::new(),
-        }
-    }
-}
-
-#[derive(Clone, Copy)]
-pub enum UpdateType {
-    Title,
-    CountFakePictures,
-}
+use crate::models::{
+    group::Group,
+    group_update::{GroupUpdate, UpdateType},
+    vars::THUMB_URI,
+};
 
 // ------ ------
 //    Update
@@ -31,31 +13,46 @@ pub enum UpdateType {
 pub enum Msg {
     TitleChanged(String, Group),
     Upload(upload::Msg),
-    UpdateGroup(Group, UpdateType),
-    AddPicture(Picture, Uuid),
+    UpdateGroup(GroupUpdate),
 }
 
-pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
+pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::TitleChanged(input, mut group) => {
-            group.title = input;
-            orders.send_msg(Msg::UpdateGroup(group, UpdateType::Title));
+            group.title = input.clone();
+            orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+                upd_type: UpdateType::Title,
+                id: Some(group.id),
+                picture: None,
+                title: Some(input),
+                count_fake_pictures: None,
+            }));
         }
         Msg::Upload(msg) => {
             match msg {
-                upload::Msg::Success(ref picture, ref group_id) => {
-                    orders.send_msg(Msg::AddPicture(picture.clone(), *group_id));
+                upload::Msg::Success(ref picture, group_id) => {
+                    orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+                        upd_type: UpdateType::AddPicture,
+                        id: Some(group_id),
+                        picture: Some(picture.clone()),
+                        title: None,
+                        count_fake_pictures: None,
+                    }));
                 }
-                upload::Msg::RenderFakePictures(count, ref group) => {
-                    let mut gr = group.clone();
-                    gr.count_fake_pictures = count;
-                    orders.send_msg(Msg::UpdateGroup(gr, UpdateType::CountFakePictures));
+                upload::Msg::RenderFakePictures(count, group_id) => {
+                    orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+                        upd_type: UpdateType::CountFakePictures,
+                        id: Some(group_id),
+                        picture: None,
+                        title: None,
+                        count_fake_pictures: Some(count),
+                    }));
                 }
                 _ => (),
             }
-            upload::update(msg, &mut model.upload, &mut orders.proxy(Msg::Upload));
+            upload::update(msg, &mut orders.proxy(Msg::Upload));
         }
-        Msg::UpdateGroup(_, _) | Msg::AddPicture(_, _) => (),
+        Msg::UpdateGroup(_) => (),
     }
 }
 
@@ -104,6 +101,6 @@ pub fn view(group: Group) -> Node<Msg> {
                 ]
             }),
         ],
-        upload::view(gr).map_msg(Msg::Upload),
+        upload::view(gr.id).map_msg(Msg::Upload),
     ]
 }

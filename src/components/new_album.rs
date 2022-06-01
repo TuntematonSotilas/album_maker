@@ -2,10 +2,12 @@ use seed::{self, prelude::*, *};
 
 use crate::{
     components::group,
-    models::{album::Album, group::Group, page::TITLE_NEW_ALBUM, vars::BASE_URI},
+    models::{
+        album::Album, group::Group, group_update::UpdateType, page::TITLE_NEW_ALBUM, vars::BASE_URI,
+    },
 };
 
-use super::{group::UpdateType, notification::NotifType};
+use super::notification::NotifType;
 
 // ------ ------
 //     Model
@@ -13,15 +15,13 @@ use super::{group::UpdateType, notification::NotifType};
 pub struct Model {
     auth_header: String,
     album: Album,
-    group: group::Model,
 }
 
 impl Model {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             auth_header: String::new(),
             album: Album::new(),
-            group: group::Model::new(),
         }
     }
     pub fn is_not_valid(&self) -> bool {
@@ -56,7 +56,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::InitComp => {
             model.album = Album::new();
-            model.group = group::Model::new();
         }
         Msg::Submit => {
             orders.skip(); // No need to rerender
@@ -98,33 +97,36 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
         }
         Msg::Group(msg) => {
-            match msg {
-                group::Msg::UpdateGroup(ref group_update, update_type) => {
-                    if let Some(groups) = &mut model.album.groups {
-                        if let Some(group) = groups.iter_mut().find(|g| g.id == group_update.id) {
-                            let grp_upd = group_update.clone();
-                            match update_type {
-                                UpdateType::CountFakePictures => {
-                                    group.count_fake_pictures = grp_upd.count_fake_pictures;
-                                }
-                                UpdateType::Title => group.title = grp_upd.title,
-                            }
-                        }
-                    }
-                }
-                group::Msg::AddPicture(ref picture, group_id) => {
+            if let group::Msg::UpdateGroup(ref group_update) = msg {
+                if let Some(group_id) = group_update.id {
                     if let Some(groups) = &mut model.album.groups {
                         if let Some(group) = groups.iter_mut().find(|g| g.id == group_id) {
-                            if let Some(pictures) = &mut group.pictures {
-                                pictures.push(picture.clone());
-                                group.count_fake_pictures -= 1;
+                            let grp_upd = group_update.clone();
+                            match group_update.upd_type {
+                                UpdateType::CountFakePictures => {
+                                    if let Some(count) = grp_upd.count_fake_pictures {
+                                        group.count_fake_pictures = count;
+                                    }
+                                }
+                                UpdateType::Title => {
+                                    if let Some(title) = grp_upd.title {
+                                        group.title = title;
+                                    }
+                                }
+                                UpdateType::AddPicture => {
+                                    if let Some(picture) = grp_upd.picture {
+                                        if let Some(pictures) = &mut group.pictures {
+                                            pictures.push(picture);
+                                            group.count_fake_pictures -= 1;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
-                _ => (),
             }
-            group::update(msg, &mut model.group, &mut orders.proxy(Msg::Group));
+            group::update(msg, &mut orders.proxy(Msg::Group));
         }
     }
 }
