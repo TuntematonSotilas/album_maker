@@ -23,10 +23,12 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             group.title = input.clone();
             orders.send_msg(Msg::UpdateGroup(GroupUpdate {
                 upd_type: UpdateType::Title,
-                id: Some(group.id),
+                id: group.id,
                 picture: None,
                 title: Some(input),
                 count_fake_pictures: None,
+				asset_id: None,
+				caption: None,
             }));
         }
         Msg::Upload(msg) => {
@@ -34,27 +36,44 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                 upload::Msg::Success(ref picture, group_id) => {
                     orders.send_msg(Msg::UpdateGroup(GroupUpdate {
                         upd_type: UpdateType::AddPicture,
-                        id: Some(group_id),
+                        id: group_id,
                         picture: Some(picture.clone()),
                         title: None,
                         count_fake_pictures: None,
+						asset_id: None,
+						caption: None,
                     }));
                 }
                 upload::Msg::RenderFakePictures(count, group_id) => {
                     orders.send_msg(Msg::UpdateGroup(GroupUpdate {
                         upd_type: UpdateType::CountFakePictures,
-                        id: Some(group_id),
+                        id: group_id,
                         picture: None,
                         title: None,
                         count_fake_pictures: Some(count),
+						asset_id: None,
+						caption: None,
                     }));
                 }
                 _ => (),
             }
             upload::update(msg, &mut orders.proxy(Msg::Upload));
-        }
+        },
+		Msg::Picture(msg) => {
+			if let picture::Msg::UpdateCaption(group_id, ref caption, ref asset_id) = msg {
+				orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+					upd_type: UpdateType::Caption,
+					id: group_id,
+					picture: None,
+					title: None,
+					count_fake_pictures: None,
+					asset_id: Some(asset_id.clone()),
+					caption: Some(caption.clone()),
+				}));
+			}
+			picture::update(msg, &mut orders.proxy(Msg::Picture));
+		},
         Msg::UpdateGroup(_) => (),
-		Msg::Picture(_) => (),
     }
 }
 
@@ -81,7 +100,7 @@ pub fn view(group: Group) -> Node<Msg> {
         div![
 			match gr.clone().pictures {
                 Some(pictures) => div![pictures.iter().map(|picture| {
-                    picture::view(picture.clone()).map_msg(Msg::Picture)
+                    picture::view(gr.id, picture.clone()).map_msg(Msg::Picture)
                 })],
                 None => empty![],
             },

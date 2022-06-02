@@ -1,4 +1,5 @@
 use seed::{self, prelude::*, *};
+use uuid::Uuid;
 
 use crate::models::{vars::THUMB_URI, picture::Picture};
 
@@ -6,25 +7,21 @@ use crate::models::{vars::THUMB_URI, picture::Picture};
 //    Update
 // ------ ------
 pub enum Msg {
-    CaptionChanged(String, Picture),
+    CaptionChanged(Uuid, String, Picture),
+	UpdateCaption(Uuid, String, String)
 }
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::CaptionChanged(input, mut picture) => {
-            picture.caption = Some(input.clone());
-            /*orders.send_msg(Msg::UpdateGroup(GroupUpdate {
-                upd_type: UpdateType::Title,
-                id: Some(group.id),
-                picture: None,
-                title: Some(input),
-                count_fake_pictures: None,
-            }));*/
-        }
+        Msg::CaptionChanged(group_id, input, mut picture) => {
+			picture.caption = Some(input.clone());
+            orders.send_msg(Msg::UpdateCaption(group_id, input, picture.asset_id));
+        },
+		Msg::UpdateCaption(_, _, _) => ()
     }
 }
 
-pub fn view(picture: Picture) -> Node<Msg> {
+pub fn view(group_id: Uuid, picture: Picture) -> Node<Msg> {
 	div![
 		C!["container", "columns", "is-vcentered"],
 		div![
@@ -53,7 +50,7 @@ pub fn view(picture: Picture) -> Node<Msg> {
 							At::Placeholder => "Caption",
 							At::Value => picture.clone().caption.unwrap_or_default(),
 						},
-						input_ev(Ev::Input, move |input| Msg::CaptionChanged(input, picture)),
+						input_ev(Ev::Input, move |input| Msg::CaptionChanged(group_id, input, picture)),
 					]
 				]
 			],
