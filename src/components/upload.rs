@@ -68,7 +68,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
 
 pub fn view(group_id: Uuid) -> Node<Msg> {
     div![
-        C!("field"),
+        C!("field mt-2"),
         div![
             C!("control"),
             div![

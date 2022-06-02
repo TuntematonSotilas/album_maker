@@ -5,4 +5,5 @@ pub struct Picture {
     pub asset_id: String,
     pub public_id: String,
     pub format: String,
+	pub caption: Option<String>,
 }

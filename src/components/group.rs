@@ -1,10 +1,10 @@
 use seed::{self, prelude::*, *};
 
 use super::upload;
+use super::picture;
 use crate::models::{
     group::Group,
     group_update::{GroupUpdate, UpdateType},
-    vars::THUMB_URI,
 };
 
 // ------ ------
@@ -12,8 +12,9 @@ use crate::models::{
 // ------ ------
 pub enum Msg {
     TitleChanged(String, Group),
-    Upload(upload::Msg),
     UpdateGroup(GroupUpdate),
+    Upload(upload::Msg),
+	Picture(picture::Msg),
 }
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
@@ -53,6 +54,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             upload::update(msg, &mut orders.proxy(Msg::Upload));
         }
         Msg::UpdateGroup(_) => (),
+		Msg::Picture(_) => (),
     }
 }
 
@@ -77,17 +79,9 @@ pub fn view(group: Group) -> Node<Msg> {
             ]
         ],
         div![
-            match gr.clone().pictures {
+			match gr.clone().pictures {
                 Some(pictures) => div![pictures.iter().map(|picture| {
-                    figure![
-                        C!["image", "is-128x128"],
-                        img![attrs! { At::Src =>
-                            THUMB_URI.to_string() +
-                            picture.public_id.as_str() +
-                            "." +
-                            picture.format.as_str()
-                        }]
-                    ]
+                    picture::view(picture.clone()).map_msg(Msg::Picture)
                 })],
                 None => empty![],
             },
