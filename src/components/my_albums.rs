@@ -78,7 +78,25 @@ pub fn view(model: &Model) -> Node<Msg> {
                             div![C!["column", "is-three-quarters"], &album.title],
                             div![
                                 C!("column"),
-                                button![C!("delete"), ev(Ev::Click, |_| Msg::Delete),]
+								a![
+									C!("button is-small mr-5"),
+									attrs! { 
+										At::Title => "Open" ,
+										At::Href => "/album/".to_string() + album.id.as_str() },
+									span![
+										C!("icon is-small"),
+										i![C!("ion-android-open")]
+									],
+								],
+								button![
+									C!("button is-small"),
+									attrs! { At::Title => "Delete" },
+									ev(Ev::Click, |_| Msg::Delete),
+									span![
+										C!("icon is-small"),
+										i![C!("ion-close-circled")],
+									]
+								]	
                             ]
                         ]
                     ]

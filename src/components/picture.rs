@@ -23,7 +23,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
 
 pub fn view(group_id: Uuid, picture: Picture) -> Node<Msg> {
 	div![
-		C!["container", "columns", "is-vcentered"],
+		C!["container", "columns", "is-vcentered", "is-mobile"],
 		div![
 			C!("column"),
 			figure![
