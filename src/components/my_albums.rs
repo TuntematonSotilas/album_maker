@@ -9,6 +9,7 @@ use crate::models::{album::Album, page::TITLE_MY_ALBUMS, vars::BASE_URI};
 pub struct Model {
     auth_header: String,
     albums: Option<Vec<Album>>,
+	album_id_to_delete: Option<String>,
 }
 
 // ------ ------
@@ -18,8 +19,11 @@ pub enum Msg {
     SetAuth(String),
     InitComp,
     Received(Vec<Album>),
-    Error,
-    Delete,
+    ErrorGet,
+    Delete(String),
+	AskDelete(String),
+	ErrorDelete,
+	SuccessDelete,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -44,18 +48,41 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                             .expect("deserialization failed");
                         Msg::Received(albums)
                     }
-                    _ => Msg::Error,
+                    _ => Msg::ErrorGet,
                 }
             });
         }
-        Msg::Error => {
+        Msg::ErrorGet => {
             error!("Error getting albums");
         }
-        Msg::Received(albums) => {
+		Msg::Received(albums) => {
             model.albums = Some(albums);
         }
-        Msg::Delete => {
-            log!("delete");
+		Msg::AskDelete(id) => {
+			model.album_id_to_delete = Some(id);
+		}
+        Msg::Delete(id) => {
+            let auth = model.auth_header.clone();
+			let uri = BASE_URI.to_string() + "deletealbum?id=" + id.as_str();
+            orders.skip(); // No need to rerender
+            orders.perform_cmd(async {
+                let response = Request::new(uri)
+                    .header(Header::authorization(auth))
+                    .fetch()
+                    .await
+                    .expect("HTTP request failed");
+
+                match response.status().code {
+                    204 => Msg::SuccessDelete,
+                    _ => Msg::ErrorDelete,
+                }
+            });
+        }
+		Msg::ErrorDelete => {
+            error!("Error deleting albums");
+        }
+		Msg::SuccessDelete => {
+            error!("Error deleting albums");
         }
     }
 }
@@ -70,7 +97,8 @@ pub fn view(model: &Model) -> Node<Msg> {
             C!("box"),
             p![C!["title", "is-5", "has-text-link"], TITLE_MY_ALBUMS],
             if model.albums.is_some() {
-                div![model.albums.as_ref().unwrap().iter().map(|album| {
+               div![model.albums.as_ref().unwrap().iter().map(|album| {
+				   let id = album.id.clone();
                     p![
                         C!("panel-block"),
                         div![
@@ -79,7 +107,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 								C!["column", "is-three-quarters"], 
 								attrs! { 
 									At::Title => "Open",
-									At::Href => "/album/".to_string() + album.id.as_str() 
+									At::Href => "/album/".to_string() + id.as_str() 
 								},
 								&album.title
 							],
@@ -89,7 +117,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 									C!["button", "is-link", "is-light", "is-small"],
 									span![C!("icon"), i![C!("ion-close-circled")]],
 									span!["Delete"],
-									ev(Ev::Click, |_| Msg::Delete),
+									ev(Ev::Click,|_| Msg::AskDelete(id)),
 								]
                             ]
                         ]
