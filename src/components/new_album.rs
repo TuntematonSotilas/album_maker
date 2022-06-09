@@ -98,35 +98,39 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::Group(msg) => {
             if let group::Msg::UpdateGroup(ref group_update) = msg {
-				if let Some(groups) = &mut model.album.groups {
-					if let Some(group) = groups.iter_mut().find(|g| g.id == group_update.id) {
-						let grp_upd = group_update.clone();
-						match group_update.upd_type {
-							UpdateType::CountFakePictures => {
-								group.count_fake_pictures = grp_upd.count_fake_pictures.unwrap_or_default();
-							}
-							UpdateType::Title => {
-								group.title = grp_upd.title.unwrap_or_default();
-							}
-							UpdateType::AddPicture => {
-								if let Some(picture) = grp_upd.picture {
-									if let Some(pictures) = &mut group.pictures {
-										pictures.push(picture);
-										group.count_fake_pictures -= 1;
-									}
-								}
-							},
-							UpdateType::Caption => {
-								if let Some(pictures) = &mut group.pictures {
-									if let Some(picture) = pictures.iter_mut()
-										.find(|p| p.asset_id == group_update.clone().asset_id.unwrap_or_default()) {
-											picture.caption = Some(group_update.clone().caption.unwrap_or_default());
-									}
-								}
-							}
-						}
-					}
-				}
+                if let Some(groups) = &mut model.album.groups {
+                    if let Some(group) = groups.iter_mut().find(|g| g.id == group_update.id) {
+                        let grp_upd = group_update.clone();
+                        match group_update.upd_type {
+                            UpdateType::CountFakePictures => {
+                                group.count_fake_pictures =
+                                    grp_upd.count_fake_pictures.unwrap_or_default();
+                            }
+                            UpdateType::Title => {
+                                group.title = grp_upd.title.unwrap_or_default();
+                            }
+                            UpdateType::AddPicture => {
+                                if let Some(picture) = grp_upd.picture {
+                                    if let Some(pictures) = &mut group.pictures {
+                                        pictures.push(picture);
+                                        group.count_fake_pictures -= 1;
+                                    }
+                                }
+                            }
+                            UpdateType::Caption => {
+                                if let Some(pictures) = &mut group.pictures {
+                                    if let Some(picture) = pictures.iter_mut().find(|p| {
+                                        p.asset_id
+                                            == group_update.clone().asset_id.unwrap_or_default()
+                                    }) {
+                                        picture.caption =
+                                            Some(group_update.clone().caption.unwrap_or_default());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
             group::update(msg, &mut orders.proxy(Msg::Group));
         }

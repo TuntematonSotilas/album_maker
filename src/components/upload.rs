@@ -19,7 +19,7 @@ pub enum Msg {
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::FilesChanged(files_opt, group_id) => {
-			load_dotenv!();
+            load_dotenv!();
             if let Some(files) = files_opt {
                 let count = files.length();
                 orders.send_msg(Msg::RenderFakePictures(count, group_id));
@@ -27,11 +27,14 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                     if let Some(file) = files.get(i) {
                         if let Ok(form_data) = FormData::new() {
                             let upload_preset = env!("UPLOAD_PRESET");
-                            _ = form_data.append_with_blob("file", &file);
-							_ = form_data.append_with_str("upload_preset", upload_preset);
-							let folder = "amaker/".to_string() + group_id.to_string().as_str();
-							_ = form_data.append_with_str("folder", folder.as_str());
-                            orders.send_msg(Msg::SendUpload(form_data, group_id));
+                            let folder = "amaker/".to_string() + group_id.to_string().as_str();
+                            let res_file = form_data.append_with_blob("file", &file);
+                            let res_preset =
+                                form_data.append_with_str("upload_preset", upload_preset);
+                            let res_folder = form_data.append_with_str("folder", folder.as_str());
+                            if res_file.is_ok() && res_preset.is_ok() && res_folder.is_ok() {
+                                orders.send_msg(Msg::SendUpload(form_data, group_id));
+                            }
                         }
                     }
                 }

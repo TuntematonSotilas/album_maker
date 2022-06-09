@@ -9,7 +9,7 @@ use crate::models::{album::Album, page::TITLE_MY_ALBUMS, vars::BASE_URI};
 pub struct Model {
     auth_header: String,
     albums: Option<Vec<Album>>,
-	album_id_to_delete: Option<String>,
+    album_id_to_delete: Option<String>,
 }
 
 // ------ ------
@@ -21,10 +21,10 @@ pub enum Msg {
     Received(Vec<Album>),
     ErrorGet,
     Delete(String),
-	AskDelete(String),
-	CancelDelete,
-	ErrorDelete,
-	SuccessDelete,
+    AskDelete(String),
+    CancelDelete,
+    ErrorDelete,
+    SuccessDelete,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -56,35 +56,35 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::ErrorGet => {
             error!("Error getting albums");
         }
-		Msg::Received(albums) => {
+        Msg::Received(albums) => {
             model.albums = Some(albums);
         }
-		Msg::AskDelete(id) => {
-			model.album_id_to_delete = Some(id);
-		}
-		Msg::CancelDelete => { 
-			model.album_id_to_delete = None; 
-		}
+        Msg::AskDelete(id) => {
+            model.album_id_to_delete = Some(id);
+        }
+        Msg::CancelDelete => {
+            model.album_id_to_delete = None;
+        }
         Msg::Delete(id) => {
             orders.skip(); // No need to rerender
-			let auth = model.auth_header.clone();
-			let uri = BASE_URI.to_string() + "deletealbum?id=" + id.as_str();            
-			let request = Request::new(uri)
-                    .header(Header::authorization(auth))
-					.method(Method::Post);
+            let auth = model.auth_header.clone();
+            let uri = BASE_URI.to_string() + "deletealbum?id=" + id.as_str();
+            let request = Request::new(uri)
+                .header(Header::authorization(auth))
+                .method(Method::Post);
             orders.perform_cmd(async {
-				let response = fetch(request).await.expect("HTTP request failed");
+                let response = fetch(request).await.expect("HTTP request failed");
                 match response.status().code {
                     204 => Msg::SuccessDelete,
                     _ => Msg::ErrorDelete,
                 }
             });
         }
-		Msg::ErrorDelete => {
+        Msg::ErrorDelete => {
             error!("Error deleting albums");
         }
-		Msg::SuccessDelete => {
-            error!("Error deleting albums");
+        Msg::SuccessDelete => {
+            error!("Success deleting albums");
         }
     }
 }
@@ -99,53 +99,54 @@ pub fn view(model: &Model) -> Node<Msg> {
             C!("box"),
             p![C!["title", "is-5", "has-text-link"], TITLE_MY_ALBUMS],
             if model.albums.is_some() {
-               div![model.albums.as_ref().unwrap().iter().map(|album| {
-				   let id = album.id.clone();
-				   let album_id_to_delete = model.album_id_to_delete.clone();
-				   let is_ask = model.album_id_to_delete.is_some() && album_id_to_delete.unwrap() == id;
-                   p![
+                div![model.albums.as_ref().unwrap().iter().map(|album| {
+                    let id = album.id.clone();
+                    let album_id_to_delete = model.album_id_to_delete.clone();
+                    let is_ask =
+                        model.album_id_to_delete.is_some() && album_id_to_delete.unwrap() == id;
+                    p![
                         C!("panel-block"),
                         div![
                             C!["container", "columns", "is-mobile"],
-							div![
-								C!["column", "is-two-thirds"], 
-								if is_ask {
-									span!["Delete this album ?"]
-								} else {
-									a![
-										attrs! { 
-											At::Title => "Open",
-											At::Href => "/album/".to_string() + id.as_str() 
-										},
-										&album.title
-									]
-								}
-							],
+                            div![
+                                C!["column", "is-two-thirds"],
+                                if is_ask {
+                                    span!["Delete this album ?"]
+                                } else {
+                                    a![
+                                        attrs! {
+                                            At::Title => "Open",
+                                            At::Href => "/album/".to_string() + id.as_str()
+                                        },
+                                        &album.title
+                                    ]
+                                }
+                            ],
                             div![
                                 C!("column"),
-								if is_ask {
-									div![
-										button![
-											C!["button", "is-link", "is-light", "is-small", "mr-2"],
-											span![C!("icon"), i![C!("ion-close-circled")]],
-											span!["NO"],
-											ev(Ev::Click,|_| Msg::CancelDelete),
-										],
-										button![
-											C!["button", "is-danger", "is-light", "is-small"],
-											span![C!("icon"), i![C!("ion-close-circled")]],
-											span!["YES"],
-											ev(Ev::Click,|_| Msg::Delete(id)),
-										]
-									]
-								} else {
-									button![
-										C!["button", "is-danger", "is-light", "is-small"],
-										span![C!("icon"), i![C!("ion-close-circled")]],
-										span!["Delete"],
-										ev(Ev::Click,|_| Msg::AskDelete(id)),
-									]
-								}
+                                if is_ask {
+                                    div![
+                                        button![
+                                            C!["button", "is-link", "is-light", "is-small", "mr-2"],
+                                            span![C!("icon"), i![C!("ion-close-circled")]],
+                                            span!["NO"],
+                                            ev(Ev::Click, |_| Msg::CancelDelete),
+                                        ],
+                                        button![
+                                            C!["button", "is-danger", "is-light", "is-small"],
+                                            span![C!("icon"), i![C!("ion-close-circled")]],
+                                            span!["YES"],
+                                            ev(Ev::Click, |_| Msg::Delete(id)),
+                                        ]
+                                    ]
+                                } else {
+                                    button![
+                                        C!["button", "is-danger", "is-light", "is-small"],
+                                        span![C!("icon"), i![C!("ion-close-circled")]],
+                                        span!["Delete"],
+                                        ev(Ev::Click, |_| Msg::AskDelete(id)),
+                                    ]
+                                }
                             ]
                         ]
                     ]
