@@ -22,9 +22,9 @@ pub enum Msg {
     ErrorGet,
     Delete(String),
     AskDelete(String),
-    CancelDelete,
+    SuccessDelete(String),
     ErrorDelete,
-    SuccessDelete,
+    CancelDelete,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -71,11 +71,11 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             let uri = BASE_URI.to_string() + "deletealbum?id=" + id.as_str();
             let request = Request::new(uri)
                 .header(Header::authorization(auth))
-                .method(Method::Post);
+                .method(Method::Delete);
             orders.perform_cmd(async {
                 let response = fetch(request).await.expect("HTTP request failed");
                 match response.status().code {
-                    204 => Msg::SuccessDelete,
+                    204 => Msg::SuccessDelete(id),
                     _ => Msg::ErrorDelete,
                 }
             });
@@ -83,8 +83,11 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::ErrorDelete => {
             error!("Error deleting albums");
         }
-        Msg::SuccessDelete => {
-            error!("Success deleting albums");
+        Msg::SuccessDelete(id) => {
+            if let Some(albums) = &mut model.albums {
+				let index = albums.iter().position(|album| *album.id == id).unwrap();
+				albums.remove(index);
+			}
         }
     }
 }
