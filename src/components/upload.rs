@@ -19,21 +19,19 @@ pub enum Msg {
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::FilesChanged(files_opt, group_id) => {
+			load_dotenv!();
             if let Some(files) = files_opt {
                 let count = files.length();
                 orders.send_msg(Msg::RenderFakePictures(count, group_id));
                 for i in 0..count {
                     if let Some(file) = files.get(i) {
                         if let Ok(form_data) = FormData::new() {
-                            load_dotenv!();
                             let upload_preset = env!("UPLOAD_PRESET");
-                            if form_data.append_with_blob("file", &file).is_ok()
-                                && form_data
-                                    .append_with_str("upload_preset", upload_preset)
-                                    .is_ok()
-                            {
-                                orders.send_msg(Msg::SendUpload(form_data, group_id));
-                            }
+                            _ = form_data.append_with_blob("file", &file);
+							_ = form_data.append_with_str("upload_preset", upload_preset);
+							let folder = "amaker/".to_string() + group_id.to_string().as_str();
+							_ = form_data.append_with_str("folder", folder.as_str());
+                            orders.send_msg(Msg::SendUpload(form_data, group_id));
                         }
                     }
                 }
