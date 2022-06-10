@@ -1,6 +1,6 @@
 use seed::{self, prelude::*, *};
 
-use crate::models::{album::Album, page::TITLE_MY_ALBUMS, vars::BASE_URI};
+use crate::models::{album::Album, page::TITLE_MY_ALBUMS, vars::{BASE_URI, DELETE_PICS_URI}};
 
 // ------ ------
 //     Model
@@ -68,16 +68,25 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::Delete(id) => {
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
-            let uri = BASE_URI.to_string() + "deletealbum?id=" + id.as_str();
-            let request = Request::new(uri)
+            let delete_uri = BASE_URI.to_string() + "deletealbum?id=" + id.as_str();
+            let delete_request = Request::new(delete_uri)
                 .header(Header::authorization(auth))
                 .method(Method::Delete);
+
+			let delete_pics_uri = DELETE_PICS_URI.to_string();
+			let delete_pics_request = Request::new(delete_pics_uri)
+				//.header(Header::authorization(auth))
+				.method(Method::Delete);
+				
             orders.perform_cmd(async {
-                let response = fetch(request).await.expect("HTTP request failed");
-                match response.status().code {
-                    204 => Msg::SuccessDelete(id),
-                    _ => Msg::ErrorDelete,
-                }
+                let delete_response = fetch(delete_request).await.expect("HTTP request failed");
+				let delete_pics_response = fetch(delete_pics_request).await.expect("HTTP request failed");
+
+                if delete_response.status().code == 204 && delete_pics_response.status().code == 200 {
+					Msg::SuccessDelete(id)
+				} else {
+					Msg::ErrorDelete
+				}
             });
         }
         Msg::ErrorDelete => {
