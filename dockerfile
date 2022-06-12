@@ -6,7 +6,7 @@ COPY src/ src/
 COPY public/ public/
 COPY .env .env
 RUN cargo install cargo-make
-RUN cargo install wasm-pack --version 0.10.2
+RUN cargo install wasm-pack
 RUN cargo make build_release
 
 FROM nginx:1.21.6 as runner
