@@ -72,14 +72,14 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             let delete_request = Request::new(delete_uri)
                 .header(Header::authorization(auth))
                 .method(Method::Delete);
-	
+
             orders.perform_cmd(async {
                 let delete_response = fetch(delete_request).await.expect("HTTP request failed");
                 if delete_response.status().code == 204 {
-					Msg::SuccessDelete(id)
-				} else {
-					Msg::ErrorDelete
-				}
+                    Msg::SuccessDelete(id)
+                } else {
+                    Msg::ErrorDelete
+                }
             });
         }
         Msg::ErrorDelete => {
@@ -87,9 +87,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::SuccessDelete(id) => {
             if let Some(albums) = &mut model.albums {
-				let index = albums.iter().position(|album| *album.id == id).unwrap();
-				albums.remove(index);
-			}
+                let index = albums.iter().position(|album| *album.id == id).unwrap();
+                albums.remove(index);
+            }
         }
     }
 }
