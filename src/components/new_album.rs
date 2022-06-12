@@ -51,12 +51,8 @@ pub enum Msg {
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::SetAuth(auth_header) => {
-            model.auth_header = auth_header;
-        }
-        Msg::InitComp => {
-            model.album = Album::new();
-        }
+        Msg::SetAuth(auth_header) => model.auth_header = auth_header,
+        Msg::InitComp => model.album = Album::new(),
         Msg::Submit => {
             orders.skip(); // No need to rerender
             let uri = BASE_URI.to_string() + "editalbum";
