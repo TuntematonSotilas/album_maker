@@ -29,7 +29,7 @@ fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
         notification: notification::Model::default(),
         my_albums: my_albums::Model::default(),
         new_album: new_album::Model::new(),
-		view_album: view_album::Model::new(),
+        view_album: view_album::Model::new(),
         page: login_page,
         login: login::Model::default(),
     }
@@ -44,7 +44,7 @@ struct Model {
     page: models::page::Page,
     my_albums: my_albums::Model,
     new_album: new_album::Model,
-	view_album: view_album::Model,
+    view_album: view_album::Model,
     notification: notification::Model,
     login: login::Model,
 }
@@ -56,7 +56,7 @@ enum Msg {
     Header(header::Msg),
     MyAlbums(my_albums::Msg),
     NewAlbum(new_album::Msg),
-	ViewAlbum(view_album::Msg),
+    ViewAlbum(view_album::Msg),
     Login(login::Msg),
     UrlChanged(subs::UrlChanged),
     InitComp(Option<String>),
@@ -100,13 +100,17 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
             new_album::update(msg, &mut model.new_album, &mut orders.proxy(Msg::NewAlbum));
         }
-		Msg::ViewAlbum(msg) => {
-            view_album::update(msg, &mut model.view_album, &mut orders.proxy(Msg::ViewAlbum));
+        Msg::ViewAlbum(msg) => {
+            view_album::update(
+                msg,
+                &mut model.view_album,
+                &mut orders.proxy(Msg::ViewAlbum),
+            );
         }
         Msg::UrlChanged(subs::UrlChanged(mut url)) => {
             let page = match url.next_path_part() {
                 Some(models::page::LK_NEW_ALBUM) => models::page::Page::NewAlbum,
-				Some(models::page::LK_VIEW_ALBUM) => models::page::Page::ViewAlbum,
+                Some(models::page::LK_VIEW_ALBUM) => models::page::Page::ViewAlbum,
                 Some(models::page::LK_LOGIN) => models::page::Page::Login,
                 _ => models::page::Page::MyAlbums,
             };
@@ -114,20 +118,24 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 
             orders.send_msg(Msg::Header(header::Msg::SetPage(page)));
 
-			let opt_id: Option<String> = url.next_path_part().map(str::to_string);
+            let opt_id: Option<String> = url.next_path_part().map(str::to_string);
             orders.send_msg(Msg::InitComp(opt_id));
         }
         Msg::InitComp(opt_id) => {
             if model.is_logged {
                 match model.page {
-                    models::page::Page::MyAlbums => { orders.send_msg(Msg::MyAlbums(my_albums::Msg::InitComp)); },
-                    models::page::Page::NewAlbum => { orders.send_msg(Msg::NewAlbum(new_album::Msg::InitComp)); },
-					models::page::Page::ViewAlbum => { 
-						if let Some(id) = opt_id {
-							orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(id))); 
-						}
-					},
-                    _ => (),
+                    models::page::Page::MyAlbums => {
+                        orders.send_msg(Msg::MyAlbums(my_albums::Msg::InitComp));
+                    }
+                    models::page::Page::NewAlbum => {
+                        orders.send_msg(Msg::NewAlbum(new_album::Msg::InitComp));
+                    }
+                    models::page::Page::ViewAlbum => {
+                        if let Some(id) = opt_id {
+                            orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(id)));
+                        }
+                    }
+                    models::page::Page::Login => (),
                 }
             }
         }
@@ -152,7 +160,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::SetAuth(auth) => {
             orders.send_msg(Msg::NewAlbum(new_album::Msg::SetAuth(auth.clone())));
             orders.send_msg(Msg::MyAlbums(my_albums::Msg::SetAuth(auth.clone())));
-			orders.send_msg(Msg::ViewAlbum(view_album::Msg::SetAuth(auth)));
+            orders.send_msg(Msg::ViewAlbum(view_album::Msg::SetAuth(auth)));
         }
     }
 }
@@ -173,10 +181,13 @@ fn view(model: &Model) -> Node<Msg> {
                         div![
                             C!["columns", "is-centered", "m-1"],
                             match &model.page {
-                                models::page::Page::NewAlbum => new_album::view(&model.new_album).map_msg(Msg::NewAlbum),
-                                models::page::Page::MyAlbums => my_albums::view(&model.my_albums).map_msg(Msg::MyAlbums),
-								models::page::Page::ViewAlbum => view_album::view(&model.view_album).map_msg(Msg::ViewAlbum),
-                                _ => empty!(),
+                                models::page::Page::NewAlbum =>
+                                    new_album::view(&model.new_album).map_msg(Msg::NewAlbum),
+                                models::page::Page::MyAlbums =>
+                                    my_albums::view(&model.my_albums).map_msg(Msg::MyAlbums),
+                                models::page::Page::ViewAlbum =>
+                                    view_album::view(&model.view_album).map_msg(Msg::ViewAlbum),
+                                models::page::Page::Login => empty!(),
                             }
                         ]
                     }

@@ -1,12 +1,15 @@
+use crate::models::{
+    album::Album,
+    vars::{BASE_URI, THUMB_URI},
+};
 use seed::{self, prelude::*, *};
-use crate::models::{album::Album, vars::{BASE_URI, THUMB_URI}};
 
 // ------ ------
 //     Model
 // ------ -----
 pub struct Model {
-	auth_header: String,
-	album: Album,
+    auth_header: String,
+    album: Album,
 }
 
 impl Model {
@@ -22,38 +25,37 @@ impl Model {
 //    Update
 // ------ ------
 pub enum Msg {
-	SetAuth(String),
+    SetAuth(String),
     InitComp(String),
-	ErrorGet,
-	Received(Album)
+    ErrorGet,
+    Received(Album),
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
-	match msg {
-		Msg::SetAuth(auth_header) => model.auth_header = auth_header,
-		Msg::InitComp(id) => {
-			orders.skip(); // No need to rerender
-			let auth = model.auth_header.clone();
-			let uri = BASE_URI.to_string() + "getalbum?id=" + id.as_str();
-			orders.perform_cmd(async {
-				let response = Request::new(uri)
-					.header(Header::authorization(auth))
-					.fetch()
-					.await
-					.expect("HTTP request failed");
+    match msg {
+        Msg::SetAuth(auth_header) => model.auth_header = auth_header,
+        Msg::InitComp(id) => {
+            orders.skip(); // No need to rerender
+            let auth = model.auth_header.clone();
+            let uri = BASE_URI.to_string() + "getalbum?id=" + id.as_str();
+            orders.perform_cmd(async {
+                let response = Request::new(uri)
+                    .header(Header::authorization(auth))
+                    .fetch()
+                    .await
+                    .expect("HTTP request failed");
 
-				match response.status().code {
-					200 => {
-						let album = response
-							.json::<Album>()
-							.await
-							.expect("deserialization failed");
-						Msg::Received(album)
-					}
-					_ => Msg::ErrorGet,
-				}
-			});
-		
+                match response.status().code {
+                    200 => {
+                        let album = response
+                            .json::<Album>()
+                            .await
+                            .expect("deserialization failed");
+                        Msg::Received(album)
+                    }
+                    _ => Msg::ErrorGet,
+                }
+            });
         }
         Msg::ErrorGet => {
             error!("Error getting albums");
@@ -61,7 +63,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::Received(album) => {
             model.album = album;
         }
-	}
+    }
 }
 
 // ------ ------
@@ -71,30 +73,28 @@ pub fn view(model: &Model) -> Node<Msg> {
     div![
         C!["column", "is-centered", "is-half"],
         p![C!["title", "is-5", "has-text-link"], &model.album.title],
-		match &model.album.groups {
-            Some(groups) => div![groups
-                .iter()
-                .map(|group| { 
-					div![
-						C!("box"),
-						p![C!["title", "is-6", "has-text-link"], &group.title],
-						match &group.pictures {
-							Some(pictures) => div![pictures.iter().map(|picture| {
-								figure![
-									C!["image", "is-128x128"],
-									img![attrs! { At::Src =>
-										THUMB_URI.to_string() +
-										picture.public_id.as_str() +
-										"." +
-										picture.format.as_str()
-									}]
-								]
-							})],
-							None => empty![],
-						}
-					]
-				 })],
+        match &model.album.groups {
+            Some(groups) => div![groups.iter().map(|group| {
+                div![
+                    C!("box"),
+                    p![C!["title", "is-6", "has-text-link"], &group.title],
+                    match &group.pictures {
+                        Some(pictures) => div![pictures.iter().map(|picture| {
+                            figure![
+                                C!["image", "is-128x128"],
+                                img![attrs! { At::Src =>
+                                    THUMB_URI.to_string() +
+                                    picture.public_id.as_str() +
+                                    "." +
+                                    picture.format.as_str()
+                                }]
+                            ]
+                        })],
+                        None => empty![],
+                    }
+                ]
+            })],
             None => empty![],
         },
-	]
+    ]
 }

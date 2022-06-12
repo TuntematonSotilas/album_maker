@@ -11,6 +11,6 @@ pub const TITLE_LOGIN: &str = "Sign in to your albums";
 pub enum Page {
     MyAlbums,
     NewAlbum,
-	ViewAlbum,
+    ViewAlbum,
     Login,
 }
