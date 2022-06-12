@@ -29,7 +29,7 @@ fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
         notification: notification::Model::default(),
         my_albums: my_albums::Model::default(),
         new_album: new_album::Model::new(),
-		view_album: view_album::Model::default(),
+		view_album: view_album::Model::new(),
         page: login_page,
         login: login::Model::default(),
     }
@@ -122,7 +122,11 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 match model.page {
                     models::page::Page::MyAlbums => { orders.send_msg(Msg::MyAlbums(my_albums::Msg::InitComp)); },
                     models::page::Page::NewAlbum => { orders.send_msg(Msg::NewAlbum(new_album::Msg::InitComp)); },
-					models::page::Page::ViewAlbum => { orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(opt_id))); },
+					models::page::Page::ViewAlbum => { 
+						if let Some(id) = opt_id {
+							orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(id))); 
+						}
+					},
                     _ => (),
                 }
             }

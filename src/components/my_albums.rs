@@ -31,8 +31,8 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::SetAuth(auth_header) => model.auth_header = auth_header,
         Msg::InitComp => {
+			orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
-            orders.skip(); // No need to rerender
             orders.perform_cmd(async {
                 let uri = BASE_URI.to_string() + "myalbums";
                 let response = Request::new(uri)
