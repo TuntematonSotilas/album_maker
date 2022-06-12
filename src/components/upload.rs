@@ -19,25 +19,27 @@ pub enum Msg {
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::FilesChanged(files_opt, group_id) => {
-            load_dotenv!();
+			load_dotenv!();
             if let Some(files) = files_opt {
                 let count = files.length();
                 orders.send_msg(Msg::RenderFakePictures(count, group_id));
                 for i in 0..count {
                     if let Some(file) = files.get(i) {
                         if let Ok(form_data) = FormData::new() {
-                            let upload_preset = env!("UPLOAD_PRESET");
-                            let res_file = form_data.append_with_blob("file", &file);
-                            let res_preset =
-                                form_data.append_with_str("upload_preset", upload_preset);
-                            if res_file.is_ok() && res_preset.is_ok() {
-                                orders.send_msg(Msg::SendUpload(form_data, group_id));
-                            }
+                            let upload_preset = env!("CLD_UPLOAD_PRESET");
+							let folder = "amaker/".to_string() + group_id.to_string().as_str();
+                            let file_res = form_data.append_with_blob("file", &file);
+							let preset_res_ = form_data.append_with_str("upload_preset", upload_preset);
+							let folder_res = form_data.append_with_str("folder", folder.as_str());
+							if file_res.is_ok() && preset_res_.is_ok() && folder_res.is_ok()
+							{
+								orders.send_msg(Msg::SendUpload(form_data, group_id));
+							}
                         }
                     }
                 }
-            }
-        }
+			}
+		}
         Msg::SendUpload(form_data, group_id) => {
             let uri = UPLOAD_URI.to_string();
             let request = Request::new(uri)

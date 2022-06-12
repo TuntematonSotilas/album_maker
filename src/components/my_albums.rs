@@ -1,6 +1,6 @@
 use seed::{self, prelude::*, *};
 
-use crate::models::{album::Album, page::TITLE_MY_ALBUMS, vars::{BASE_URI, DELETE_PICS_URI}};
+use crate::models::{album::Album, page::TITLE_MY_ALBUMS, vars::BASE_URI};
 
 // ------ ------
 //     Model
@@ -72,17 +72,10 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             let delete_request = Request::new(delete_uri)
                 .header(Header::authorization(auth))
                 .method(Method::Delete);
-
-			let delete_pics_uri = DELETE_PICS_URI.to_string();
-			let delete_pics_request = Request::new(delete_pics_uri)
-				//.header(Header::authorization(auth))
-				.method(Method::Delete);
-				
+	
             orders.perform_cmd(async {
                 let delete_response = fetch(delete_request).await.expect("HTTP request failed");
-				let delete_pics_response = fetch(delete_pics_request).await.expect("HTTP request failed");
-
-                if delete_response.status().code == 204 && delete_pics_response.status().code == 200 {
+                if delete_response.status().code == 204 {
 					Msg::SuccessDelete(id)
 				} else {
 					Msg::ErrorDelete
