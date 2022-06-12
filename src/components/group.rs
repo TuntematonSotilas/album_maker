@@ -98,7 +98,7 @@ pub fn view(group: Group) -> Node<Msg> {
             ]
         ],
         div![
-            match gr.clone().pictures {
+            match gr.pictures.clone() {
                 Some(pictures) => div![pictures.iter().map(|picture| {
                     picture::view(gr.id, picture.clone()).map_msg(Msg::Picture)
                 })],

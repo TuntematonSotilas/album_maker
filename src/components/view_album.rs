@@ -1,5 +1,5 @@
 use seed::{self, prelude::*, *};
-use crate::models::{album::Album, vars::BASE_URI};
+use crate::models::{album::Album, vars::{BASE_URI, THUMB_URI}};
 
 // ------ ------
 //     Model
@@ -70,16 +70,28 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 pub fn view(model: &Model) -> Node<Msg> {
     div![
         C!["column", "is-centered", "is-half"],
-        div![
-            C!("box"),
-            p![C!["title", "is-5", "has-text-link"], &model.album.title],
-		],
+        p![C!["title", "is-5", "has-text-link"], &model.album.title],
 		match &model.album.groups {
             Some(groups) => div![groups
                 .iter()
                 .map(|group| { 
-					div![&group.title
-					
+					div![
+						C!("box"),
+						p![C!["title", "is-6", "has-text-link"], &group.title],
+						match &group.pictures {
+							Some(pictures) => div![pictures.iter().map(|picture| {
+								figure![
+									C!["image", "is-128x128"],
+									img![attrs! { At::Src =>
+										THUMB_URI.to_string() +
+										picture.public_id.as_str() +
+										"." +
+										picture.format.as_str()
+									}]
+								]
+							})],
+							None => empty![],
+						}
 					]
 				 })],
             None => empty![],
