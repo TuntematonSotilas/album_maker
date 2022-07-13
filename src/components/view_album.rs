@@ -82,15 +82,19 @@ pub fn view(model: &Model) -> Node<Msg> {
 						C!["is-flex", "is-justify-content-center"],
 						match &group.pictures {
 							Some(pictures) => div![pictures.iter().map(|picture| {
-								figure![
-									C!["image", "pic-view", "m-1"],
-									img![attrs! { At::Src =>
-										VIEW_URI.to_string() +
-										picture.public_id.as_str() +
-										"." +
-										picture.format.as_str()
-									}]
+								div![
+									figure![
+										C!["image", "pic-view", "m-1"],
+										img![attrs! { At::Src =>
+											VIEW_URI.to_string() +
+											picture.public_id.as_str() +
+											"." +
+											picture.format.as_str()
+										}]
+									],
+									span![picture.caption.clone().unwrap_or_default()],
 								]
+								
 							})],
 							None => empty![],
                     	}
