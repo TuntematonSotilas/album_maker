@@ -12,6 +12,7 @@ use crate::models::{
 // ------ ------
 pub enum Msg {
     TitleChanged(String, Group),
+	DescChanged(String, Group),
     UpdateGroup(GroupUpdate),
     Upload(upload::Msg),
     Picture(picture::Msg),
@@ -30,7 +31,19 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                 asset_id: None,
                 caption: None,
             }));
-        }
+        },
+		Msg::DescChanged(input, mut group) => {
+            group.title = input.clone();
+            orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+                upd_type: UpdateType::Title,
+                id: group.id,
+                picture: None,
+                title: Some(input),
+                count_fake_pictures: None,
+                asset_id: None,
+                caption: None,
+            }));
+        },
         Msg::Upload(msg) => {
             match msg {
                 upload::Msg::Success(ref picture, group_id) => {
@@ -94,9 +107,18 @@ pub fn view(group: Group) -> Node<Msg> {
                         At::Value => group.title,
                     },
                     input_ev(Ev::Input, move |input| Msg::TitleChanged(input, group)),
-                ]
-            ]
-        ],
+                ],
+			],
+		],
+		div![
+            C!("field"),
+			textarea![
+				C!("textarea"),
+				attrs! {
+					At::Placeholder => "description"
+				},
+			]
+		],
         div![
             match gr.pictures.clone() {
                 Some(pictures) => div![pictures.iter().map(|picture| {
