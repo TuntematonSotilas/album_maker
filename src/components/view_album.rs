@@ -1,6 +1,6 @@
 use crate::models::{
     album::Album,
-    vars::{BASE_URI, THUMB_URI},
+    vars::{BASE_URI, VIEW_URI},
 };
 use seed::{self, prelude::*, *};
 
@@ -81,9 +81,9 @@ pub fn view(model: &Model) -> Node<Msg> {
                     match &group.pictures {
                         Some(pictures) => div![pictures.iter().map(|picture| {
                             figure![
-                                C!["image", "is-128x128"],
+                                C!["image", "pic-view", "m-1"],
                                 img![attrs! { At::Src =>
-                                    THUMB_URI.to_string() +
+                                    VIEW_URI.to_string() +
                                     picture.public_id.as_str() +
                                     "." +
                                     picture.format.as_str()
