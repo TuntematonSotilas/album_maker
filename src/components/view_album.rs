@@ -71,7 +71,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
     div![
-        C!["column", "is-half"],
+        C!["column", "is-two-thirds"],
         p![C!["title", "is-5", "has-text-link"], &model.album.title],
         match &model.album.groups {
             Some(groups) => div![groups.iter().map(|group| {
@@ -79,23 +79,25 @@ pub fn view(model: &Model) -> Node<Msg> {
                     C!("box"),
                     p![C!["title", "is-6", "has-text-link"], &group.title],
 					div![
-						C!["is-flex", "is-justify-content-center"],
 						match &group.pictures {
-							Some(pictures) => div![pictures.iter().map(|picture| {
-								div![
-									figure![
-										C!["image", "pic-view", "m-1"],
-										img![attrs! { At::Src =>
-											VIEW_URI.to_string() +
-											picture.public_id.as_str() +
-											"." +
-											picture.format.as_str()
-										}]
-									],
-									span![picture.caption.clone().unwrap_or_default()],
-								]
-								
-							})],
+							Some(pictures) => div![
+								C!["is-flex", "is-flex-wrap-wrap", "is-justify-content-center"],
+								pictures.iter().map(|picture| {
+									div![
+									
+										figure![
+											C!["image", "pic-view", "m-1"],
+											img![attrs! { At::Src =>
+												VIEW_URI.to_string() +
+												picture.public_id.as_str() +
+												"." +
+												picture.format.as_str()
+											}]
+										],
+										span![picture.caption.clone().unwrap_or_default()],
+									]
+								}
+							)],
 							None => empty![],
                     	}
 					]
