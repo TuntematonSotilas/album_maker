@@ -100,7 +100,7 @@ pub fn view(group: Group) -> Node<Msg> {
             div![
                 C!("control"),
                 input![
-                    C!["input", IF!(gr_t.title.is_empty() => "is-danger")],
+                    C!["input", "is-small", IF!(gr_t.title.is_empty() => "is-danger")],
                     attrs! {
                         At::Type => "text",
                         At::Name => "title",
@@ -114,7 +114,7 @@ pub fn view(group: Group) -> Node<Msg> {
 		div![
             C!("field"),
 			textarea![
-				C!("textarea"),
+				C!["textarea", "is-small"],
 				attrs! {
 					At::Placeholder => "description",
 					At::Value => gr_d.description,

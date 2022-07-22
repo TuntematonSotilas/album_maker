@@ -43,7 +43,7 @@ pub fn view(group_id: Uuid, picture: Picture) -> Node<Msg> {
                 div![
                     C!("control"),
                     input![
-                        C!("input"),
+                        C!["input", "is-small"],
                         attrs! {
                             At::Type => "text",
                             At::Name => "caption",

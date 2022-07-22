@@ -73,7 +73,7 @@ pub fn view(group_id: Uuid) -> Node<Msg> {
         div![
             C!("control"),
             div![
-                C!["file", "is-centered", "is-medium", "is-success", "is-boxed"],
+                C!["file", "is-centered", "is-small", "is-success", "is-boxed"],
                 label![
                     C!("file-label"),
                     input![

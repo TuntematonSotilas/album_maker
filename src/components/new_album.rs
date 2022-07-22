@@ -150,7 +150,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                 div![
                     C!("control"),
                     input![
-                        C!["input", IF!(model.album.title.is_empty() => "is-danger")],
+                        C!["input", "is-small", IF!(model.album.title.is_empty() => "is-danger")],
                         attrs! {
                             At::Type => "text",
                             At::Name => "title",
@@ -163,7 +163,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                 div![
                     C!("control"),
                     button![
-                        C!["button", "is-primary"],
+                        C!["button", "is-primary", "is-small"],
                         "Save",
                         ev(Ev::Click, |_| Msg::Submit),
                         attrs! { At::Disabled => model.is_not_valid().as_at_value() },
