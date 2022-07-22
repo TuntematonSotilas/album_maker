@@ -103,7 +103,10 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                                     grp_upd.count_fake_pictures.unwrap_or_default();
                             }
                             UpdateType::Title => {
-                                group.title = grp_upd.title.unwrap_or_default();
+                                group.title = grp_upd.grp_data.unwrap_or_default();
+                            }
+							UpdateType::Description => {
+                                group.description = grp_upd.grp_data.unwrap_or_default();
                             }
                             UpdateType::AddPicture => {
                                 if let Some(picture) = grp_upd.picture {

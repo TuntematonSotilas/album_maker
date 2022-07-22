@@ -1,4 +1,5 @@
 use seed::{self, prelude::*, *};
+use uuid::Uuid;
 
 use super::picture;
 use super::upload;
@@ -11,8 +12,8 @@ use crate::models::{
 //    Update
 // ------ ------
 pub enum Msg {
-    TitleChanged(String, Group),
-	DescChanged(String, Group),
+    TitleChanged(String, Uuid),
+	DescChanged(String, Uuid),
     UpdateGroup(GroupUpdate),
     Upload(upload::Msg),
     Picture(picture::Msg),
@@ -20,25 +21,23 @@ pub enum Msg {
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::TitleChanged(input, mut group) => {
-            group.title = input.clone();
+        Msg::TitleChanged(input, group_id) => {
             orders.send_msg(Msg::UpdateGroup(GroupUpdate {
                 upd_type: UpdateType::Title,
-                id: group.id,
+                id: group_id,
                 picture: None,
-                title: Some(input),
+                grp_data: Some(input),
                 count_fake_pictures: None,
                 asset_id: None,
                 caption: None,
             }));
         },
-		Msg::DescChanged(input, mut group) => {
-            group.title = input.clone();
+		Msg::DescChanged(input, group_id) => {
             orders.send_msg(Msg::UpdateGroup(GroupUpdate {
-                upd_type: UpdateType::Title,
-                id: group.id,
+                upd_type: UpdateType::Description,
+                id: group_id,
                 picture: None,
-                title: Some(input),
+                grp_data: Some(input),
                 count_fake_pictures: None,
                 asset_id: None,
                 caption: None,
@@ -51,7 +50,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                         upd_type: UpdateType::AddPicture,
                         id: group_id,
                         picture: Some(picture.clone()),
-                        title: None,
+                        grp_data: None,
                         count_fake_pictures: None,
                         asset_id: None,
                         caption: None,
@@ -62,7 +61,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                         upd_type: UpdateType::CountFakePictures,
                         id: group_id,
                         picture: None,
-                        title: None,
+                        grp_data: None,
                         count_fake_pictures: Some(count),
                         asset_id: None,
                         caption: None,
@@ -78,7 +77,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                     upd_type: UpdateType::Caption,
                     id: group_id,
                     picture: None,
-                    title: None,
+                    grp_data: None,
                     count_fake_pictures: None,
                     asset_id: Some(asset_id.clone()),
                     caption: Some(caption.clone()),
@@ -91,7 +90,9 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
 }
 
 pub fn view(group: Group) -> Node<Msg> {
-    let gr = group.clone();
+    let gr_t = group.clone();
+	let gr_d = group.clone();
+	let gr_p = group.clone();
     div![
         C!("box group"),
         div![
@@ -99,14 +100,14 @@ pub fn view(group: Group) -> Node<Msg> {
             div![
                 C!("control"),
                 input![
-                    C!["input", IF!(group.title.is_empty() => "is-danger")],
+                    C!["input", IF!(gr_t.title.is_empty() => "is-danger")],
                     attrs! {
                         At::Type => "text",
                         At::Name => "title",
                         At::Placeholder => "Group name",
-                        At::Value => group.title,
+                        At::Value => gr_t.title,
                     },
-                    input_ev(Ev::Input, move |input| Msg::TitleChanged(input, group)),
+                    input_ev(Ev::Input, move |input| Msg::TitleChanged(input, gr_t.id)),
                 ],
 			],
 		],
@@ -115,18 +116,20 @@ pub fn view(group: Group) -> Node<Msg> {
 			textarea![
 				C!("textarea"),
 				attrs! {
-					At::Placeholder => "description"
+					At::Placeholder => "description",
+					At::Value => gr_d.description,
 				},
+				input_ev(Ev::Input, move |input| Msg::DescChanged(input, gr_d.id)),
 			]
 		],
         div![
-            match gr.pictures.clone() {
+            match gr_p.pictures.clone() {
                 Some(pictures) => div![pictures.iter().map(|picture| {
-                    picture::view(gr.id, picture.clone()).map_msg(Msg::Picture)
+                    picture::view(gr_p.id, picture.clone()).map_msg(Msg::Picture)
                 })],
                 None => empty![],
             },
-            (0..gr.count_fake_pictures).map(|_| {
+            (0..gr_p.count_fake_pictures).map(|_| {
                 figure![
                     C!["image", "is-128x128", "m-1"],
                     progress![
@@ -136,6 +139,6 @@ pub fn view(group: Group) -> Node<Msg> {
                 ]
             }),
         ],
-        upload::view(gr.id).map_msg(Msg::Upload),
+        upload::view(gr_p.id).map_msg(Msg::Upload),
     ]
 }
