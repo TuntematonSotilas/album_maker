@@ -146,7 +146,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                                     ]
                                 } else {
                                     button![
-                                        C!["button", "is-danger", "is-light", "is-small"],
+                                        C!["button", "is-link", "is-light", "is-small"],
                                         span![C!("icon"), i![C!("ion-close-circled")]],
                                         span!["Delete"],
                                         ev(Ev::Click, |_| Msg::AskDelete(id)),
