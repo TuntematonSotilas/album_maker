@@ -112,9 +112,8 @@ pub fn view(model: &Model) -> Node<Msg> {
                     p![
                         C!("panel-block"),
                         div![
-                            C!["container", "columns", "is-mobile"],
+                            C!["container", "is-flex", "is-justify-content-space-between"],
                             div![
-                                C!["column", "is-two-thirds"],
                                 if is_ask {
                                     span!["Delete this album ?"]
                                 } else {
@@ -128,7 +127,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                                 }
                             ],
                             div![
-                                C!("column"),
+                                C!["is-align-content-flex-end"],
                                 if is_ask {
                                     div![
                                         button![
