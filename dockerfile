@@ -1,4 +1,4 @@
-FROM rust:1.60 as builder
+FROM rust:1.62.1 as builder
 WORKDIR /app
 COPY Cargo.toml ./
 COPY Makefile.toml ./ 
@@ -9,7 +9,7 @@ RUN cargo install cargo-make
 RUN cargo install wasm-pack
 RUN cargo make build_release
 
-FROM nginx:1.21.6 as runner
+FROM nginx:1.23.1 as runner
 WORKDIR /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY index.html ./
