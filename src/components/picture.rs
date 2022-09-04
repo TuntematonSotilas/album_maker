@@ -28,12 +28,7 @@ pub fn view(group_id: Uuid, picture: Picture) -> Node<Msg> {
             C!("column"),
             figure![
                 C!["image", "is-128x128"],
-                img![attrs! { At::Src =>
-                    THUMB_URI.to_string() +
-                    picture.public_id.as_str() +
-                    "." +
-                    picture.format.as_str()
-                }]
+                img![attrs!{ At::Src => format!("{}{}.{}", THUMB_URI, picture.public_id, picture.format) }]
             ]
         ],
         div![

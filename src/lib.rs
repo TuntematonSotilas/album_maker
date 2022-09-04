@@ -28,7 +28,7 @@ fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
         header: header::Model::new(login_page.clone()),
         notification: notification::Model::default(),
         my_albums: my_albums::Model::default(),
-        new_album: new_album::Model::new(),
+        edit_album: edit_album::Model::new(),
         view_album: view_album::Model::new(),
         page: login_page,
         login: login::Model::default(),
@@ -43,7 +43,7 @@ struct Model {
     header: header::Model,
     page: models::page::Page,
     my_albums: my_albums::Model,
-    new_album: new_album::Model,
+    edit_album: edit_album::Model,
     view_album: view_album::Model,
     notification: notification::Model,
     login: login::Model,
@@ -55,7 +55,7 @@ struct Model {
 enum Msg {
     Header(header::Msg),
     MyAlbums(my_albums::Msg),
-    NewAlbum(new_album::Msg),
+    EditAlbum(edit_album::Msg),
     ViewAlbum(view_album::Msg),
     Login(login::Msg),
     UrlChanged(subs::UrlChanged),
@@ -94,11 +94,11 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::MyAlbums(msg) => {
             my_albums::update(msg, &mut model.my_albums, &mut orders.proxy(Msg::MyAlbums));
         }
-        Msg::NewAlbum(msg) => {
-            if let new_album::Msg::ShowNotif(ref notif_type, ref message) = msg {
+        Msg::EditAlbum(msg) => {
+            if let edit_album::Msg::ShowNotif(ref notif_type, ref message) = msg {
                 orders.send_msg(Msg::ShowNotif(*notif_type, message.clone()));
             }
-            new_album::update(msg, &mut model.new_album, &mut orders.proxy(Msg::NewAlbum));
+            edit_album::update(msg, &mut model.edit_album, &mut orders.proxy(Msg::EditAlbum));
         }
         Msg::ViewAlbum(msg) => {
             view_album::update(
@@ -111,6 +111,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             let page = match url.next_path_part() {
                 Some(models::page::LK_NEW_ALBUM) => models::page::Page::NewAlbum,
                 Some(models::page::LK_VIEW_ALBUM) => models::page::Page::ViewAlbum,
+                Some(models::page::LK_EDIT_ALBUM) => models::page::Page::EditAlbum,
                 Some(models::page::LK_LOGIN) => models::page::Page::Login,
                 _ => models::page::Page::MyAlbums,
             };
@@ -127,8 +128,11 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     models::page::Page::MyAlbums => {
                         orders.send_msg(Msg::MyAlbums(my_albums::Msg::InitComp));
                     }
-                    models::page::Page::NewAlbum => {
-                        orders.send_msg(Msg::NewAlbum(new_album::Msg::InitComp));
+					models::page::Page::NewAlbum => {
+                        orders.send_msg(Msg::EditAlbum(edit_album::Msg::InitComp(None)));
+                    }
+                    models::page::Page::EditAlbum => {
+                        orders.send_msg(Msg::EditAlbum(edit_album::Msg::InitComp(opt_id)));
                     }
                     models::page::Page::ViewAlbum => {
                         if let Some(id) = opt_id {
@@ -158,7 +162,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.send_msg(Msg::Header(header::Msg::SetIsLogged));
         }
         Msg::SetAuth(auth) => {
-            orders.send_msg(Msg::NewAlbum(new_album::Msg::SetAuth(auth.clone())));
+            orders.send_msg(Msg::EditAlbum(edit_album::Msg::SetAuth(auth.clone())));
             orders.send_msg(Msg::MyAlbums(my_albums::Msg::SetAuth(auth.clone())));
             orders.send_msg(Msg::ViewAlbum(view_album::Msg::SetAuth(auth)));
         }
@@ -181,8 +185,8 @@ fn view(model: &Model) -> Node<Msg> {
                         div![
                             C!["columns", "is-centered", "m-1"],
                             match &model.page {
-                                models::page::Page::NewAlbum =>
-                                    new_album::view(&model.new_album).map_msg(Msg::NewAlbum),
+                                models::page::Page::NewAlbum | models::page::Page::EditAlbum =>
+                                    edit_album::view(&model.edit_album).map_msg(Msg::EditAlbum),
                                 models::page::Page::MyAlbums =>
                                     my_albums::view(&model.my_albums).map_msg(Msg::MyAlbums),
                                 models::page::Page::ViewAlbum =>

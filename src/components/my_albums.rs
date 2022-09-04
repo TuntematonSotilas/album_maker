@@ -1,6 +1,6 @@
 use seed::{self, prelude::*, *};
 
-use crate::models::{album::Album, page::TITLE_MY_ALBUMS, vars::BASE_URI};
+use crate::models::{album::Album, page::{TITLE_MY_ALBUMS, LK_VIEW_ALBUM}, vars::BASE_URI};
 
 // ------ ------
 //     Model
@@ -68,7 +68,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::Delete(id) => {
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
-            let delete_uri = BASE_URI.to_string() + "deletealbum?id=" + id.as_str();
+            let delete_uri = format!("{}deletealbum?id={}", BASE_URI, id);
             let delete_request = Request::new(delete_uri)
                 .header(Header::authorization(auth))
                 .method(Method::Delete);
@@ -120,7 +120,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                                     a![
                                         attrs! {
                                             At::Title => "Open",
-                                            At::Href => "/album/".to_string() + id.as_str()
+                                            At::Href => format!("/{}/{}", LK_VIEW_ALBUM, id),
                                         },
                                         &album.title
                                     ]

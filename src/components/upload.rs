@@ -27,7 +27,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                     if let Some(file) = files.get(i) {
                         if let Ok(form_data) = FormData::new() {
                             let upload_preset = env!("CLD_UPLOAD_PRESET");
-                            let folder = "amaker/".to_string() + group_id.to_string().as_str();
+                            let folder = format!("amaker/{}", group_id);
                             let file_res = form_data.append_with_blob("file", &file);
                             let preset_res_ =
                                 form_data.append_with_str("upload_preset", upload_preset);
