@@ -11,6 +11,7 @@ use seed::{prelude::*, *};
 
 mod components;
 mod models;
+mod api;
 
 // ------ ------
 //     Init

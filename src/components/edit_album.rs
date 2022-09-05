@@ -3,8 +3,8 @@ use seed::{self, prelude::*, *};
 use crate::{
     components::group,
     models::{
-        album::Album, group::Group, group_update::UpdateType, page::TITLE_NEW_ALBUM, vars::BASE_URI,
-    },
+        album::Album, group::Group, group_update::UpdateType, page::{TITLE_NEW_ALBUM, TITLE_EDIT_ALBUM}, vars::BASE_URI,
+    }, api::api,
 };
 
 use super::notification::NotifType;
@@ -13,6 +13,7 @@ use super::notification::NotifType;
 //     Model
 // ------ -----
 pub struct Model {
+	is_new: bool,
     auth_header: String,
     album: Album,
 }
@@ -20,6 +21,7 @@ pub struct Model {
 impl Model {
     pub const fn new() -> Self {
         Self {
+			is_new: true,
             auth_header: String::new(),
             album: Album::new(),
         }
@@ -41,6 +43,9 @@ impl Model {
 pub enum Msg {
     SetAuth(String),
     InitComp(Option<String>),
+	GetAlbum(String),
+	ErrorGet,
+    Received(Album),
     Submit,
     Success(String),
     TitleChanged(String),
@@ -54,10 +59,30 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::SetAuth(auth_header) => model.auth_header = auth_header,
         Msg::InitComp(id_opt) => {
 			match id_opt {
-				Some(id) => log!("edit album", id),
-				None => model.album = Album::new()
+				Some(id) => { 
+					model.is_new = false;
+					orders.send_msg(Msg::GetAlbum(id)); 
+				},
+				None => { model.album = Album::new(); }
 			}
-		},
+		}
+		Msg::GetAlbum(id) => {
+			orders.skip(); // No need to rerender
+            let auth = model.auth_header.clone();
+            orders.perform_cmd(async {
+                let opt_album = api::get_album(id, auth).await;
+				match opt_album {
+					Some(album) => Msg::Received(album),
+					None => Msg::ErrorGet,
+				} 
+            });
+		}
+		Msg::ErrorGet => {
+            error!("Error getting albums");
+        }
+        Msg::Received(album) => {
+            model.album = album;
+        }
         Msg::Submit => {
             orders.skip(); // No need to rerender
             let uri = BASE_URI.to_string() + "editalbum";
@@ -149,10 +174,16 @@ pub fn view(model: &Model) -> Node<Msg> {
         C!["column", "is-centered", "is-half"],
         div![
             C!("box"),
-            p![C!["title", "is-5", "has-text-link"], TITLE_NEW_ALBUM],
-            div![
+            p![C!["title", "is-5", "has-text-link"], 
+				match model.is_new { 
+					true => TITLE_NEW_ALBUM,
+					false => TITLE_EDIT_ALBUM
+				},
+			],
+			label![C!("label"), "Album name"],
+			div![
                 C!["field", "has-addons"],
-                div![
+				div![
                     C!("control"),
                     input![
                         C!["input", "is-small", IF!(model.album.title.is_empty() => "is-danger")],

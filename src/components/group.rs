@@ -98,6 +98,7 @@ pub fn view(group: Group) -> Node<Msg> {
         div![
             C!("field"),
             div![
+				label![C!("label"), "Group name"],
                 C!("control"),
                 input![
                     C!["input", "is-small", IF!(gr_t.title.is_empty() => "is-danger")],
@@ -113,10 +114,11 @@ pub fn view(group: Group) -> Node<Msg> {
 		],
 		div![
             C!("field"),
+			label![C!("label"), "Description"],
 			textarea![
 				C!["textarea", "is-small"],
 				attrs! {
-					At::Placeholder => "description",
+					At::Placeholder => "Description",
 					At::Value => gr_d.description,
 				},
 				input_ev(Ev::Input, move |input| Msg::DescChanged(input, gr_d.id)),

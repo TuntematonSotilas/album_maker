@@ -25,7 +25,7 @@ pub fn view(group_id: Uuid, picture: Picture) -> Node<Msg> {
     div![
         C!["container", "columns", "is-vcentered", "is-mobile"],
         div![
-            C!("column"),
+            C!["column", "is-flex-grow-0"],
             figure![
                 C!["image", "is-128x128"],
                 img![attrs!{ At::Src => format!("{}{}.{}", THUMB_URI, picture.public_id, picture.format) }]
@@ -35,6 +35,7 @@ pub fn view(group_id: Uuid, picture: Picture) -> Node<Msg> {
             C!("column"),
             div![
                 C!("field"),
+				label![C!("label"), "Caption"],
                 div![
                     C!("control"),
                     input![

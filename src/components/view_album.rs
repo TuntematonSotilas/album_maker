@@ -1,6 +1,9 @@
-use crate::models::{
-    album::Album,
-    vars::{BASE_URI, VIEW_URI}, page::{LK_EDIT_ALBUM, TITLE_EDIT_ALBUM},
+use crate::{
+	api::api, 
+	models::{
+		album::Album,
+		vars::THUMB_URI, page::{LK_EDIT_ALBUM, TITLE_EDIT_ALBUM},
+	},
 };
 use seed::{self, prelude::*, *};
 
@@ -37,24 +40,12 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::InitComp(id) => {
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
-            let uri = format!("{}getalbum?id={}", BASE_URI, id);
             orders.perform_cmd(async {
-                let response = Request::new(uri)
-                    .header(Header::authorization(auth))
-                    .fetch()
-                    .await
-                    .expect("HTTP request failed");
-
-                match response.status().code {
-                    200 => {
-                        let album = response
-                            .json::<Album>()
-                            .await
-                            .expect("deserialization failed");
-                        Msg::Received(album)
-                    }
-                    _ => Msg::ErrorGet,
-                }
+                let opt_album = api::get_album(id, auth).await;
+				match opt_album {
+					Some(album) => Msg::Received(album),
+					None => Msg::ErrorGet,
+				} 
             });
         }
         Msg::ErrorGet => {
@@ -96,8 +87,8 @@ pub fn view(model: &Model) -> Node<Msg> {
 									div![
 									
 										figure![
-											C!["image", "pic-view", "m-1"],
-											img![attrs!{ At::Src => format!("{}{}.{}", VIEW_URI, picture.public_id, picture.format) }]
+											C!["image", "is-128x128", "m-1"],
+											img![attrs!{ At::Src => format!("{}{}.{}", THUMB_URI, picture.public_id, picture.format) }]
 										],
 										span![picture.caption.clone().unwrap_or_default()],
 									]
