@@ -4,6 +4,8 @@
 #![allow(clippy::wildcard_imports)]
 #![allow(clippy::unused_unit)]
 
+extern crate crypto;
+
 use crate::components::*;
 use components::notification::NotifType;
 use models::page::LK_LOGIN;

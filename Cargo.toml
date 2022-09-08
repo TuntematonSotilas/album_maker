@@ -21,6 +21,7 @@ serde = "1.0.132"
 base64 = "0.13.0"
 uuid = { version = "1.0.0", features = ["v4", "serde"] }
 load-dotenv = "0.1.2"
+rust-crypto-wasm = "0.3.1"
 
 [profile.release]
 lto = true

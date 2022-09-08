@@ -2,6 +2,8 @@ use seed::{self, prelude::*, *};
 
 use crate::models::{album::Album, page::{TITLE_MY_ALBUMS, LK_VIEW_ALBUM}, vars::BASE_URI};
 
+use crypto::{sha1::Sha1, digest::Digest};
+
 // ------ ------
 //     Model
 // ------ -----
@@ -66,6 +68,10 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.album_id_to_delete = None;
         }
         Msg::Delete(id) => {
+			/*let mut hasher = Sha1::new();
+			hasher.input_str(tohash);
+			let hex = hasher.result_str();
+			*/
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
             let delete_uri = format!("{}deletealbum?id={}", BASE_URI, id);
