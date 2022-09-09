@@ -30,7 +30,8 @@ pub async fn delete_picture(public_id: String) -> bool
 	let uri = DESTROY_URI.to_string();
 	let apikey = env!("CLD_API_KEY");
 	let secret = env!("CLD_API_SECRET");
-	let ts = "1";
+	let ts = js_sys::Date::now().to_string();
+
 	let to_hash = format!("public_id={}&timestamp={}{}", public_id, ts, secret);
 	log!(to_hash);
 	let mut hasher = Sha1::new();
@@ -41,7 +42,7 @@ pub async fn delete_picture(public_id: String) -> bool
 		let pub_id_res = form_data.append_with_str("public_id", &public_id);
 		let key_res = form_data.append_with_str("api_key", apikey);
 		let secret_res = form_data.append_with_str("api_secret", secret);
-		let ts_res = form_data.append_with_str("timestamp", ts);
+		let ts_res = form_data.append_with_str("timestamp", &ts);
 		let sign_res = form_data.append_with_str("signature", &signature);
 
 		if pub_id_res.is_ok() && key_res.is_ok() && secret_res.is_ok() && ts_res.is_ok() && sign_res.is_ok() {
