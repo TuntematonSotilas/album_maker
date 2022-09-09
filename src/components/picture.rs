@@ -9,6 +9,7 @@ use crate::models::{picture::Picture, vars::THUMB_URI};
 pub enum Msg {
     CaptionChanged(Uuid, String, Picture),
     UpdateCaption(Uuid, String, String),
+	DeletePicture(String),
 }
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
@@ -18,10 +19,14 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             orders.send_msg(Msg::UpdateCaption(group_id, input, picture.asset_id));
         }
         Msg::UpdateCaption(_, _, _) => (),
+		Msg::DeletePicture(public_id) => {
+			log!("DeletePicture", public_id);
+		}
     }
 }
 
 pub fn view(group_id: Uuid, picture: Picture) -> Node<Msg> {
+	let pic_del = picture.clone();
     div![
         C!["container", "columns", "is-vcentered", "is-mobile"],
         div![
@@ -52,6 +57,14 @@ pub fn view(group_id: Uuid, picture: Picture) -> Node<Msg> {
                     ]
                 ]
             ],
+			div![
+				C!("control"),
+				button![
+					C!["button", "is-primary", "is-small"],
+					"Delete",
+					ev(Ev::Click, |_| Msg::DeletePicture(pic_del.public_id))
+				]
+			]
         ]
     ]
 }
