@@ -32,7 +32,9 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
 			});
 		},
 		Msg::DeletePictureSuccess(_, _) => (),
-		Msg::DeleteFail => (),
+		Msg::DeleteFail => {
+			error!("Error when deleting picture");
+		},
     }
 }
 
