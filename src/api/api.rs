@@ -1,5 +1,5 @@
 use crate::models::{album::Album, vars::{BASE_URI, DESTROY_URI}};
-use seed::{self, prelude::*, *};
+use seed::{self, prelude::*};
 use crypto::{sha1::Sha1, digest::Digest};
 use web_sys::FormData;
 
@@ -33,7 +33,6 @@ pub async fn delete_picture(public_id: String) -> bool
 	let ts = js_sys::Date::now().to_string();
 
 	let to_hash = format!("public_id={}&timestamp={}{}", public_id, ts, secret);
-	log!(to_hash);
 	let mut hasher = Sha1::new();
 		hasher.input_str(&to_hash);
 	let signature = hasher.result_str();

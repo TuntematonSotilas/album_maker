@@ -9,8 +9,8 @@ use crate::{models::{picture::Picture, vars::THUMB_URI}, api::api};
 pub enum Msg {
     CaptionChanged(Uuid, String, Picture),
     UpdateCaption(Uuid, String, String),
-	DeletePicture(String),
-	DeleteSuccess,
+	DeletePicture(Uuid, String, String),
+	DeletePictureSuccess(Uuid, String),
 	DeleteFail,
 }
 
@@ -21,18 +21,18 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             orders.send_msg(Msg::UpdateCaption(group_id, input, picture.asset_id));
         }
         Msg::UpdateCaption(_, _, _) => (),
-		Msg::DeletePicture(public_id) => {
+		Msg::DeletePicture(group_id, public_id, asset_id) => {
 			orders.skip(); // No need to rerender
-			orders.perform_cmd(async {
+			orders.perform_cmd(async move {
 				let success = api::delete_picture(public_id).await;
 				match success {
-					true => Msg::DeleteSuccess,
+					true => Msg::DeletePictureSuccess(group_id, asset_id),
 					false => Msg::DeleteFail
 				}
 			});
 		},
-		Msg::DeleteSuccess => {},
-		Msg::DeleteFail => {},
+		Msg::DeletePictureSuccess(_, _) => (),
+		Msg::DeleteFail => (),
     }
 }
 
@@ -63,7 +63,7 @@ pub fn view(group_id: Uuid, picture: Picture) -> Node<Msg> {
                             At::Value => picture.clone().caption.unwrap_or_default(),
                         },
                         input_ev(Ev::Input, move |input| Msg::CaptionChanged(
-                            group_id, input, picture
+                            group_id.clone(), input, picture
                         )),
                     ]
                 ]
@@ -74,7 +74,7 @@ pub fn view(group_id: Uuid, picture: Picture) -> Node<Msg> {
 					C!["button", "is-link", "is-light", "is-small"],
 					span![C!("icon"), i![C!("ion-close-circled")]],
 					span!["Delete"],
-					ev(Ev::Click, |_| Msg::DeletePicture(pic_del.public_id))
+					ev(Ev::Click, move |_| Msg::DeletePicture(group_id.clone(), pic_del.public_id, pic_del.asset_id))
 				]
 			]
         ]

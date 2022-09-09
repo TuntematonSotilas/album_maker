@@ -157,6 +157,14 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                                     }
                                 }
                             }
+							UpdateType::DeletePicture => {
+                                if let Some(pictures) = &mut group.pictures {
+									if let Some(pos) = pictures.iter().position(|p| 
+										p.asset_id == group_update.clone().asset_id.unwrap_or_default()) {
+											pictures.remove(pos);
+									}
+                                }
+                            }
                         }
                     }
                 }

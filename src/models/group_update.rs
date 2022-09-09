@@ -7,6 +7,7 @@ pub enum UpdateType {
 	Description,
     CountFakePictures,
     AddPicture,
+	DeletePicture,
     Caption,
 }
 

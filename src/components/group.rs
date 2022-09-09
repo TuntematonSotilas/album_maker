@@ -72,17 +72,31 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             upload::update(msg, &mut orders.proxy(Msg::Upload));
         }
         Msg::Picture(msg) => {
-            if let picture::Msg::UpdateCaption(group_id, ref caption, ref asset_id) = msg {
-                orders.send_msg(Msg::UpdateGroup(GroupUpdate {
-                    upd_type: UpdateType::Caption,
-                    id: group_id,
-                    picture: None,
-                    grp_data: None,
-                    count_fake_pictures: None,
-                    asset_id: Some(asset_id.clone()),
-                    caption: Some(caption.clone()),
-                }));
-            }
+			match msg {
+				picture::Msg::UpdateCaption(group_id, ref caption, ref asset_id) => {
+					orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+						upd_type: UpdateType::Caption,
+						id: group_id,
+						picture: None,
+						grp_data: None,
+						count_fake_pictures: None,
+						asset_id: Some(asset_id.clone()),
+						caption: Some(caption.clone()),
+					}));
+				},
+				picture::Msg::DeletePictureSuccess(group_id, ref asset_id) => {
+					orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+						upd_type: UpdateType::DeletePicture,
+						id: group_id,
+						picture: None,
+						grp_data: None,
+						count_fake_pictures: None,
+						asset_id: Some(asset_id.clone()),
+						caption: None,
+					}));
+				}
+				_ => (),
+			}
             picture::update(msg, &mut orders.proxy(Msg::Picture));
         }
         Msg::UpdateGroup(_) => (),
