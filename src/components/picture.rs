@@ -1,7 +1,7 @@
 use seed::{self, prelude::*, *};
 use uuid::Uuid;
 
-use crate::models::{picture::Picture, vars::THUMB_URI};
+use crate::{models::{picture::Picture, vars::THUMB_URI}, api::api};
 
 // ------ ------
 //    Update
@@ -10,6 +10,8 @@ pub enum Msg {
     CaptionChanged(Uuid, String, Picture),
     UpdateCaption(Uuid, String, String),
 	DeletePicture(String),
+	DeleteSuccess,
+	DeleteFail,
 }
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
@@ -20,8 +22,17 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
         }
         Msg::UpdateCaption(_, _, _) => (),
 		Msg::DeletePicture(public_id) => {
-			log!("DeletePicture", public_id);
-		}
+			orders.skip(); // No need to rerender
+			orders.perform_cmd(async {
+				let success = api::delete_picture(public_id).await;
+				match success {
+					true => Msg::DeleteSuccess,
+					false => Msg::DeleteFail
+				}
+			});
+		},
+		Msg::DeleteSuccess => {},
+		Msg::DeleteFail => {},
     }
 }
 
@@ -60,8 +71,9 @@ pub fn view(group_id: Uuid, picture: Picture) -> Node<Msg> {
 			div![
 				C!("control"),
 				button![
-					C!["button", "is-primary", "is-small"],
-					"Delete",
+					C!["button", "is-link", "is-light", "is-small"],
+					span![C!("icon"), i![C!("ion-close-circled")]],
+					span!["Delete"],
 					ev(Ev::Click, |_| Msg::DeletePicture(pic_del.public_id))
 				]
 			]

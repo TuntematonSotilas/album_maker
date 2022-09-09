@@ -1,5 +1,3 @@
-use std::time::SystemTime;
-
 use crate::models::{album::Album, vars::{BASE_URI, DESTROY_URI}};
 use seed::{self, prelude::*, *};
 use crypto::{sha1::Sha1, digest::Digest};
@@ -26,28 +24,25 @@ pub async fn get_album(id: String, auth: String) -> Option<Album>
 	}
 }
 
-pub async fn delete_picture(public_id: String)
+pub async fn delete_picture(public_id: String) -> bool
 {
-	let mut ts = String::new();
-	let mut signature = String::new();
-
+	let mut res = false;
 	let uri = DESTROY_URI.to_string();
+	let apikey = env!("CLD_API_KEY");
 	let secret = env!("CLD_API_SECRET");
-	let now = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH);
-	if let Ok(duration) = now {
-		ts = duration.as_millis().to_string();
-		let to_hash = format!("{0}&{1}{2}", public_id, ts, secret);
-		let mut hasher = Sha1::new();
-			hasher.input_str(&to_hash);
-		signature = hasher.result_str();
-	}
-	
+	let ts = "1";
+	let to_hash = format!("public_id={}&timestamp={}{}", public_id, ts, secret);
+	log!(to_hash);
+	let mut hasher = Sha1::new();
+		hasher.input_str(&to_hash);
+	let signature = hasher.result_str();
+
 	if let Ok(form_data) = FormData::new() {	
 		let pub_id_res = form_data.append_with_str("public_id", &public_id);
-		let key_res = form_data.append_with_str("api_key", env!("CLD_UPLOAD_PRESET"));
+		let key_res = form_data.append_with_str("api_key", apikey);
 		let secret_res = form_data.append_with_str("api_secret", secret);
-		let ts_res = form_data.append_with_str("timestamp", &ts);
-		let sign_res = form_data.append_with_str("timestamp", &signature);
+		let ts_res = form_data.append_with_str("timestamp", ts);
+		let sign_res = form_data.append_with_str("signature", &signature);
 
 		if pub_id_res.is_ok() && key_res.is_ok() && secret_res.is_ok() && ts_res.is_ok() && sign_res.is_ok() {
 			let request = Request::new(uri)
@@ -56,8 +51,9 @@ pub async fn delete_picture(public_id: String)
 			
 			let response = fetch(request).await.expect("HTTP request failed");
 			if response.status().is_ok() {
-				log!("Delete Pic Ok")
+				res = true
 			}
 		}
 	}
+	res
 }
