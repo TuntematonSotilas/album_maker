@@ -4,10 +4,10 @@ use uuid::Uuid;
 #[derive(Debug, Clone, Copy)]
 pub enum UpdateType {
     Title,
-	Description,
+    Description,
     CountFakePictures,
     AddPicture,
-	DeletePicture,
+    DeletePicture,
     Caption,
 }
 

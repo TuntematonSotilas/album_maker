@@ -1,17 +1,22 @@
 use seed::{self, prelude::*, *};
 
 use crate::{
+    api::api,
     components::group,
     models::{
-        album::Album, group::Group, group_update::UpdateType, page::{TITLE_NEW_ALBUM, TITLE_EDIT_ALBUM}, notif::{Notif, NotifType},
-    }, api::api,
+        album::Album,
+        group::Group,
+        group_update::UpdateType,
+        notif::{Notif, NotifType},
+        page::{TITLE_EDIT_ALBUM, TITLE_NEW_ALBUM},
+    },
 };
 
 // ------ ------
 //     Model
 // ------ -----
 pub struct Model {
-	is_new: bool,
+    is_new: bool,
     auth_header: String,
     album: Album,
 }
@@ -19,7 +24,7 @@ pub struct Model {
 impl Model {
     pub const fn new() -> Self {
         Self {
-			is_new: true,
+            is_new: true,
             auth_header: String::new(),
             album: Album::new(),
         }
@@ -41,44 +46,45 @@ impl Model {
 pub enum Msg {
     SetAuth(String),
     InitComp(Option<String>),
-	GetAlbum(String),
-	ErrorGet,
+    GetAlbum(String),
+    ErrorGet,
     Received(Album),
     Submit,
     TitleChanged(String),
     AddGroup,
     Group(group::Msg),
-	NotifySuccess(String),
-	NotifyError,
+    NotifySuccess(String),
+    NotifyError,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::SetAuth(auth_header) => model.auth_header = auth_header,
-        Msg::InitComp(id_opt) => {
-			match id_opt {
-				Some(id) => { 
-					model.is_new = false;
-					orders.send_msg(Msg::GetAlbum(id)); 
-				},
-				None => { model.album = Album::new(); }
-			}
-		}
-		Msg::GetAlbum(id) => {
-			orders.skip(); // No need to rerender
+        Msg::InitComp(id_opt) => match id_opt {
+            Some(id) => {
+                model.is_new = false;
+                orders.send_msg(Msg::GetAlbum(id));
+            }
+            None => {
+                model.album = Album::new();
+            }
+        },
+        Msg::GetAlbum(id) => {
+            orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
             orders.perform_cmd(async {
                 let opt_album = api::get_album(id, auth).await;
-				match opt_album {
-					Some(album) => Msg::Received(album),
-					None => Msg::ErrorGet,
-				} 
+                match opt_album {
+                    Some(album) => Msg::Received(album),
+                    None => Msg::ErrorGet,
+                }
             });
-		}
-		Msg::ErrorGet => {
-			orders.notify(Notif { 
-				notif_type: NotifType::Success, 
-				message : "Error getting album".to_string()});
+        }
+        Msg::ErrorGet => {
+            orders.notify(Notif {
+                notif_type: NotifType::Success,
+                message: "Error getting album".to_string(),
+            });
         }
         Msg::Received(album) => {
             model.album = album;
@@ -86,27 +92,28 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::Submit => {
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
-			let album = model.album.clone();
+            let album = model.album.clone();
             orders.perform_cmd(async {
-				let opt_id = api::update_album(album, auth).await;
-				match opt_id {
-					Some(id) => Msg::NotifySuccess(id),
-					None => Msg::NotifyError
-				}
-			});
+                let opt_id = api::update_album(album, auth).await;
+                match opt_id {
+                    Some(id) => Msg::NotifySuccess(id),
+                    None => Msg::NotifyError,
+                }
+            });
         }
-		Msg::NotifySuccess(id) => {
-			model.album.id = id;
-			orders.notify(Notif { 
-				notif_type: NotifType::Success, 
-				message : "Album saved".to_string()});
-		}
-		Msg::NotifyError => {
-			orders.notify(Notif { 
-				notif_type: NotifType::Error, 
-				message: "Login error".to_string()
-			});
-		}
+        Msg::NotifySuccess(id) => {
+            model.album.id = id;
+            orders.notify(Notif {
+                notif_type: NotifType::Success,
+                message: "Album saved".to_string(),
+            });
+        }
+        Msg::NotifyError => {
+            orders.notify(Notif {
+                notif_type: NotifType::Error,
+                message: "Login error".to_string(),
+            });
+        }
         Msg::TitleChanged(title) => model.album.title = title,
         Msg::AddGroup => {
             if let Some(groups) = &mut model.album.groups {
@@ -126,7 +133,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                             UpdateType::Title => {
                                 group.title = grp_upd.grp_data.unwrap_or_default();
                             }
-							UpdateType::Description => {
+                            UpdateType::Description => {
                                 group.description = grp_upd.grp_data.unwrap_or_default();
                             }
                             UpdateType::AddPicture => {
@@ -148,12 +155,14 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                                     }
                                 }
                             }
-							UpdateType::DeletePicture => {
+                            UpdateType::DeletePicture => {
                                 if let Some(pictures) = &mut group.pictures {
-									if let Some(pos) = pictures.iter().position(|p| 
-										p.asset_id == group_update.clone().asset_id.unwrap_or_default()) {
-											pictures.remove(pos);
-									}
+                                    if let Some(pos) = pictures.iter().position(|p| {
+                                        p.asset_id
+                                            == group_update.clone().asset_id.unwrap_or_default()
+                                    }) {
+                                        pictures.remove(pos);
+                                    }
                                 }
                             }
                         }
@@ -173,19 +182,25 @@ pub fn view(model: &Model) -> Node<Msg> {
         C!["column", "is-centered", "is-half"],
         div![
             C!("box"),
-            p![C!["title", "is-5", "has-text-link"], 
-				match model.is_new { 
-					true => TITLE_NEW_ALBUM,
-					false => TITLE_EDIT_ALBUM
-				},
-			],
-			label![C!("label"), "Album name"],
-			div![
+            p![
+                C!["title", "is-5", "has-text-link"],
+                if model.is_new {
+                    TITLE_NEW_ALBUM
+                } else {
+                    TITLE_EDIT_ALBUM
+                },
+            ],
+            label![C!("label"), "Album name"],
+            div![
                 C!["field", "has-addons"],
-				div![
+                div![
                     C!("control"),
                     input![
-                        C!["input", "is-small", IF!(model.album.title.is_empty() => "is-danger")],
+                        C![
+                            "input",
+                            "is-small",
+                            IF!(model.album.title.is_empty() => "is-danger")
+                        ],
                         attrs! {
                             At::Type => "text",
                             At::Name => "title",

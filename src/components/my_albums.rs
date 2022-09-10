@@ -1,6 +1,13 @@
 use seed::{self, prelude::*, *};
 
-use crate::{models::{album::Album, page::{TITLE_MY_ALBUMS, LK_VIEW_ALBUM}, notif::{Notif, NotifType}}, api::api};
+use crate::{
+    api::api,
+    models::{
+        album::Album,
+        notif::{Notif, NotifType},
+        page::{LK_VIEW_ALBUM, TITLE_MY_ALBUMS},
+    },
+};
 
 // ------ ------
 //     Model
@@ -36,17 +43,16 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.perform_cmd(async {
                 let albums_opt = api::get_my_ablums(auth).await;
                 match albums_opt {
-                    Some(albums) => {
-                        Msg::Received(albums)
-                    }
+                    Some(albums) => Msg::Received(albums),
                     None => Msg::ErrorGet,
                 }
             });
         }
         Msg::ErrorGet => {
-			orders.notify(Notif { 
-				notif_type: NotifType::Success, 
-				message : "Error getting albums".to_string()});
+            orders.notify(Notif {
+                notif_type: NotifType::Success,
+                message: "Error getting albums".to_string(),
+            });
         }
         Msg::Received(albums) => {
             model.albums = Some(albums);
@@ -59,21 +65,23 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::Delete(id) => {
             orders.skip(); // No need to rerender
-			let auth = model.auth_header.clone();
-			let id_del = id.clone();
-			let id_suc = id.clone();
+            let auth = model.auth_header.clone();
+            let id_del = id.clone();
+            let id_suc = id;
             orders.perform_cmd(async {
                 let success = api::delete_ablum(id_del, auth).await;
-                match success {
-                    true => Msg::SuccessDelete(id_suc),
-                	false => Msg::ErrorDelete
+                if success {
+                    Msg::SuccessDelete(id_suc)
+                } else {
+                    Msg::ErrorDelete
                 }
             });
         }
         Msg::ErrorDelete => {
-			orders.notify(Notif { 
-				notif_type: NotifType::Success, 
-				message : "Error deleting album".to_string()});
+            orders.notify(Notif {
+                notif_type: NotifType::Success,
+                message: "Error deleting album".to_string(),
+            });
         }
         Msg::SuccessDelete(id) => {
             if let Some(albums) = &mut model.albums {
@@ -103,19 +111,17 @@ pub fn view(model: &Model) -> Node<Msg> {
                         C!("panel-block"),
                         div![
                             C!["container", "is-flex", "is-justify-content-space-between"],
-                            div![
-                                if is_ask {
-                                    span!["Delete this album ?"]
-                                } else {
-                                    a![
-                                        attrs! {
-                                            At::Title => "Open",
-                                            At::Href => format!("/{}/{}", LK_VIEW_ALBUM, id),
-                                        },
-                                        &album.title
-                                    ]
-                                }
-                            ],
+                            div![if is_ask {
+                                span!["Delete this album ?"]
+                            } else {
+                                a![
+                                    attrs! {
+                                        At::Title => "Open",
+                                        At::Href => format!("/{}/{}", LK_VIEW_ALBUM, id),
+                                    },
+                                    &album.title
+                                ]
+                            }],
                             div![
                                 C!["is-align-content-flex-end"],
                                 if is_ask {

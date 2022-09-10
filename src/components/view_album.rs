@@ -1,9 +1,11 @@
 use crate::{
-	api::api, 
-	models::{
-		album::Album,
-		vars::THUMB_URI, page::{LK_EDIT_ALBUM, TITLE_EDIT_ALBUM}, notif::{Notif, NotifType},
-	},
+    api::api,
+    models::{
+        album::Album,
+        notif::{Notif, NotifType},
+        page::{LK_EDIT_ALBUM, TITLE_EDIT_ALBUM},
+        vars::THUMB_URI,
+    },
 };
 use seed::{self, prelude::*, *};
 
@@ -42,16 +44,17 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             let auth = model.auth_header.clone();
             orders.perform_cmd(async {
                 let opt_album = api::get_album(id, auth).await;
-				match opt_album {
-					Some(album) => Msg::Received(album),
-					None => Msg::ErrorGet,
-				} 
+                match opt_album {
+                    Some(album) => Msg::Received(album),
+                    None => Msg::ErrorGet,
+                }
             });
         }
         Msg::ErrorGet => {
-            orders.notify(Notif { 
-				notif_type: NotifType::Success, 
-				message : "Error getting album".to_string()});
+            orders.notify(Notif {
+                notif_type: NotifType::Success,
+                message: "Error getting album".to_string(),
+            });
         }
         Msg::Received(album) => {
             model.album = album;
@@ -66,28 +69,29 @@ pub fn view(model: &Model) -> Node<Msg> {
     div![
         C!["column", "is-two-thirds"],
         div![
-			C!["title", "is-5", "has-text-link"], 
-			&model.album.title,
-			a![
-				C!["button", "is-link", "is-light", "is-small", "ml-2"],
-				attrs! { At::Href => format!("/{}/{}", LK_EDIT_ALBUM, model.album.id) },
-				span![C!("icon"), i![C!("ion-edit")]],
-				span![TITLE_EDIT_ALBUM],
-			],
-		],
+            C!["title", "is-5", "has-text-link"],
+            &model.album.title,
+            a![
+                C!["button", "is-link", "is-light", "is-small", "ml-2"],
+                attrs! { At::Href => format!("/{}/{}", LK_EDIT_ALBUM, model.album.id) },
+                span![C!("icon"), i![C!("ion-edit")]],
+                span![TITLE_EDIT_ALBUM],
+            ],
+        ],
         match &model.album.groups {
             Some(groups) => div![groups.iter().map(|group| {
                 div![
                     C!("box"),
                     p![C!["title", "is-6", "has-text-link"], &group.title],
-					p![C!["subtitle", "is-7", "has-text-primary	"], &group.description],
-					div![
-						match &group.pictures {
-							Some(pictures) => div![
+                    p![
+                        C!["subtitle", "is-7", "has-text-primary	"],
+                        &group.description
+                    ],
+                    div![match &group.pictures {
+                        Some(pictures) => div![
 								C!["is-flex", "is-flex-wrap-wrap", "is-justify-content-center"],
 								pictures.iter().map(|picture| {
 									div![
-									
 										figure![
 											C!["image", "is-128x128", "m-1"],
 											img![attrs!{ At::Src => format!("{}{}.{}", THUMB_URI, picture.public_id, picture.format) }]
@@ -96,9 +100,8 @@ pub fn view(model: &Model) -> Node<Msg> {
 									]
 								}
 							)],
-							None => empty![],
-                    	}
-					]
+                        None => empty![],
+                    }]
                 ]
             })],
             None => empty![],

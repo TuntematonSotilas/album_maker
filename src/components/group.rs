@@ -13,7 +13,7 @@ use crate::models::{
 // ------ ------
 pub enum Msg {
     TitleChanged(String, Uuid),
-	DescChanged(String, Uuid),
+    DescChanged(String, Uuid),
     UpdateGroup(GroupUpdate),
     Upload(upload::Msg),
     Picture(picture::Msg),
@@ -31,8 +31,8 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                 asset_id: None,
                 caption: None,
             }));
-        },
-		Msg::DescChanged(input, group_id) => {
+        }
+        Msg::DescChanged(input, group_id) => {
             orders.send_msg(Msg::UpdateGroup(GroupUpdate {
                 upd_type: UpdateType::Description,
                 id: group_id,
@@ -42,7 +42,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                 asset_id: None,
                 caption: None,
             }));
-        },
+        }
         Msg::Upload(msg) => {
             match msg {
                 upload::Msg::Success(ref picture, group_id) => {
@@ -72,31 +72,31 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             upload::update(msg, &mut orders.proxy(Msg::Upload));
         }
         Msg::Picture(msg) => {
-			match msg {
-				picture::Msg::UpdateCaption(group_id, ref caption, ref asset_id) => {
-					orders.send_msg(Msg::UpdateGroup(GroupUpdate {
-						upd_type: UpdateType::Caption,
-						id: group_id,
-						picture: None,
-						grp_data: None,
-						count_fake_pictures: None,
-						asset_id: Some(asset_id.clone()),
-						caption: Some(caption.clone()),
-					}));
-				},
-				picture::Msg::DeletePictureSuccess(group_id, ref asset_id) => {
-					orders.send_msg(Msg::UpdateGroup(GroupUpdate {
-						upd_type: UpdateType::DeletePicture,
-						id: group_id,
-						picture: None,
-						grp_data: None,
-						count_fake_pictures: None,
-						asset_id: Some(asset_id.clone()),
-						caption: None,
-					}));
-				}
-				_ => (),
-			}
+            match msg {
+                picture::Msg::UpdateCaption(group_id, ref caption, ref asset_id) => {
+                    orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+                        upd_type: UpdateType::Caption,
+                        id: group_id,
+                        picture: None,
+                        grp_data: None,
+                        count_fake_pictures: None,
+                        asset_id: Some(asset_id.clone()),
+                        caption: Some(caption.clone()),
+                    }));
+                }
+                picture::Msg::DeletePictureSuccess(group_id, ref asset_id) => {
+                    orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+                        upd_type: UpdateType::DeletePicture,
+                        id: group_id,
+                        picture: None,
+                        grp_data: None,
+                        count_fake_pictures: None,
+                        asset_id: Some(asset_id.clone()),
+                        caption: None,
+                    }));
+                }
+                _ => (),
+            }
             picture::update(msg, &mut orders.proxy(Msg::Picture));
         }
         Msg::UpdateGroup(_) => (),
@@ -105,17 +105,21 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
 
 pub fn view(group: Group) -> Node<Msg> {
     let gr_t = group.clone();
-	let gr_d = group.clone();
-	let gr_p = group.clone();
+    let gr_d = group.clone();
+    let gr_p = group;
     div![
         C!("box group"),
         div![
             C!("field"),
             div![
-				label![C!("label"), "Group name"],
+                label![C!("label"), "Group name"],
                 C!("control"),
                 input![
-                    C!["input", "is-small", IF!(gr_t.title.is_empty() => "is-danger")],
+                    C![
+                        "input",
+                        "is-small",
+                        IF!(gr_t.title.is_empty() => "is-danger")
+                    ],
                     attrs! {
                         At::Type => "text",
                         At::Name => "title",
@@ -124,20 +128,20 @@ pub fn view(group: Group) -> Node<Msg> {
                     },
                     input_ev(Ev::Input, move |input| Msg::TitleChanged(input, gr_t.id)),
                 ],
-			],
-		],
-		div![
+            ],
+        ],
+        div![
             C!("field"),
-			label![C!("label"), "Description"],
-			textarea![
-				C!["textarea", "is-small"],
-				attrs! {
-					At::Placeholder => "Description",
-					At::Value => gr_d.description,
-				},
-				input_ev(Ev::Input, move |input| Msg::DescChanged(input, gr_d.id)),
-			]
-		],
+            label![C!("label"), "Description"],
+            textarea![
+                C!["textarea", "is-small"],
+                attrs! {
+                    At::Placeholder => "Description",
+                    At::Value => gr_d.description,
+                },
+                input_ev(Ev::Input, move |input| Msg::DescChanged(input, gr_d.id)),
+            ]
+        ],
         div![
             match gr_p.pictures.clone() {
                 Some(pictures) => div![pictures.iter().map(|picture| {

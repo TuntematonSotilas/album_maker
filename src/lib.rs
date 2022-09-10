@@ -7,19 +7,18 @@
 extern crate crypto;
 
 use crate::components::*;
-use models::{page::LK_LOGIN, notif::Notif};
+use models::{notif::Notif, page::LK_LOGIN};
 use seed::{prelude::*, *};
 
+mod api;
 mod components;
 mod models;
-mod api;
 
 // ------ ------
 //     Init
 // ------ ------
 fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
-
-	orders.subscribe(Msg::ShowNotif);
+    orders.subscribe(Msg::ShowNotif);
     orders.subscribe(Msg::UrlChanged);
 
     let login_url = Url::new().add_path_part(LK_LOGIN);
@@ -67,7 +66,7 @@ enum Msg {
     SetAuth(String),
     Notification(notification::Msg),
     SetIsLogged,
-	ShowNotif(Notif),
+    ShowNotif(Notif),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -97,7 +96,11 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             my_albums::update(msg, &mut model.my_albums, &mut orders.proxy(Msg::MyAlbums));
         }
         Msg::EditAlbum(msg) => {
-            edit_album::update(msg, &mut model.edit_album, &mut orders.proxy(Msg::EditAlbum));
+            edit_album::update(
+                msg,
+                &mut model.edit_album,
+                &mut orders.proxy(Msg::EditAlbum),
+            );
         }
         Msg::ViewAlbum(msg) => {
             view_album::update(
@@ -127,7 +130,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     models::page::Page::MyAlbums => {
                         orders.send_msg(Msg::MyAlbums(my_albums::Msg::InitComp));
                     }
-					models::page::Page::NewAlbum => {
+                    models::page::Page::NewAlbum => {
                         orders.send_msg(Msg::EditAlbum(edit_album::Msg::InitComp(None)));
                     }
                     models::page::Page::EditAlbum => {
@@ -143,13 +146,10 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
         }
         Msg::Login(msg) => {
-            match msg {
-                login::Msg::SetAuth(ref auth) => {
-                    orders.send_msg(Msg::SetIsLogged);
-                    orders.send_msg(Msg::SetAuth(auth.clone()));
-                    orders.notify(subs::UrlRequested::new(Url::new()));
-                }
-                _ => (),
+            if let login::Msg::SetAuth(ref auth) = msg {
+                orders.send_msg(Msg::SetIsLogged);
+                orders.send_msg(Msg::SetAuth(auth.clone()));
+                orders.notify(subs::UrlRequested::new(Url::new()));
             }
             login::update(msg, &mut model.login, &mut orders.proxy(Msg::Login));
         }

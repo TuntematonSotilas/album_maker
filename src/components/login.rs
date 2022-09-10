@@ -1,5 +1,9 @@
+use crate::models::{
+    notif::{Notif, NotifType},
+    page::TITLE_LOGIN,
+    vars::BASE_URI,
+};
 use seed::{self, prelude::*, *};
-use crate::models::{page::TITLE_LOGIN, vars::BASE_URI, notif::{Notif, NotifType}};
 
 // ------ ------
 //     Model
@@ -18,7 +22,7 @@ pub enum Msg {
     UsernameChanged(String),
     PwdChanged(String),
     SetAuth(String),
-	NotifyError,
+    NotifyError,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -38,19 +42,19 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 if response.status().is_ok() {
                     Msg::SetAuth(auth.clone())
                 } else {
-					Msg::NotifyError
+                    Msg::NotifyError
                 }
             });
         }
-		Msg::NotifyError => {
-			orders.notify(Notif { 
-				notif_type: NotifType::Error, 
-				message: "Login error".to_string()
-			});
-		}
+        Msg::NotifyError => {
+            orders.notify(Notif {
+                notif_type: NotifType::Error,
+                message: "Login error".to_string(),
+            });
+        }
         Msg::UsernameChanged(username) => model.username = username,
         Msg::PwdChanged(password) => model.password = password,
-		Msg::SetAuth(_) => (),
+        Msg::SetAuth(_) => (),
     }
 }
 

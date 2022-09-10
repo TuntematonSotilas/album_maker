@@ -12,7 +12,7 @@ pub const TITLE_LOGIN: &str = "Sign in to your albums";
 #[derive(Debug, Clone)]
 pub enum Page {
     MyAlbums,
-	NewAlbum,
+    NewAlbum,
     EditAlbum,
     ViewAlbum,
     Login,

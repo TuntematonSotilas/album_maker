@@ -3,7 +3,13 @@ use seed::{self, prelude::*, *};
 use uuid::Uuid;
 use web_sys::{self, FileList, FormData};
 
-use crate::{models::{picture::Picture, notif::{Notif, NotifType}}, api::api};
+use crate::{
+    api::api,
+    models::{
+        notif::{Notif, NotifType},
+        picture::Picture,
+    },
+};
 
 // ------ ------
 //    Update
@@ -42,19 +48,20 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
         }
         Msg::SendUpload(form_data, group_id) => {
             orders.skip(); // No need to rerender
-			orders.perform_cmd(async move {
-               let pic_opt = api::upload_picture(form_data).await;
-               match pic_opt {
+            orders.perform_cmd(async move {
+                let pic_opt = api::upload_picture(form_data).await;
+                match pic_opt {
                     Some(picture) => Msg::Success(picture, group_id),
-					None => Msg::Error
-            	}
+                    None => Msg::Error,
+                }
             });
         }
         Msg::RenderFakePictures(_, _) | Msg::Success(_, _) => (),
         Msg::Error => {
-            orders.notify(Notif { 
-				notif_type: NotifType::Success, 
-				message : "Error uploading picture".to_string()});
+            orders.notify(Notif {
+                notif_type: NotifType::Success,
+                message: "Error uploading picture".to_string(),
+            });
         }
     }
 }

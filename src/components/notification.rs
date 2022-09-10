@@ -1,5 +1,5 @@
-use seed::{prelude::*, *};
 use crate::models::notif::{Notif, NotifType};
+use seed::{prelude::*, *};
 
 // ------ ------
 //     Model
@@ -10,12 +10,12 @@ pub struct Model {
 }
 
 impl Model {
-	pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
-			is_visible: false,
-			notif: Notif::new(),
-		}
-	}
+            is_visible: false,
+            notif: Notif::new(),
+        }
+    }
 }
 
 // ------ ------

@@ -1,9 +1,9 @@
+pub mod edit_album;
 pub mod error;
 pub mod group;
 pub mod header;
 pub mod login;
 pub mod my_albums;
-pub mod edit_album;
 pub mod notification;
 pub mod picture;
 pub mod upload;
