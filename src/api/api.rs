@@ -75,11 +75,7 @@ pub async fn delete_ablum(id: String, auth: String) -> bool {
         .method(Method::Delete);
 
     let delete_response = fetch(delete_request).await.expect("HTTP request failed");
-    if delete_response.status().code == 204 {
-        true
-    } else {
-        false
-    }
+    delete_response.status().code == 204
 }
 
 pub async fn upload_picture(form_data: FormData) -> Option<Picture> {
