@@ -1,7 +1,28 @@
-use crate::models::{album::Album, vars::{BASE_URI, DESTROY_URI}};
-use seed::{self, prelude::*};
+use crate::models::{album::{Album}, vars::{BASE_URI, DESTROY_URI, UPLOAD_URI}, picture::Picture};
+use seed::{prelude::*};
 use crypto::{sha1::Sha1, digest::Digest};
 use web_sys::FormData;
+
+pub async fn get_my_ablums(auth: String) -> Option<Vec<Album>>
+{
+	let uri = BASE_URI.to_string() + "myalbums";
+	let response = Request::new(uri)
+		.header(Header::authorization(auth))
+		.fetch()
+		.await
+		.expect("HTTP request failed");
+
+	match response.status().code {
+		200 => {
+			let albums = response
+				.json::<Vec<Album>>()
+				.await
+				.expect("deserialization failed");
+			Some(albums)
+		}
+		_ => None
+	}
+}
 
 pub async fn get_album(id: String, auth: String) -> Option<Album>
 {
@@ -22,6 +43,60 @@ pub async fn get_album(id: String, auth: String) -> Option<Album>
 		},
 		_ => None
 	}
+}
+
+pub async fn update_album(album: Album, auth: String) -> Option<String>
+{
+	let mut res = None;
+	let uri = BASE_URI.to_string() + "editalbum";
+	let request = Request::new(uri)
+		.method(Method::Put)
+		.header(Header::authorization(auth))
+		.json(&album)
+		.expect("Serialization failed");
+
+	let response = fetch(request).await.expect("HTTP request failed");
+
+	if response.status().is_ok() {
+		let res_id = response.json::<String>().await;
+		if let Ok(id) = res_id {
+			res = Some(id);
+		}
+	}
+	res
+}
+
+pub async fn delete_ablum(id: String, auth: String) -> bool 
+{
+	let delete_uri = format!("{}deletealbum?id={}", BASE_URI, id);
+	let delete_request = Request::new(delete_uri)
+		.header(Header::authorization(auth))
+		.method(Method::Delete);
+
+	let delete_response = fetch(delete_request).await.expect("HTTP request failed");
+	if delete_response.status().code == 204 {
+		true
+	} else {
+		false
+	}
+}
+
+pub async fn upload_picture(form_data: FormData) -> Option<Picture> 
+{
+	let mut res = None;
+	let uri = UPLOAD_URI.to_string();
+	let request = Request::new(uri)
+		.method(Method::Post)
+		.body(JsValue::from(form_data));
+
+	let response = fetch(request).await.expect("HTTP request failed");
+	if response.status().is_ok() {
+		let res_pic = response.json::<Picture>().await;
+		if let Ok(picture) = res_pic {
+			res = Some(picture);
+		}
+	}
+	res
 }
 
 pub async fn delete_picture(public_id: String) -> bool

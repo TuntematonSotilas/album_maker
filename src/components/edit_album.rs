@@ -3,7 +3,7 @@ use seed::{self, prelude::*, *};
 use crate::{
     components::group,
     models::{
-        album::Album, group::Group, group_update::UpdateType, page::{TITLE_NEW_ALBUM, TITLE_EDIT_ALBUM}, vars::BASE_URI,
+        album::Album, group::Group, group_update::UpdateType, page::{TITLE_NEW_ALBUM, TITLE_EDIT_ALBUM},
     }, api::api,
 };
 
@@ -85,28 +85,15 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::Submit => {
             orders.skip(); // No need to rerender
-            let uri = BASE_URI.to_string() + "editalbum";
             let auth = model.auth_header.clone();
-            let request = Request::new(uri)
-                .method(Method::Put)
-                .header(Header::authorization(auth))
-                .json(&model.album)
-                .expect("Serialization failed");
-
+			let album = model.album.clone();
             orders.perform_cmd(async {
-                let response = fetch(request).await.expect("HTTP request failed");
-
-                if response.status().is_ok() {
-                    let res_id = response.json::<String>().await;
-                    if let Ok(id) = res_id {
-                        Msg::Success(id)
-                    } else {
-                        Msg::ShowNotif(NotifType::Error, "Error when saving".to_string())
-                    }
-                } else {
-                    Msg::ShowNotif(NotifType::Error, "Error when saving".to_string())
-                }
-            });
+				let opt_id = api::update_album(album, auth).await;
+				match opt_id {
+					Some(id) => Msg::Success(id),
+					None => Msg::ShowNotif(NotifType::Error, "Error when saving".to_string())
+				}
+			});
         }
         Msg::Success(id) => {
             model.album.id = id;

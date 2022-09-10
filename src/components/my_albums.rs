@@ -1,6 +1,6 @@
 use seed::{self, prelude::*, *};
 
-use crate::models::{album::Album, page::{TITLE_MY_ALBUMS, LK_VIEW_ALBUM}, vars::BASE_URI};
+use crate::{models::{album::Album, page::{TITLE_MY_ALBUMS, LK_VIEW_ALBUM}}, api::api};
 
 // ------ ------
 //     Model
@@ -34,22 +34,12 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
             orders.perform_cmd(async {
-                let uri = BASE_URI.to_string() + "myalbums";
-                let response = Request::new(uri)
-                    .header(Header::authorization(auth))
-                    .fetch()
-                    .await
-                    .expect("HTTP request failed");
-
-                match response.status().code {
-                    200 => {
-                        let albums = response
-                            .json::<Vec<Album>>()
-                            .await
-                            .expect("deserialization failed");
+                let albums_opt = api::get_my_ablums(auth).await;
+                match albums_opt {
+                    Some(albums) => {
                         Msg::Received(albums)
                     }
-                    _ => Msg::ErrorGet,
+                    None => Msg::ErrorGet,
                 }
             });
         }
@@ -67,18 +57,14 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::Delete(id) => {
             orders.skip(); // No need to rerender
-            let auth = model.auth_header.clone();
-            let delete_uri = format!("{}deletealbum?id={}", BASE_URI, id);
-            let delete_request = Request::new(delete_uri)
-                .header(Header::authorization(auth))
-                .method(Method::Delete);
-
+			let auth = model.auth_header.clone();
+			let id_del = id.clone();
+			let id_suc = id.clone();
             orders.perform_cmd(async {
-                let delete_response = fetch(delete_request).await.expect("HTTP request failed");
-                if delete_response.status().code == 204 {
-                    Msg::SuccessDelete(id)
-                } else {
-                    Msg::ErrorDelete
+                let success = api::delete_ablum(id_del, auth).await;
+                match success {
+                    true => Msg::SuccessDelete(id_suc),
+                	false => Msg::ErrorDelete
                 }
             });
         }

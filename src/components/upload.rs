@@ -3,7 +3,7 @@ use seed::{self, prelude::*, *};
 use uuid::Uuid;
 use web_sys::{self, FileList, FormData};
 
-use crate::models::{picture::Picture, vars::UPLOAD_URI};
+use crate::{models::{picture::Picture}, api::api};
 
 // ------ ------
 //    Update
@@ -41,23 +41,13 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             }
         }
         Msg::SendUpload(form_data, group_id) => {
-            let uri = UPLOAD_URI.to_string();
-            let request = Request::new(uri)
-                .method(Method::Post)
-                .body(JsValue::from(form_data));
-
-            orders.perform_cmd(async move {
-                let response = fetch(request).await.expect("HTTP request failed");
-                if response.status().is_ok() {
-                    let res_pic = response.json::<Picture>().await;
-                    if let Ok(picture) = res_pic {
-                        Msg::Success(picture, group_id)
-                    } else {
-                        Msg::Error
-                    }
-                } else {
-                    Msg::Error
-                }
+            orders.skip(); // No need to rerender
+			orders.perform_cmd(async move {
+               let pic_opt = api::upload_picture(form_data).await;
+               match pic_opt {
+                    Some(picture) => Msg::Success(picture, group_id),
+					None => Msg::Error
+            	}
             });
         }
         Msg::RenderFakePictures(_, _) | Msg::Success(_, _) => (),
