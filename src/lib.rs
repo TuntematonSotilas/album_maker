@@ -7,8 +7,7 @@
 extern crate crypto;
 
 use crate::components::*;
-use components::notification::NotifType;
-use models::page::LK_LOGIN;
+use models::{page::LK_LOGIN, notif::Notif};
 use seed::{prelude::*, *};
 
 mod components;
@@ -19,6 +18,8 @@ mod api;
 //     Init
 // ------ ------
 fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
+
+	orders.subscribe(Msg::ShowNotif);
     orders.subscribe(Msg::UrlChanged);
 
     let login_url = Url::new().add_path_part(LK_LOGIN);
@@ -29,7 +30,7 @@ fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
     Model {
         is_logged: false,
         header: header::Model::new(login_page.clone()),
-        notification: notification::Model::default(),
+        notification: notification::Model::new(),
         my_albums: my_albums::Model::default(),
         edit_album: edit_album::Model::new(),
         view_album: view_album::Model::new(),
@@ -65,8 +66,8 @@ enum Msg {
     InitComp(Option<String>),
     SetAuth(String),
     Notification(notification::Msg),
-    ShowNotif(NotifType, String),
     SetIsLogged,
+	ShowNotif(Notif),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -89,18 +90,13 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 &mut orders.proxy(Msg::Notification),
             );
         }
-        Msg::ShowNotif(notif_type, message) => {
-            orders.send_msg(Msg::Notification(notification::Msg::Show(
-                notif_type, message,
-            )));
+        Msg::ShowNotif(notif) => {
+            orders.send_msg(Msg::Notification(notification::Msg::Show(notif)));
         }
         Msg::MyAlbums(msg) => {
             my_albums::update(msg, &mut model.my_albums, &mut orders.proxy(Msg::MyAlbums));
         }
         Msg::EditAlbum(msg) => {
-            if let edit_album::Msg::ShowNotif(ref notif_type, ref message) = msg {
-                orders.send_msg(Msg::ShowNotif(*notif_type, message.clone()));
-            }
             edit_album::update(msg, &mut model.edit_album, &mut orders.proxy(Msg::EditAlbum));
         }
         Msg::ViewAlbum(msg) => {
@@ -152,9 +148,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     orders.send_msg(Msg::SetIsLogged);
                     orders.send_msg(Msg::SetAuth(auth.clone()));
                     orders.notify(subs::UrlRequested::new(Url::new()));
-                }
-                login::Msg::ShowNotif(ref notif_type, ref message) => {
-                    orders.send_msg(Msg::ShowNotif(*notif_type, message.clone()));
                 }
                 _ => (),
             }

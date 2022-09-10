@@ -3,7 +3,7 @@ use seed::{self, prelude::*, *};
 use uuid::Uuid;
 use web_sys::{self, FileList, FormData};
 
-use crate::{models::{picture::Picture}, api::api};
+use crate::{models::{picture::Picture, notif::{Notif, NotifType}}, api::api};
 
 // ------ ------
 //    Update
@@ -52,7 +52,9 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
         }
         Msg::RenderFakePictures(_, _) | Msg::Success(_, _) => (),
         Msg::Error => {
-            error!("Error when uploading");
+            orders.notify(Notif { 
+				notif_type: NotifType::Success, 
+				message : "Error uploading picture".to_string()});
         }
     }
 }

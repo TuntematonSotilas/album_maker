@@ -1,7 +1,7 @@
 use seed::{self, prelude::*, *};
 use uuid::Uuid;
 
-use crate::{models::{picture::Picture, vars::THUMB_URI}, api::api};
+use crate::{models::{picture::Picture, vars::THUMB_URI, notif::{Notif, NotifType}}, api::api};
 
 // ------ ------
 //    Update
@@ -33,7 +33,9 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
 		},
 		Msg::DeletePictureSuccess(_, _) => (),
 		Msg::DeleteFail => {
-			error!("Error when deleting picture");
+			orders.notify(Notif { 
+				notif_type: NotifType::Success, 
+				message : "Error deleting picture".to_string()});
 		},
     }
 }

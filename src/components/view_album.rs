@@ -2,7 +2,7 @@ use crate::{
 	api::api, 
 	models::{
 		album::Album,
-		vars::THUMB_URI, page::{LK_EDIT_ALBUM, TITLE_EDIT_ALBUM},
+		vars::THUMB_URI, page::{LK_EDIT_ALBUM, TITLE_EDIT_ALBUM}, notif::{Notif, NotifType},
 	},
 };
 use seed::{self, prelude::*, *};
@@ -49,7 +49,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             });
         }
         Msg::ErrorGet => {
-            error!("Error getting albums");
+            orders.notify(Notif { 
+				notif_type: NotifType::Success, 
+				message : "Error getting album".to_string()});
         }
         Msg::Received(album) => {
             model.album = album;

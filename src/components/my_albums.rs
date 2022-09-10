@@ -1,6 +1,6 @@
 use seed::{self, prelude::*, *};
 
-use crate::{models::{album::Album, page::{TITLE_MY_ALBUMS, LK_VIEW_ALBUM}}, api::api};
+use crate::{models::{album::Album, page::{TITLE_MY_ALBUMS, LK_VIEW_ALBUM}, notif::{Notif, NotifType}}, api::api};
 
 // ------ ------
 //     Model
@@ -44,7 +44,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             });
         }
         Msg::ErrorGet => {
-            error!("Error getting albums");
+			orders.notify(Notif { 
+				notif_type: NotifType::Success, 
+				message : "Error getting albums".to_string()});
         }
         Msg::Received(albums) => {
             model.albums = Some(albums);
@@ -69,7 +71,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             });
         }
         Msg::ErrorDelete => {
-            error!("Error deleting albums");
+			orders.notify(Notif { 
+				notif_type: NotifType::Success, 
+				message : "Error deleting album".to_string()});
         }
         Msg::SuccessDelete(id) => {
             if let Some(albums) = &mut model.albums {

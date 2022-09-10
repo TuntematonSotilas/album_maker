@@ -3,11 +3,9 @@ use seed::{self, prelude::*, *};
 use crate::{
     components::group,
     models::{
-        album::Album, group::Group, group_update::UpdateType, page::{TITLE_NEW_ALBUM, TITLE_EDIT_ALBUM},
+        album::Album, group::Group, group_update::UpdateType, page::{TITLE_NEW_ALBUM, TITLE_EDIT_ALBUM}, notif::{Notif, NotifType},
     }, api::api,
 };
-
-use super::notification::NotifType;
 
 // ------ ------
 //     Model
@@ -47,11 +45,11 @@ pub enum Msg {
 	ErrorGet,
     Received(Album),
     Submit,
-    Success(String),
     TitleChanged(String),
-    ShowNotif(NotifType, String),
     AddGroup,
     Group(group::Msg),
+	NotifySuccess(String),
+	NotifyError,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -78,7 +76,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             });
 		}
 		Msg::ErrorGet => {
-            error!("Error getting albums");
+			orders.notify(Notif { 
+				notif_type: NotifType::Success, 
+				message : "Error getting album".to_string()});
         }
         Msg::Received(album) => {
             model.album = album;
@@ -90,20 +90,24 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.perform_cmd(async {
 				let opt_id = api::update_album(album, auth).await;
 				match opt_id {
-					Some(id) => Msg::Success(id),
-					None => Msg::ShowNotif(NotifType::Error, "Error when saving".to_string())
+					Some(id) => Msg::NotifySuccess(id),
+					None => Msg::NotifyError
 				}
 			});
         }
-        Msg::Success(id) => {
-            model.album.id = id;
-            orders.send_msg(Msg::ShowNotif(
-                NotifType::Success,
-                "Album saved".to_string(),
-            ));
-        }
+		Msg::NotifySuccess(id) => {
+			model.album.id = id;
+			orders.notify(Notif { 
+				notif_type: NotifType::Success, 
+				message : "Album saved".to_string()});
+		}
+		Msg::NotifyError => {
+			orders.notify(Notif { 
+				notif_type: NotifType::Error, 
+				message: "Login error".to_string()
+			});
+		}
         Msg::TitleChanged(title) => model.album.title = title,
-        Msg::ShowNotif(_, _) => (),
         Msg::AddGroup => {
             if let Some(groups) = &mut model.album.groups {
                 groups.push(Group::new());
