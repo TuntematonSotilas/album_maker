@@ -6,7 +6,7 @@ use web_sys::{self, FileList, FormData};
 use crate::{
     api::api,
     models::{
-        notif::{Notif, NotifType},
+        notif::{Notif, TypeNotifs},
         picture::Picture,
     },
 };
@@ -59,7 +59,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
         Msg::RenderFakePictures(_, _) | Msg::Success(_, _) => (),
         Msg::Error => {
             orders.notify(Notif {
-                notif_type: NotifType::Success,
+                notif_type: TypeNotifs::Success,
                 message: "Error uploading picture".to_string(),
             });
         }

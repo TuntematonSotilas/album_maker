@@ -4,7 +4,7 @@ use crate::{
     api::api,
     models::{
         album::Album,
-        notif::{Notif, NotifType},
+        notif::{Notif, TypeNotifs},
         page::{LK_VIEW_ALBUM, TITLE_MY_ALBUMS},
     },
 };
@@ -50,7 +50,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::ErrorGet => {
             orders.notify(Notif {
-                notif_type: NotifType::Success,
+                notif_type: TypeNotifs::Success,
                 message: "Error getting albums".to_string(),
             });
         }
@@ -79,7 +79,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::ErrorDelete => {
             orders.notify(Notif {
-                notif_type: NotifType::Success,
+                notif_type: TypeNotifs::Success,
                 message: "Error deleting album".to_string(),
             });
         }

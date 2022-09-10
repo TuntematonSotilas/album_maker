@@ -1,4 +1,4 @@
-use crate::models::notif::{Notif, NotifType};
+use crate::models::notif::{Notif, TypeNotifs};
 use seed::{prelude::*, *};
 
 // ------ ------
@@ -43,8 +43,8 @@ pub fn view(model: &Model) -> Node<Msg> {
         _ => "",
     };
     let c_type = match &model.notif.notif_type {
-        NotifType::Success => "is-success",
-        NotifType::Error => "is-danger",
+        TypeNotifs::Success => "is-success",
+        TypeNotifs::Error => "is-danger",
     };
     div![
         C!["notification", "notif", c_type, c_visible],

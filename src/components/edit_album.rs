@@ -7,7 +7,7 @@ use crate::{
         album::Album,
         group::Group,
         group_update::{GroupUpdate, UpdateType},
-        notif::{Notif, NotifType},
+        notif::{Notif, TypeNotifs},
         page::{TITLE_EDIT_ALBUM, TITLE_NEW_ALBUM},
     },
 };
@@ -82,7 +82,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::ErrorGet => {
             orders.notify(Notif {
-                notif_type: NotifType::Success,
+                notif_type: TypeNotifs::Success,
                 message: "Error getting album".to_string(),
             });
         }
@@ -104,13 +104,13 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::NotifySuccess(id) => {
             model.album.id = id;
             orders.notify(Notif {
-                notif_type: NotifType::Success,
+                notif_type: TypeNotifs::Success,
                 message: "Album saved".to_string(),
             });
         }
         Msg::NotifyError => {
             orders.notify(Notif {
-                notif_type: NotifType::Error,
+                notif_type: TypeNotifs::Error,
                 message: "Login error".to_string(),
             });
         }

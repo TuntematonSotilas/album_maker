@@ -1,5 +1,5 @@
 use crate::models::{
-    notif::{Notif, NotifType},
+    notif::{Notif, TypeNotifs},
     page::TITLE_LOGIN,
     vars::BASE_URI,
 };
@@ -48,7 +48,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::NotifyError => {
             orders.notify(Notif {
-                notif_type: NotifType::Error,
+                notif_type: TypeNotifs::Error,
                 message: "Login error".to_string(),
             });
         }

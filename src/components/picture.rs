@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::{
     api::api,
     models::{
-        notif::{Notif, NotifType},
+        notif::{Notif, TypeNotifs},
         picture::Picture,
         vars::THUMB_URI,
     },
@@ -41,7 +41,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
         Msg::DeletePictureSuccess(_, _) | Msg::UpdateCaption(_, _, _) => (),
         Msg::DeleteFail => {
             orders.notify(Notif {
-                notif_type: NotifType::Success,
+                notif_type: TypeNotifs::Success,
                 message: "Error deleting picture".to_string(),
             });
         }
