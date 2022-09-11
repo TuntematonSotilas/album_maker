@@ -1,3 +1,5 @@
+#![allow(clippy::future_not_send)]
+
 use crate::models::{
     album::Album,
     picture::Picture,
