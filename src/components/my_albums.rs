@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use seed::{self, prelude::*, *};
 
 use crate::{
@@ -9,6 +11,11 @@ use crate::{
     },
 };
 
+#[derive(PartialEq)]
+enum State {
+	AskDelete,
+	Deleting
+}
 // ------ ------
 //     Model
 // ------ -----
@@ -16,7 +23,9 @@ use crate::{
 pub struct Model {
     auth_header: String,
     albums: Option<Vec<Album>>,
-    album_id_to_delete: Option<String>,
+	states: HashMap<String, State>,
+	total_pic_to_delete: usize,
+	nb_pic_deleted: i32,
 }
 
 // ------ ------
@@ -27,11 +36,12 @@ pub enum Msg {
     InitComp,
     Received(Vec<Album>),
     ErrorGet,
-    Delete(String),
+    DeleteAllPics(String),
+	DeleteAlbum(String),
     AskDelete(String),
     SuccessDelete(String),
     ErrorDelete,
-    CancelDelete,
+    CancelDelete(String),
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -58,25 +68,71 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.albums = Some(albums);
         }
         Msg::AskDelete(id) => {
-            model.album_id_to_delete = Some(id);
+			model.states.entry(id).or_insert(State::AskDelete);
         }
-        Msg::CancelDelete => {
-            model.album_id_to_delete = None;
+        Msg::CancelDelete(id) => {
+            model.states.remove(&id);
         }
-        Msg::Delete(id) => {
-            orders.skip(); // No need to rerender
-            let auth = model.auth_header.clone();
-            let id_del = id.clone();
-            let id_suc = id;
-            orders.perform_cmd(async {
+        Msg::DeleteAllPics(id) => {
+			orders.skip(); // No need to rerender
+            let id = id.clone();
+			let id_f = id.clone();
+			let id_del = id.clone();
+
+			model.states.entry(id).or_insert(State::Deleting);
+
+			//Delete all pictures
+			if let Some(albums) = model.albums.clone() {
+				if let Some(album) = albums.iter().find(|a| a.id == id_f ) {
+					if let Some(groups) = album.groups.clone() {
+						let pic_ids: Vec<String> = groups.iter().filter_map(|g| {
+							if let Some(pictures) = g.pictures.clone() {
+								let pic_ids = pictures.iter().map(|p| p.public_id.clone()).collect();
+								Some(pic_ids)
+							} else {
+								None
+							}
+						}).collect();
+						model.total_pic_to_delete = pic_ids.len();
+						
+						orders.perform_cmd(async {
+							let mut all_success = false;
+							for pic_id in pic_ids {
+								let pic_id = pic_id.clone();
+								let res = apifn::delete_picture(pic_id).await;
+								if res {
+									all_success = true;
+									//model.nb_pic_deleted += 1;
+								} else {
+									all_success = false;
+									break;
+								}
+							}
+							if all_success {
+								Msg::DeleteAlbum(id_del)
+							} else {
+								Msg::ErrorDelete
+							}
+						});
+						
+					}
+				}
+			}
+			
+			
+        }
+		Msg::DeleteAlbum(id) => {
+			let auth = model.auth_header.clone();
+			let id_del = id.clone();
+			orders.perform_cmd(async {
                 let success = apifn::delete_ablum(id_del, auth).await;
                 if success {
-                    Msg::SuccessDelete(id_suc)
+                    Msg::SuccessDelete(id)
                 } else {
                     Msg::ErrorDelete
                 }
             });
-        }
+		}
         Msg::ErrorDelete => {
             orders.notify(Notif {
                 notif_type: TypeNotifs::Error,
@@ -103,48 +159,65 @@ pub fn view(model: &Model) -> Node<Msg> {
             p![C!["title", "is-5", "has-text-link"], TITLE_MY_ALBUMS],
             if model.albums.is_some() {
                 div![model.albums.as_ref().unwrap().iter().map(|album| {
-                    let id = album.id.clone();
-                    let album_id_to_delete = model.album_id_to_delete.clone();
-                    let is_ask =
-                        model.album_id_to_delete.is_some() && album_id_to_delete.unwrap() == id;
+                    let id_del = album.id.clone();
+					let id_can = album.id.clone();
+                    let state = model.states.get(&id_del);
                     p![
                         C!("panel-block"),
                         div![
                             C!["container", "is-flex", "is-justify-content-space-between"],
-                            div![if is_ask {
-                                span!["Delete this album ?"]
-                            } else {
-                                a![
-                                    attrs! {
-                                        At::Title => "Open",
-                                        At::Href => format!("/{}/{}", LK_VIEW_ALBUM, id),
-                                    },
-                                    &album.title
-                                ]
-                            }],
+                            div![
+								if state.is_some() {
+									match state.unwrap() {
+										State::AskDelete => {
+											span!["Delete this album ?"]
+										},
+										State::Deleting => {
+											progress![
+												C!("progress"),
+												attrs! { At::Value => "5", At::Max => "10" },
+												"5"
+											]
+										}
+									}
+								}
+								else {
+									a![
+										attrs! {
+											At::Title => "Open",
+											At::Href => format!("/{}/{}", LK_VIEW_ALBUM, id_del),
+										},
+										&album.title
+									]
+								}
+							],
                             div![
                                 C!["is-align-content-flex-end"],
-                                if is_ask {
-                                    div![
-                                        button![
-                                            C!["button", "is-link", "is-light", "is-small", "mr-2"],
-                                            span![C!("icon"), i![C!("ion-close-circled")]],
-                                            span!["NO"],
-                                            ev(Ev::Click, |_| Msg::CancelDelete),
-                                        ],
-                                        button![
-                                            C!["button", "is-danger", "is-light", "is-small"],
-                                            span![C!("icon"), i![C!("ion-close-circled")]],
-                                            span!["YES"],
-                                            ev(Ev::Click, |_| Msg::Delete(id)),
-                                        ]
-                                    ]
+                                if state.is_some() {
+									if state.unwrap() == &State::AskDelete {
+										div![
+											button![
+												C!["button", "is-link", "is-light", "is-small", "mr-2"],
+												span![C!("icon"), i![C!("ion-close-circled")]],
+												span!["NO"],
+												ev(Ev::Click, |_| Msg::CancelDelete(id_del)),
+											],
+											button![
+												C!["button", "is-danger", "is-light", "is-small"],
+												span![C!("icon"), i![C!("ion-close-circled")]],
+												span!["YES"],
+												ev(Ev::Click, |_| Msg::DeleteAllPics(id_can)),
+											]
+										]
+									} else {
+										empty!()
+									}
                                 } else {
                                     button![
                                         C!["button", "is-link", "is-light", "is-small"],
                                         span![C!("icon"), i![C!("ion-close-circled")]],
                                         span!["Delete"],
-                                        ev(Ev::Click, |_| Msg::AskDelete(id)),
+                                        ev(Ev::Click, |_| Msg::AskDelete(id_del)),
                                     ]
                                 }
                             ]
