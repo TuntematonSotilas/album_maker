@@ -131,7 +131,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     }
 }
 
-fn update_group(group_update: &GroupUpdate, groups: &mut Vec<Group>) {
+fn update_group(group_update: &GroupUpdate, groups: &mut [Group]) {
     if let Some(group) = groups.iter_mut().find(|g| g.id == group_update.id) {
         let grp_upd = group_update.clone();
         match group_update.upd_type {
