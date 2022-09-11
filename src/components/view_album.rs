@@ -1,5 +1,5 @@
 use crate::{
-    api::api,
+    api::apifn,
     models::{
         album::Album,
         notif::{Notif, TypeNotifs},
@@ -43,7 +43,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
             orders.perform_cmd(async {
-                let opt_album = api::get_album(id, auth).await;
+                let opt_album = apifn::get_album(id, auth).await;
                 match opt_album {
                     Some(album) => Msg::Received(album),
                     None => Msg::ErrorGet,

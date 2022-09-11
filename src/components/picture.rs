@@ -2,7 +2,7 @@ use seed::{self, prelude::*, *};
 use uuid::Uuid;
 
 use crate::{
-    api::api,
+    api::apifn,
     models::{
         notif::{Notif, TypeNotifs},
         picture::Picture,
@@ -30,7 +30,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
         Msg::DeletePicture(group_id, public_id, asset_id) => {
             orders.skip(); // No need to rerender
             orders.perform_cmd(async move {
-                let success = api::delete_picture(public_id).await;
+                let success = apifn::delete_picture(public_id).await;
                 if success {
                     Msg::DeletePictureSuccess(group_id, asset_id)
                 } else {

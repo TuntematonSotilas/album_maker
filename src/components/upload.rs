@@ -4,7 +4,7 @@ use uuid::Uuid;
 use web_sys::{self, FileList, FormData};
 
 use crate::{
-    api::api,
+    api::apifn,
     models::{
         notif::{Notif, TypeNotifs},
         picture::Picture,
@@ -49,7 +49,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
         Msg::SendUpload(form_data, group_id) => {
             orders.skip(); // No need to rerender
             orders.perform_cmd(async move {
-                let pic_opt = api::upload_picture(form_data).await;
+                let pic_opt = apifn::upload_picture(form_data).await;
                 match pic_opt {
                     Some(picture) => Msg::Success(picture, group_id),
                     None => Msg::Error,

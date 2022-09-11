@@ -1,7 +1,7 @@
 use seed::{self, prelude::*, *};
 
 use crate::{
-    api::api,
+    api::apifn,
     models::{
         album::Album,
         notif::{Notif, TypeNotifs},
@@ -41,7 +41,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
             orders.perform_cmd(async {
-                let albums_opt = api::get_my_ablums(auth).await;
+                let albums_opt = apifn::get_my_ablums(auth).await;
                 match albums_opt {
                     Some(albums) => Msg::Received(albums),
                     None => Msg::ErrorGet,
@@ -69,7 +69,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             let id_del = id.clone();
             let id_suc = id;
             orders.perform_cmd(async {
-                let success = api::delete_ablum(id_del, auth).await;
+                let success = apifn::delete_ablum(id_del, auth).await;
                 if success {
                     Msg::SuccessDelete(id_suc)
                 } else {

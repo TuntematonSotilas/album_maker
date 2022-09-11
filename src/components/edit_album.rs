@@ -1,7 +1,7 @@
 use seed::{self, prelude::*, *};
 
 use crate::{
-    api::api,
+    api::apifn,
     components::group,
     models::{
         album::Album,
@@ -73,7 +73,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
             orders.perform_cmd(async {
-                let opt_album = api::get_album(id, auth).await;
+                let opt_album = apifn::get_album(id, auth).await;
                 match opt_album {
                     Some(album) => Msg::Received(album),
                     None => Msg::ErrorGet,
@@ -94,7 +94,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             let auth = model.auth_header.clone();
             let album = model.album.clone();
             orders.perform_cmd(async {
-                let opt_id = api::update_album(album, auth).await;
+                let opt_id = apifn::update_album(album, auth).await;
                 match opt_id {
                     Some(id) => Msg::NotifySuccess(id),
                     None => Msg::NotifyError,
