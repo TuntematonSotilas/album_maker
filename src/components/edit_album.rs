@@ -82,7 +82,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::ErrorGet => {
             orders.notify(Notif {
-                notif_type: TypeNotifs::Success,
+                notif_type: TypeNotifs::Error,
                 message: "Error getting album".to_string(),
             });
         }

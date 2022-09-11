@@ -41,7 +41,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
         Msg::DeletePictureSuccess(_, _) | Msg::UpdateCaption(_, _, _) => (),
         Msg::DeleteFail => {
             orders.notify(Notif {
-                notif_type: TypeNotifs::Success,
+                notif_type: TypeNotifs::Error,
                 message: "Error deleting picture".to_string(),
             });
         }

@@ -59,7 +59,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
         Msg::RenderFakePictures(_, _) | Msg::Success(_, _) => (),
         Msg::Error => {
             orders.notify(Notif {
-                notif_type: TypeNotifs::Success,
+                notif_type: TypeNotifs::Error,
                 message: "Error uploading picture".to_string(),
             });
         }
