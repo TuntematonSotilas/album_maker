@@ -74,29 +74,47 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.states.remove(&id);
         }
         Msg::DeleteAllPics(id) => {
-			orders.skip(); // No need to rerender
+			
             let id = id.clone();
 			let id_f = id.clone();
 			let id_del = id.clone();
 
 			model.states.entry(id).or_insert(State::Deleting);
 
+			let entry = model.states.get(&id_f);
+			if entry.is_some() {
+				let e = entry.unwrap();
+				match e {
+					State::Deleting => log!("Deleting"),
+					State::AskDelete => log!("Deleting"),
+				}
+			} else {
+				log!("none");
+			}
+
+			orders.force_render_now();
+
+			/*orders.skip(); // No need to rerender
+
 			//Delete all pictures
 			if let Some(albums) = model.albums.clone() {
 				if let Some(album) = albums.iter().find(|a| a.id == id_f ) {
 					if let Some(groups) = album.groups.clone() {
-						let pic_ids: Vec<String> = groups.iter().filter_map(|g| {
+						let grp_pic_ids = groups.iter().map(|g| {
 							if let Some(pictures) = g.pictures.clone() {
-								let pic_ids = pictures.iter().map(|p| p.public_id.clone()).collect();
-								Some(pic_ids)
+								let pic_p_ids:Vec<String> = pictures.iter().map(|p| p.public_id.clone()).collect();
+								log!("a-", pic_p_ids);
+								pic_p_ids
 							} else {
-								None
+								Vec::new()
 							}
-						}).collect();
+						});
+						let pic_ids: Vec<String> = grp_pic_ids.into_iter().flatten().collect();
 						model.total_pic_to_delete = pic_ids.len();
-						
+						log!(pic_ids);
+
 						orders.perform_cmd(async {
-							let mut all_success = false;
+							let mut all_success = true;
 							for pic_id in pic_ids {
 								let pic_id = pic_id.clone();
 								let res = apifn::delete_picture(pic_id).await;
@@ -109,6 +127,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 								}
 							}
 							if all_success {
+								log("all_success");
 								Msg::DeleteAlbum(id_del)
 							} else {
 								Msg::ErrorDelete
@@ -117,7 +136,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 						
 					}
 				}
-			}
+			}*/
 			
 			
         }
@@ -142,7 +161,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::SuccessDelete(id) => {
             if let Some(albums) = &mut model.albums {
                 let index = albums.iter().position(|album| *album.id == id).unwrap();
-                albums.remove(index);
+                //albums.remove(index);
             }
         }
     }
@@ -174,7 +193,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 										},
 										State::Deleting => {
 											progress![
-												C!("progress"),
+												C!["progress", "is-danger"],
 												attrs! { At::Value => "5", At::Max => "10" },
 												"5"
 											]
