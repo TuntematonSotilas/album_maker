@@ -13,14 +13,14 @@ use crate::{
 
 #[derive(PartialEq)]
 enum DeleteState {
-	AskDelete,
-	Deleting
+    AskDelete,
+    Deleting,
 }
 
 struct State {
-	del_state: DeleteState,
-	total_pics: usize,
-	nb_pics: i32,
+    del_state: DeleteState,
+    total_pics: usize,
+    nb_pics: i32,
 }
 // ------ ------
 //     Model
@@ -29,7 +29,7 @@ struct State {
 pub struct Model {
     auth_header: String,
     albums: Option<Vec<Album>>,
-	states: HashMap<String, State>,
+    states: HashMap<String, State>,
 }
 
 // ------ ------
@@ -41,13 +41,13 @@ pub enum Msg {
     Received(Vec<Album>),
     ErrorGet,
     DeleteAllPics(String),
-	DeleteAlbum(String),
+    DeleteAlbum(String),
     AskDelete(String),
     SuccessDelete(String),
     ErrorDelete(String),
     CancelDelete(String),
-	SuccessDeleteOnePic(String),
-	ErrorDeleteOnePic,
+    SuccessDeleteOnePic(String),
+    ErrorDeleteOnePic,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -74,69 +74,66 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.albums = Some(albums);
         }
         Msg::AskDelete(id) => {
-			model.states.insert(id, State {
-				del_state: DeleteState::AskDelete,
-				total_pics: 0,
-				nb_pics: 0,
-			});
+            model.states.insert(
+                id,
+                State {
+                    del_state: DeleteState::AskDelete,
+                    total_pics: 0,
+                    nb_pics: 0,
+                },
+            );
         }
         Msg::CancelDelete(id) => {
             model.states.remove(&id);
         }
         Msg::DeleteAllPics(id) => {
-			
-            let id = id.clone();
-			let id_f = id.clone();
-			let id_del = id.clone();
-			let id_for_suc_del = id.clone();
+            let id_f = id.clone();
+            let id_del = id.clone();
+            let id_for_suc_del = id.clone();
 
-			if let Some(delete_state) = model.states.get_mut(&id) {
-				delete_state.del_state = DeleteState::Deleting;
-				
-				//Delete all pictures
-				if let Some(albums) = model.albums.clone() {
-					if let Some(album) = albums.iter().find(|a| a.id == id_f ) {
-						if let Some(groups) = album.groups.clone() {
-							let grp_pic_ids = groups.iter().map(|g| {
-								if let Some(pictures) = g.pictures.clone() {
-									let pic_p_ids:Vec<String> = pictures.iter().map(|p| p.public_id.clone()).collect();
-									pic_p_ids
-								} else {
-									Vec::new()
-								}
-							});
-							let pic_ids: Vec<String> = grp_pic_ids.into_iter().flatten().collect();
-							delete_state.total_pics = pic_ids.len();
-							
-							for pic_id in pic_ids {
-								let id_for_suc_del = id_for_suc_del.clone();
-								orders.perform_cmd(async move {
-									let res = apifn::delete_picture(pic_id).await;
-									if res {
-										Msg::SuccessDeleteOnePic(id_for_suc_del)
-									} else {
-										Msg::ErrorDeleteOnePic
-									}
-								});
-							}	
-						}
-					}
-				}
+            if let Some(delete_state) = model.states.get_mut(&id) {
+                delete_state.del_state = DeleteState::Deleting;
 
-				orders.send_msg(Msg::DeleteAlbum(id_del));
+                //Delete all pictures
+                if let Some(albums) = model.albums.clone() {
+                    if let Some(album) = albums.iter().find(|a| a.id == id_f) {
+                        if let Some(groups) = album.groups.clone() {
+                            let grp_pic_ids = groups.iter().map(|g| {
+                                g.pictures.clone().map_or_else(Vec::new, |pictures| {
+                                    pictures.iter().map(|p| p.public_id.clone()).collect()
+                                })
+                            });
+                            let pic_ids: Vec<String> = grp_pic_ids.into_iter().flatten().collect();
+                            delete_state.total_pics = pic_ids.len();
 
-			}	
+                            for pic_id in pic_ids {
+                                let id_for_suc_del = id_for_suc_del.clone();
+                                orders.perform_cmd(async move {
+                                    let res = apifn::delete_picture(pic_id).await;
+                                    if res {
+                                        Msg::SuccessDeleteOnePic(id_for_suc_del)
+                                    } else {
+                                        Msg::ErrorDeleteOnePic
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+
+                orders.send_msg(Msg::DeleteAlbum(id_del));
+            }
         }
-		Msg::ErrorDeleteOnePic => (),
-		Msg::SuccessDeleteOnePic(id) => {
-			if let Some(delete_state) = model.states.get_mut(&id) {
-				delete_state.nb_pics += 1;
-			}
-		}
-		Msg::DeleteAlbum(id) => {
-			let auth = model.auth_header.clone();
-			let id_del = id.clone();
-			orders.perform_cmd(async {
+        Msg::ErrorDeleteOnePic => (),
+        Msg::SuccessDeleteOnePic(id) => {
+            if let Some(delete_state) = model.states.get_mut(&id) {
+                delete_state.nb_pics += 1;
+            }
+        }
+        Msg::DeleteAlbum(id) => {
+            let auth = model.auth_header.clone();
+            let id_del = id.clone();
+            orders.perform_cmd(async {
                 let success = apifn::delete_ablum(id_del, auth).await;
                 if success {
                     Msg::SuccessDelete(id)
@@ -144,10 +141,10 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     Msg::ErrorDelete(id)
                 }
             });
-		}
+        }
         Msg::ErrorDelete(id) => {
             model.states.remove(&id);
-			orders.notify(Notif {
+            orders.notify(Notif {
                 notif_type: TypeNotifs::Error,
                 message: "Error deleting album".to_string(),
             });

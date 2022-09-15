@@ -17,7 +17,7 @@ pub enum Msg {
     UpdateGroup(GroupUpdate),
     Upload(upload::Msg),
     Picture(picture::Msg),
-	Delete,
+    Delete,
 }
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
@@ -101,9 +101,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             picture::update(msg, &mut orders.proxy(Msg::Picture));
         }
         Msg::UpdateGroup(_) => (),
-		Msg::Delete => {
-			
-		}
+        Msg::Delete => {}
     }
 }
 
@@ -117,13 +115,12 @@ pub fn view(group: Group) -> Node<Msg> {
             C!("field"),
             div![
                 C!("control"),
-                div![C!("label"), 
-					"Group name",
-					button![C!["delete", "delete-group"],
-						ev(Ev::Click, |_| Msg::Delete),
-					],
-				],
-				input![
+                div![
+                    C!("label"),
+                    "Group name",
+                    button![C!["delete", "delete-group"], ev(Ev::Click, |_| Msg::Delete),],
+                ],
+                input![
                     C![
                         "input",
                         "is-small",
