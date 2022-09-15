@@ -3,6 +3,11 @@
 	animation: group-fade-in 0.3s;
 }
 
+.delete-group {
+	position: absolute;
+	right: 0;
+}
+
 @keyframes group-fade-in {
 	from {
 		transform: scaleY(0); 
