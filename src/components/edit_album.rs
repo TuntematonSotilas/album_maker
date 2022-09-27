@@ -1,4 +1,5 @@
 use seed::{self, prelude::*, *};
+use uuid::Uuid;
 
 use crate::{
     api::apifn,
@@ -55,6 +56,9 @@ pub enum Msg {
     Group(group::Msg),
     NotifySuccess(String),
     NotifyError,
+	DeleteGroup(Uuid),
+	ErrorDeleteOnePic,
+    SuccessDeleteOnePic(String),
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -121,17 +125,53 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
         }
         Msg::Group(msg) => {
-            if let group::Msg::UpdateGroup(ref group_update) = msg {
-                if let Some(groups) = &mut model.album.groups {
-                    update_group(group_update, groups);
-                }
-            }
+            match msg {
+				group::Msg::UpdateGroup(ref group_update) => {
+					if let Some(groups) = &mut model.album.groups {
+						update_group(group_update, groups);
+					}
+            	}
+				group::Msg::DeleteGroup(id) => {
+					orders.send_msg(Msg::DeleteGroup(id));
+				},
+				_ => ()
+			}
             group::update(msg, &mut orders.proxy(Msg::Group));
         }
+		Msg::DeleteGroup(id) => {
+			let album_id = model.album.id.clone();
+			if let Some(groups) = &mut model.album.groups {
+				if let Some(group) = groups.iter().find(|g| g.id == id) {
+						
+					// Delete all pics
+					let pic_ids = group.pictures.clone().map_or_else(Vec::new, |pictures| {
+						pictures.iter().map(|p| p.public_id.clone()).collect()
+					});
+					for pic_id in pic_ids {
+						let album_id = album_id.clone();
+						orders.perform_cmd(async move {
+							let album_id = album_id.clone();
+							let res = apifn::delete_picture(pic_id).await;
+							if res {
+								Msg::SuccessDeleteOnePic(album_id)
+							} else {
+								Msg::ErrorDeleteOnePic
+							}
+						});
+					}
+				}
+
+				if let Some(index) = groups.iter().position(|g| g.id == id) {
+					groups.remove(index);
+				}
+			}
+		}
+		Msg::SuccessDeleteOnePic(id) => log!("ok"),
+    	Msg::ErrorDeleteOnePic => error!("KO"),
     }
 }
 
-fn update_group(group_update: &GroupUpdate, groups: &mut [Group]) {
+fn update_group(group_update: &GroupUpdate, groups: &mut Vec<Group>) {
     if let Some(group) = groups.iter_mut().find(|g| g.id == group_update.id) {
         let grp_upd = group_update.clone();
         match group_update.upd_type {

@@ -89,7 +89,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::DeleteAllPics(id) => {
             let id_f = id.clone();
             let id_del = id.clone();
-            let id_for_suc_del = id.clone();
+            let id_success = id.clone();
 
             if let Some(delete_state) = model.states.get_mut(&id) {
                 delete_state.del_state = DeleteState::Deleting;
@@ -107,11 +107,11 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                             delete_state.total_pics = pic_ids.len();
 
                             for pic_id in pic_ids {
-                                let id_for_suc_del = id_for_suc_del.clone();
+                                let id_success = id_success.clone();
                                 orders.perform_cmd(async move {
                                     let res = apifn::delete_picture(pic_id).await;
                                     if res {
-                                        Msg::SuccessDeleteOnePic(id_for_suc_del)
+                                        Msg::SuccessDeleteOnePic(id_success)
                                     } else {
                                         Msg::ErrorDeleteOnePic
                                     }

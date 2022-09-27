@@ -16,7 +16,8 @@ pub enum Msg {
     UpdateGroup(GroupUpdate),
     Upload(upload::Msg),
     Picture(picture::Msg),
-    Delete,
+    Delete(Uuid),
+	DeleteGroup(Uuid),
 }
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
@@ -89,12 +90,16 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             picture::update(msg, &mut orders.proxy(Msg::Picture));
         }
         Msg::UpdateGroup(_) => (),
-        Msg::Delete => {}
+        Msg::Delete(group_id) => {
+			orders.send_msg(Msg::DeleteGroup(group_id));
+		}
+		Msg::DeleteGroup(_) => ()
     }
 }
 
 pub fn view(album_id: String, group: Group) -> Node<Msg> {
     let gr_t = group.clone();
+	let gr_d = group.clone();
     let gr_p = group;
     div![
         C!("box group"),
@@ -105,7 +110,7 @@ pub fn view(album_id: String, group: Group) -> Node<Msg> {
                 div![
                     C!("label"),
                     "Group name",
-                    button![C!["delete", "delete-group"], ev(Ev::Click, |_| Msg::Delete),],
+                    button![C!["delete", "delete-group"], ev(Ev::Click, move |_| Msg::Delete(gr_d.id)),],
                 ],
                 input![
                     C![
