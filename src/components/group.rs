@@ -13,7 +13,6 @@ use crate::models::{
 // ------ ------
 pub enum Msg {
     TitleChanged(String, Uuid),
-    DescChanged(String, Uuid),
     UpdateGroup(GroupUpdate),
     Upload(upload::Msg),
     Picture(picture::Msg),
@@ -25,17 +24,6 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
         Msg::TitleChanged(input, group_id) => {
             orders.send_msg(Msg::UpdateGroup(GroupUpdate {
                 upd_type: UpdateType::Title,
-                id: group_id,
-                picture: None,
-                grp_data: Some(input),
-                count_fake_pictures: None,
-                asset_id: None,
-                caption: None,
-            }));
-        }
-        Msg::DescChanged(input, group_id) => {
-            orders.send_msg(Msg::UpdateGroup(GroupUpdate {
-                upd_type: UpdateType::Description,
                 id: group_id,
                 picture: None,
                 grp_data: Some(input),
@@ -107,7 +95,6 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
 
 pub fn view(album_id: String, group: Group) -> Node<Msg> {
     let gr_t = group.clone();
-    let gr_d = group.clone();
     let gr_p = group;
     div![
         C!("box group"),
@@ -135,18 +122,6 @@ pub fn view(album_id: String, group: Group) -> Node<Msg> {
                     input_ev(Ev::Input, move |input| Msg::TitleChanged(input, gr_t.id)),
                 ],
             ],
-        ],
-        div![
-            C!("field"),
-            label![C!("label"), "Description"],
-            textarea![
-                C!["textarea", "is-small"],
-                attrs! {
-                    At::Placeholder => "Description",
-                    At::Value => gr_d.description,
-                },
-                input_ev(Ev::Input, move |input| Msg::DescChanged(input, gr_d.id)),
-            ]
         ],
         div![
             match gr_p.pictures.clone() {

@@ -141,9 +141,6 @@ fn update_group(group_update: &GroupUpdate, groups: &mut [Group]) {
             UpdateType::Title => {
                 group.title = grp_upd.grp_data.unwrap_or_default();
             }
-            UpdateType::Description => {
-                group.description = grp_upd.grp_data.unwrap_or_default();
-            }
             UpdateType::AddPicture => {
                 if let Some(picture) = grp_upd.picture {
                     if let Some(pictures) = &mut group.pictures {

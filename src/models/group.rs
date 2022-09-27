@@ -7,7 +7,6 @@ use super::picture::Picture;
 pub struct Group {
     pub id: Uuid,
     pub title: String,
-    pub description: String,
     pub pictures: Option<Vec<Picture>>,
     #[serde(skip_serializing, skip_deserializing)]
     pub count_fake_pictures: u32,
@@ -18,7 +17,6 @@ impl Group {
         Self {
             id: Uuid::new_v4(),
             title: String::new(),
-            description: String::new(),
             pictures: Some(Vec::new()),
             count_fake_pictures: 0,
         }

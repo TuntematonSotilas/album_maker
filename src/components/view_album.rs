@@ -83,10 +83,6 @@ pub fn view(model: &Model) -> Node<Msg> {
                 div![
                     C!("box"),
                     p![C!["title", "is-6", "has-text-link"], &group.title],
-                    p![
-                        C!["subtitle", "is-7", "has-text-primary	"],
-                        &group.description
-                    ],
                     div![match &group.pictures {
                         Some(pictures) => div![
 								C!["is-flex", "is-flex-wrap-wrap", "is-justify-content-center"],
