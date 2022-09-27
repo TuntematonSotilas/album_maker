@@ -17,7 +17,6 @@ use crate::{
 // ------ -----
 pub struct Model {
     is_new: bool,
-	is_saved: bool,
     auth_header: String,
     album: Album,
 }
@@ -26,7 +25,6 @@ impl Model {
     pub const fn new() -> Self {
         Self {
             is_new: true,
-			is_saved: false,
             auth_header: String::new(),
             album: Album::new(),
         }
@@ -65,7 +63,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::InitComp(id_opt) => match id_opt {
             Some(id) => {
                 model.is_new = false;
-				model.is_saved = true;
 				orders.send_msg(Msg::GetAlbum(id));
             }
             None => {
@@ -192,11 +189,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                     TITLE_NEW_ALBUM
                 } else {
                     TITLE_EDIT_ALBUM
-                },
-				IF!(!model.is_saved => div![C!["tag", "is-medium", "is-warning"],
-					span![C!("icon"), i![C!("ion-android-warning")]],
-					"Not Saved"
-				])
+                }
             ],
             label![C!("label"), "Album name"],
             div![
