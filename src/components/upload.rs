@@ -15,7 +15,7 @@ use crate::{
 //    Update
 // ------ ------
 pub enum Msg {
-    FilesChanged(Option<FileList>, Uuid),
+    FilesChanged(Option<FileList>, String, Uuid),
     RenderFakePictures(u32, Uuid),
     SendUpload(FormData, Uuid),
     Success(Picture, Uuid),
@@ -24,7 +24,7 @@ pub enum Msg {
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::FilesChanged(files_opt, group_id) => {
+        Msg::FilesChanged(files_opt, album_id, group_id) => {
             load_dotenv!();
             if let Some(files) = files_opt {
                 let count = files.length();
@@ -33,7 +33,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                     if let Some(file) = files.get(i) {
                         if let Ok(form_data) = FormData::new() {
                             let upload_preset = env!("CLD_UPLOAD_PRESET");
-                            let folder = format!("amaker/{}", group_id);
+                            let folder = format!("amaker/{}", album_id);
                             let file_res = form_data.append_with_blob("file", &file);
                             let preset_res_ =
                                 form_data.append_with_str("upload_preset", upload_preset);
@@ -66,7 +66,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     }
 }
 
-pub fn view(group_id: Uuid) -> Node<Msg> {
+pub fn view(album_id: String, group_id: Uuid) -> Node<Msg> {
     div![
         C!("field mt-2"),
         div![
@@ -91,7 +91,7 @@ pub fn view(group_id: Uuid) -> Node<Msg> {
                                 })
                                 .and_then(|file_input| file_input.files());
 
-                            Msg::FilesChanged(files, group_id)
+                            Msg::FilesChanged(files, album_id, group_id)
                         })
                     ],
                     span![

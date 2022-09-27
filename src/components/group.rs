@@ -105,7 +105,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     }
 }
 
-pub fn view(group: Group) -> Node<Msg> {
+pub fn view(album_id: String, group: Group) -> Node<Msg> {
     let gr_t = group.clone();
     let gr_d = group.clone();
     let gr_p = group;
@@ -165,6 +165,6 @@ pub fn view(group: Group) -> Node<Msg> {
                 ]
             }),
         ],
-        upload::view(gr_p.id).map_msg(Msg::Upload),
+        upload::view(album_id, gr_p.id).map_msg(Msg::Upload),
     ]
 }
