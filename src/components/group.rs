@@ -3,6 +3,8 @@ use uuid::Uuid;
 
 use super::picture;
 use super::upload;
+use crate::models::state::DeleteState;
+use crate::models::state::State;
 use crate::models::{
     group::Group,
     group_update::{GroupUpdate, UpdateType},
@@ -18,6 +20,7 @@ pub enum Msg {
     Picture(picture::Msg),
     Delete(Uuid),
 	DeleteGroup(Uuid),
+	AskDeleteGroup(Uuid),
 }
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
@@ -93,14 +96,21 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
         Msg::Delete(group_id) => {
 			orders.send_msg(Msg::DeleteGroup(group_id));
 		}
-		Msg::DeleteGroup(_) => ()
+		Msg::AskDeleteGroup(group_id) => (),
+		Msg::DeleteGroup(_) => (),
     }
 }
 
-pub fn view(album_id: String, group: Group) -> Node<Msg> {
+pub fn view(album_id: String, group: Group, state_opt: Option<&State>) -> Node<Msg> {
     let gr_t = group.clone();
 	let gr_d = group.clone();
     let gr_p = group;
+
+	let mut c_state = "";
+	if state_opt.is_some() {
+		c_state = "hide";
+	};
+
     div![
         C!("box group"),
         div![
@@ -110,7 +120,7 @@ pub fn view(album_id: String, group: Group) -> Node<Msg> {
                 div![
                     C!("label"),
                     "Group name",
-                    button![C!["delete", "delete-group"], ev(Ev::Click, move |_| Msg::Delete(gr_d.id)),],
+                    button![C!["delete", "delete-group"], ev(Ev::Click, move |_| Msg::AskDeleteGroup(gr_d.id)),],
                 ],
                 input![
                     C![
@@ -128,7 +138,7 @@ pub fn view(album_id: String, group: Group) -> Node<Msg> {
                 ],
             ],
         ],
-        div![
+        div![C!(c_state),
             match gr_p.pictures.clone() {
                 Some(pictures) => div![pictures.iter().map(|picture| {
                     picture::view(gr_p.id, picture.clone()).map_msg(Msg::Picture)

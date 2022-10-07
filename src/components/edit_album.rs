@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use seed::{self, prelude::*, *};
 use uuid::Uuid;
 
@@ -9,7 +11,7 @@ use crate::{
         group::Group,
         group_update::{GroupUpdate, UpdateType},
         notif::{Notif, TypeNotifs},
-        page::{TITLE_EDIT_ALBUM, TITLE_NEW_ALBUM},
+        page::{TITLE_EDIT_ALBUM, TITLE_NEW_ALBUM}, state::{State, DeleteState},
     },
 };
 
@@ -20,14 +22,16 @@ pub struct Model {
     is_new: bool,
     auth_header: String,
     album: Album,
+	states: HashMap<String, State>,
 }
 
 impl Model {
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             is_new: true,
             auth_header: String::new(),
             album: Album::new(),
+			states: HashMap::new(),
         }
     }
     pub fn is_not_valid(&self) -> bool {
@@ -134,6 +138,16 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 				group::Msg::DeleteGroup(id) => {
 					orders.send_msg(Msg::DeleteGroup(id));
 				},
+				group::Msg::AskDeleteGroup(id) => {
+					model.states.insert(
+						id.to_string(),
+						State {
+							del_state: DeleteState::AskDelete,
+							total: 0,
+							current: 0,
+						},
+					);
+				}
 				_ => ()
 			}
             group::update(msg, &mut orders.proxy(Msg::Group));
@@ -262,7 +276,10 @@ pub fn view(model: &Model) -> Node<Msg> {
         match &model.album.groups {
             Some(groups) => div![groups
                 .iter()
-                .map(|group| { group::view(model.album.id.clone(), group.clone()).map_msg(Msg::Group) })],
+                .map(|group| { 
+					let state_opt = model.states.get(&group.id.to_string());
+					group::view(model.album.id.clone(), group.clone(), state_opt).map_msg(Msg::Group) 
+				})],
             None => empty![],
         },
         div![
