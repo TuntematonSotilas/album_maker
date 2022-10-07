@@ -5,3 +5,4 @@ pub mod notif;
 pub mod page;
 pub mod picture;
 pub mod vars;
+pub mod state;

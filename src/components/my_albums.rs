@@ -8,20 +8,10 @@ use crate::{
         album::Album,
         notif::{Notif, TypeNotifs},
         page::{LK_VIEW_ALBUM, TITLE_MY_ALBUMS},
+		state::{State, DeleteState},
     },
 };
 
-#[derive(PartialEq)]
-enum DeleteState {
-    AskDelete,
-    Deleting,
-}
-
-struct State {
-    del_state: DeleteState,
-    total_pics: usize,
-    nb_pics: i32,
-}
 // ------ ------
 //     Model
 // ------ -----
@@ -78,8 +68,8 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 id,
                 State {
                     del_state: DeleteState::AskDelete,
-                    total_pics: 0,
-                    nb_pics: 0,
+                    total: 0,
+                    current: 0,
                 },
             );
         }
@@ -104,7 +94,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                                 })
                             });
                             let pic_ids: Vec<String> = grp_pic_ids.into_iter().flatten().collect();
-                            delete_state.total_pics = pic_ids.len();
+                            delete_state.total = pic_ids.len();
 
                             for pic_id in pic_ids {
                                 let id_success = id_success.clone();
@@ -127,7 +117,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::ErrorDeleteOnePic => (),
         Msg::SuccessDeleteOnePic(id) => {
             if let Some(delete_state) = model.states.get_mut(&id) {
-                delete_state.nb_pics += 1;
+                delete_state.current += 1;
             }
         }
         Msg::DeleteAlbum(id) => {
@@ -186,7 +176,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 										DeleteState::Deleting => {
 											progress![
 												C!["progress", "is-danger"],
-												attrs! { At::Value => state.nb_pics, At::Max => state.total_pics }
+												attrs! { At::Value => state.current, At::Max => state.total }
 											]
 										}
 									}
