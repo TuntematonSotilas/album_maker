@@ -3,7 +3,6 @@ use uuid::Uuid;
 
 use super::picture;
 use super::upload;
-use crate::models::state::DeleteState;
 use crate::models::state::State;
 use crate::models::{
     group::Group,
@@ -18,9 +17,7 @@ pub enum Msg {
     UpdateGroup(GroupUpdate),
     Upload(upload::Msg),
     Picture(picture::Msg),
-    Delete(Uuid),
-	DeleteGroup(Uuid),
-	AskDeleteGroup(Uuid),
+	BeginDeleteGroup(Uuid),
 }
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
@@ -93,11 +90,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             picture::update(msg, &mut orders.proxy(Msg::Picture));
         }
         Msg::UpdateGroup(_) => (),
-        Msg::Delete(group_id) => {
-			orders.send_msg(Msg::DeleteGroup(group_id));
-		}
-		Msg::AskDeleteGroup(group_id) => (),
-		Msg::DeleteGroup(_) => (),
+        Msg::BeginDeleteGroup(_) => ()
     }
 }
 
@@ -106,55 +99,60 @@ pub fn view(album_id: String, group: Group, state_opt: Option<&State>) -> Node<M
 	let gr_d = group.clone();
     let gr_p = group;
 
-	let mut c_state = "";
-	if state_opt.is_some() {
-		c_state = "hide";
-	};
-
     div![
-        C!("box group"),
-        div![
-            C!("field"),
-            div![
-                C!("control"),
-                div![
-                    C!("label"),
-                    "Group name",
-                    button![C!["delete", "delete-group"], ev(Ev::Click, move |_| Msg::AskDeleteGroup(gr_d.id)),],
-                ],
-                input![
-                    C![
-                        "input",
-                        "is-small",
-                        IF!(gr_t.title.is_empty() => "is-danger")
-                    ],
-                    attrs! {
-                        At::Type => "text",
-                        At::Name => "title",
-                        At::Placeholder => "Group name",
-                        At::Value => gr_t.title,
-                    },
-                    input_ev(Ev::Input, move |input| Msg::TitleChanged(input, gr_t.id)),
-                ],
-            ],
-        ],
-        div![C!(c_state),
-            match gr_p.pictures.clone() {
-                Some(pictures) => div![pictures.iter().map(|picture| {
-                    picture::view(gr_p.id, picture.clone()).map_msg(Msg::Picture)
-                })],
-                None => empty![],
-            },
-            (0..gr_p.count_fake_pictures).map(|_| {
-                figure![
-                    C!["image", "is-128x128", "m-1"],
-                    progress![
-                        C!["progress", "picture-progress"],
-                        attrs! { At::Max => 100 }
-                    ],
-                ]
-            }),
-        ],
-        upload::view(album_id, gr_p.id).map_msg(Msg::Upload),
+        C!["box group"],
+		if state_opt.is_some() {
+			let state = state_opt.unwrap();
+			progress![
+				C!["progress", "is-danger"],
+				attrs! { At::Value => state.current, At::Max => state.total }
+			]
+		} else {
+			div![
+				div![
+					C!("field"),
+					div![
+						C!("control"),
+						div![
+							C!("label"),
+							"Group name",
+							button![C!["delete", "delete-group"], ev(Ev::Click, move |_| Msg::BeginDeleteGroup(gr_d.id)),],
+						],
+						input![
+							C![
+								"input",
+								"is-small",
+								IF!(gr_t.title.is_empty() => "is-danger")
+							],
+							attrs! {
+								At::Type => "text",
+								At::Name => "title",
+								At::Placeholder => "Group name",
+								At::Value => gr_t.title,
+							},
+							input_ev(Ev::Input, move |input| Msg::TitleChanged(input, gr_t.id)),
+						],
+					],
+				],
+				div![
+					match gr_p.pictures.clone() {
+						Some(pictures) => div![pictures.iter().map(|picture| {
+							picture::view(gr_p.id, picture.clone()).map_msg(Msg::Picture)
+						})],
+						None => empty![],
+					},
+					(0..gr_p.count_fake_pictures).map(|_| {
+						figure![
+							C!["image", "is-128x128", "m-1"],
+							progress![
+								C!["progress", "picture-progress"],
+								attrs! { At::Max => 100 }
+							],
+						]
+					}),
+				],
+				upload::view(album_id, gr_p.id).map_msg(Msg::Upload),
+			]
+		}
     ]
 }

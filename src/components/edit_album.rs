@@ -135,18 +135,16 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 						update_group(group_update, groups);
 					}
             	}
-				group::Msg::DeleteGroup(id) => {
-					orders.send_msg(Msg::DeleteGroup(id));
-				},
-				group::Msg::AskDeleteGroup(id) => {
+				group::Msg::BeginDeleteGroup(id) => {
 					model.states.insert(
 						id.to_string(),
 						State {
-							del_state: DeleteState::AskDelete,
+							del_state: DeleteState::Deleting,
 							total: 0,
 							current: 0,
 						},
 					);
+					orders.send_msg(Msg::DeleteGroup(id));
 				}
 				_ => ()
 			}
@@ -180,8 +178,14 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 				}
 			}
 		}
-		Msg::SuccessDeleteOnePic(id) => log!("ok"),
-    	Msg::ErrorDeleteOnePic => error!("KO"),
+		Msg::SuccessDeleteOnePic(id) => {
+			if let Some(delete_state) = model.states.get_mut(&id) {
+                delete_state.current += 1;
+            }
+		}
+    	Msg::ErrorDeleteOnePic => {
+			error!("Error deleting picture");
+		}
     }
 }
 

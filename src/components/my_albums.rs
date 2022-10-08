@@ -114,7 +114,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 orders.send_msg(Msg::DeleteAlbum(id_del));
             }
         }
-        Msg::ErrorDeleteOnePic => (),
+        Msg::ErrorDeleteOnePic => {
+			error!("Error deleting picture");
+		},
         Msg::SuccessDeleteOnePic(id) => {
             if let Some(delete_state) = model.states.get_mut(&id) {
                 delete_state.current += 1;
