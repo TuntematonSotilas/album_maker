@@ -11,7 +11,8 @@ use crate::{
         group::Group,
         group_update::{GroupUpdate, UpdateType},
         notif::{Notif, TypeNotifs},
-        page::{TITLE_EDIT_ALBUM, TITLE_NEW_ALBUM}, state::{State, DeleteState},
+        page::{TITLE_EDIT_ALBUM, TITLE_NEW_ALBUM},
+        state::{State, TypeDel},
     },
 };
 
@@ -22,7 +23,7 @@ pub struct Model {
     is_new: bool,
     auth_header: String,
     album: Album,
-	states: HashMap<String, State>,
+    states: HashMap<String, State>,
 }
 
 impl Model {
@@ -31,7 +32,7 @@ impl Model {
             is_new: true,
             auth_header: String::new(),
             album: Album::new(),
-			states: HashMap::new(),
+            states: HashMap::new(),
         }
     }
     pub fn is_not_valid(&self) -> bool {
@@ -60,8 +61,8 @@ pub enum Msg {
     Group(group::Msg),
     NotifySuccess(String),
     NotifyError,
-	DeleteGroup(Uuid),
-	ErrorDeleteOnePic,
+    DeleteGroup(Uuid),
+    ErrorDeleteOnePic,
     SuccessDeleteOnePic(String),
 }
 
@@ -71,7 +72,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::InitComp(id_opt) => match id_opt {
             Some(id) => {
                 model.is_new = false;
-				orders.send_msg(Msg::GetAlbum(id));
+                orders.send_msg(Msg::GetAlbum(id));
             }
             None => {
                 model.album = Album::new();
@@ -130,66 +131,66 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::Group(msg) => {
             match msg {
-				group::Msg::UpdateGroup(ref group_update) => {
-					if let Some(groups) = &mut model.album.groups {
-						update_group(group_update, groups);
-					}
-            	}
-				group::Msg::BeginDeleteGroup(id) => {
-					model.states.insert(
-						id.to_string(),
-						State {
-							del_state: DeleteState::Deleting,
-							total: 0,
-							current: 0,
-						},
-					);
-					orders.send_msg(Msg::DeleteGroup(id));
-				}
-				_ => ()
-			}
+                group::Msg::UpdateGroup(ref group_update) => {
+                    if let Some(groups) = &mut model.album.groups {
+                        update_group(group_update, groups);
+                    }
+                }
+                group::Msg::BeginDeleteGroup(id) => {
+                    model.states.insert(
+                        id.to_string(),
+                        State {
+                            del_state: TypeDel::Deleting,
+                            total: 0,
+                            current: 0,
+                        },
+                    );
+                    orders.send_msg(Msg::DeleteGroup(id));
+                }
+                _ => (),
+            }
             group::update(msg, &mut orders.proxy(Msg::Group));
         }
-		Msg::DeleteGroup(id) => {
-			let album_id = model.album.id.clone();
-			if let Some(groups) = &mut model.album.groups {
-				if let Some(group) = groups.iter().find(|g| g.id == id) {
-						
-					// Delete all pics
-					let pic_ids = group.pictures.clone().map_or_else(Vec::new, |pictures| {
-						pictures.iter().map(|p| p.public_id.clone()).collect()
-					});
-					for pic_id in pic_ids {
-						let album_id = album_id.clone();
-						orders.perform_cmd(async move {
-							let album_id = album_id.clone();
-							let res = apifn::delete_picture(pic_id).await;
-							if res {
-								Msg::SuccessDeleteOnePic(album_id)
-							} else {
-								Msg::ErrorDeleteOnePic
-							}
-						});
-					}
-				}
-
-				if let Some(index) = groups.iter().position(|g| g.id == id) {
-					groups.remove(index);
-				}
-			}
-		}
-		Msg::SuccessDeleteOnePic(id) => {
-			if let Some(delete_state) = model.states.get_mut(&id) {
+        Msg::DeleteGroup(id) => delete_group(model, orders, id),
+        Msg::SuccessDeleteOnePic(id) => {
+            if let Some(delete_state) = model.states.get_mut(&id) {
                 delete_state.current += 1;
             }
-		}
-    	Msg::ErrorDeleteOnePic => {
-			error!("Error deleting picture");
-		}
+        }
+        Msg::ErrorDeleteOnePic => {
+            error!("Error deleting picture");
+        }
     }
 }
 
-fn update_group(group_update: &GroupUpdate, groups: &mut Vec<Group>) {
+fn delete_group(model: &mut Model, orders: &mut impl Orders<Msg>, group_id: Uuid) {
+    let album_id = model.album.id.clone();
+    if let Some(groups) = &mut model.album.groups {
+        if let Some(group) = groups.iter().find(|g| g.id == group_id) {
+            // Delete all pics
+            let pic_ids = group.pictures.clone().map_or_else(Vec::new, |pictures| {
+                pictures.iter().map(|p| p.public_id.clone()).collect()
+            });
+            for pic_id in pic_ids {
+                let album_id = album_id.clone();
+                orders.perform_cmd(async move {
+                    let album_id = album_id.clone();
+                    let res = apifn::delete_picture(pic_id).await;
+                    if res {
+                        Msg::SuccessDeleteOnePic(album_id)
+                    } else {
+                        Msg::ErrorDeleteOnePic
+                    }
+                });
+            }
+        }
+        if let Some(index) = groups.iter().position(|g| g.id == group_id) {
+            groups.remove(index);
+        }
+    }
+}
+
+fn update_group(group_update: &GroupUpdate, groups: &mut [Group]) {
     if let Some(group) = groups.iter_mut().find(|g| g.id == group_update.id) {
         let grp_upd = group_update.clone();
         match group_update.upd_type {
@@ -278,12 +279,10 @@ pub fn view(model: &Model) -> Node<Msg> {
             ]
         ],
         match &model.album.groups {
-            Some(groups) => div![groups
-                .iter()
-                .map(|group| { 
-					let state_opt = model.states.get(&group.id.to_string());
-					group::view(model.album.id.clone(), group.clone(), state_opt).map_msg(Msg::Group) 
-				})],
+            Some(groups) => div![groups.iter().map(|group| {
+                let state_opt = model.states.get(&group.id.to_string());
+                group::view(model.album.id.clone(), group.clone(), state_opt).map_msg(Msg::Group)
+            })],
             None => empty![],
         },
         div![

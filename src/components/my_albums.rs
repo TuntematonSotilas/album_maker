@@ -8,7 +8,7 @@ use crate::{
         album::Album,
         notif::{Notif, TypeNotifs},
         page::{LK_VIEW_ALBUM, TITLE_MY_ALBUMS},
-		state::{State, DeleteState},
+        state::{State, TypeDel},
     },
 };
 
@@ -67,7 +67,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.states.insert(
                 id,
                 State {
-                    del_state: DeleteState::AskDelete,
+                    del_state: TypeDel::AskDelete,
                     total: 0,
                     current: 0,
                 },
@@ -76,47 +76,10 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::CancelDelete(id) => {
             model.states.remove(&id);
         }
-        Msg::DeleteAllPics(id) => {
-            let id_f = id.clone();
-            let id_del = id.clone();
-            let id_success = id.clone();
-
-            if let Some(delete_state) = model.states.get_mut(&id) {
-                delete_state.del_state = DeleteState::Deleting;
-
-                //Delete all pictures
-                if let Some(albums) = model.albums.clone() {
-                    if let Some(album) = albums.iter().find(|a| a.id == id_f) {
-                        if let Some(groups) = album.groups.clone() {
-                            let grp_pic_ids = groups.iter().map(|g| {
-                                g.pictures.clone().map_or_else(Vec::new, |pictures| {
-                                    pictures.iter().map(|p| p.public_id.clone()).collect()
-                                })
-                            });
-                            let pic_ids: Vec<String> = grp_pic_ids.into_iter().flatten().collect();
-                            delete_state.total = pic_ids.len();
-
-                            for pic_id in pic_ids {
-                                let id_success = id_success.clone();
-                                orders.perform_cmd(async move {
-                                    let res = apifn::delete_picture(pic_id).await;
-                                    if res {
-                                        Msg::SuccessDeleteOnePic(id_success)
-                                    } else {
-                                        Msg::ErrorDeleteOnePic
-                                    }
-                                });
-                            }
-                        }
-                    }
-                }
-
-                orders.send_msg(Msg::DeleteAlbum(id_del));
-            }
-        }
+        Msg::DeleteAllPics(album_id) => delete_all_pics(model, orders, album_id.as_str()),
         Msg::ErrorDeleteOnePic => {
-			error!("Error deleting picture");
-		},
+            error!("Error deleting picture");
+        }
         Msg::SuccessDeleteOnePic(id) => {
             if let Some(delete_state) = model.states.get_mut(&id) {
                 delete_state.current += 1;
@@ -150,6 +113,39 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     }
 }
 
+fn delete_all_pics(model: &mut Model, orders: &mut impl Orders<Msg>, album_id: &str) {
+    if let Some(delete_state) = model.states.get_mut(album_id) {
+        delete_state.del_state = TypeDel::Deleting;
+        //Delete all pictures
+        if let Some(albums) = model.albums.clone() {
+            if let Some(album) = albums.iter().find(|a| a.id == album_id) {
+                if let Some(groups) = album.groups.clone() {
+                    let grp_pic_ids = groups.iter().map(|g| {
+                        g.pictures.clone().map_or_else(Vec::new, |pictures| {
+                            pictures.iter().map(|p| p.public_id.clone()).collect()
+                        })
+                    });
+                    let pic_ids: Vec<String> = grp_pic_ids.into_iter().flatten().collect();
+                    delete_state.total = pic_ids.len();
+
+                    for pic_id in pic_ids {
+                        let id_success = album_id.to_string();
+                        orders.perform_cmd(async move {
+                            let res = apifn::delete_picture(pic_id).await;
+                            if res {
+                                Msg::SuccessDeleteOnePic(id_success)
+                            } else {
+                                Msg::ErrorDeleteOnePic
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        orders.send_msg(Msg::DeleteAlbum(album_id.to_string()));
+    }
+}
+
 // ------ ------
 //     View
 // ------ ------
@@ -172,10 +168,10 @@ pub fn view(model: &Model) -> Node<Msg> {
 								if state_opt.is_some() {
 									let state = state_opt.unwrap();
 									match state.del_state {
-										DeleteState::AskDelete => {
+										TypeDel::AskDelete => {
 											span!["Delete this album ?"]
 										},
-										DeleteState::Deleting => {
+										TypeDel::Deleting => {
 											progress![
 												C!["progress", "is-danger"],
 												attrs! { At::Value => state.current, At::Max => state.total }
@@ -196,7 +192,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                             div![
                                 C!["is-align-content-flex-end"],
                                 if state_opt.is_some() {
-									if state_opt.unwrap().del_state == DeleteState::AskDelete {
+									if state_opt.unwrap().del_state == TypeDel::AskDelete {
 										div![
 											button![
 												C!["button", "is-link", "is-light", "is-small", "mr-2"],
