@@ -3,7 +3,7 @@ use crate::{
     models::{
         album::Album,
         notif::{Notif, TypeNotifs},
-        page::{LK_EDIT_ALBUM, TITLE_EDIT_ALBUM},
+        page::{LK_EDIT_ALBUM, TITLE_EDIT_ALBUM, TITLE_SLIDESHOW, LK_SLIDESHOW},
         vars::THUMB_URI,
     },
 };
@@ -69,14 +69,25 @@ pub fn view(model: &Model) -> Node<Msg> {
     div![
         C!["column", "is-two-thirds"],
         div![
-            C!["title", "is-5", "has-text-link"],
-            &model.album.title,
-            a![
-                C!["button", "is-link", "is-light", "is-small", "ml-2"],
-                attrs! { At::Href => format!("/{}/{}", LK_EDIT_ALBUM, model.album.id) },
-                span![C!("icon"), i![C!("ion-edit")]],
-                span![TITLE_EDIT_ALBUM],
-            ],
+            C!["column"],
+           	div![
+				C!["title", "is-5", "has-text-link"],
+				&model.album.title
+			],
+			div![C!("mb-2"),
+				a![
+					C!["button", "is-link", "is-light", "is-small", "ml-2"],
+					attrs! { At::Href => format!("/{}/{}", LK_EDIT_ALBUM, model.album.id) },
+					span![C!("icon"), i![C!("ion-edit")]],
+					span![TITLE_EDIT_ALBUM],
+				],
+				a![
+					C!["button", "is-primary", "is-light", "is-small", "ml-2"],
+					attrs! { At::Href => format!("/{}/{}", LK_SLIDESHOW, model.album.id) },
+					span![C!("icon"), i![C!("ion-play")]],
+					span![TITLE_SLIDESHOW],
+				]
+			]
         ],
         match &model.album.groups {
             Some(groups) => div![groups.iter().map(|group| {
