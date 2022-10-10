@@ -69,14 +69,17 @@ pub enum Msg {
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::SetAuth(auth_header) => model.auth_header = auth_header,
-        Msg::InitComp(id_opt) => match id_opt {
-            Some(id) => {
-                model.is_new = false;
-                orders.send_msg(Msg::GetAlbum(id));
-            }
-            None => {
-                model.album = Album::new();
-            }
+        Msg::InitComp(id_opt) => {
+			model.states = HashMap::new();
+			match id_opt {
+				Some(id) => {
+					model.is_new = false;
+					orders.send_msg(Msg::GetAlbum(id));
+				}
+				None => {
+					model.album = Album::new();
+				}
+			}
         },
         Msg::GetAlbum(id) => {
             orders.skip(); // No need to rerender
