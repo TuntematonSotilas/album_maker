@@ -1,4 +1,3 @@
-pub mod edit_album;
 pub mod error;
 pub mod group;
 pub mod header;
@@ -8,3 +7,5 @@ pub mod notification;
 pub mod picture;
 pub mod upload;
 pub mod view_album;
+pub mod edit_album;
+pub mod slideshow;

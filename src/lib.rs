@@ -33,6 +33,7 @@ fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
         my_albums: my_albums::Model::default(),
         edit_album: edit_album::Model::new(),
         view_album: view_album::Model::new(),
+		slideshow: slideshow::Model::new(),
         page: login_page,
         login: login::Model::default(),
     }
@@ -48,6 +49,7 @@ struct Model {
     my_albums: my_albums::Model,
     edit_album: edit_album::Model,
     view_album: view_album::Model,
+	slideshow: slideshow::Model,
     notification: notification::Model,
     login: login::Model,
 }
@@ -60,6 +62,7 @@ enum Msg {
     MyAlbums(my_albums::Msg),
     EditAlbum(edit_album::Msg),
     ViewAlbum(view_album::Msg),
+	Slideshow(slideshow::Msg),
     Login(login::Msg),
     UrlChanged(subs::UrlChanged),
     InitComp(Option<String>),
@@ -109,11 +112,15 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 &mut orders.proxy(Msg::ViewAlbum),
             );
         }
+		Msg::Slideshow(msg) => {
+			slideshow::update(msg, &mut model.slideshow, &mut orders.proxy(Msg::Slideshow))
+		}
         Msg::UrlChanged(subs::UrlChanged(mut url)) => {
             let page = match url.next_path_part() {
                 Some(models::page::LK_NEW_ALBUM) => models::page::Page::NewAlbum,
                 Some(models::page::LK_VIEW_ALBUM) => models::page::Page::ViewAlbum,
                 Some(models::page::LK_EDIT_ALBUM) => models::page::Page::EditAlbum,
+				Some(models::page::LK_SLIDESHOW) => models::page::Page::Slideshow,
                 Some(models::page::LK_LOGIN) => models::page::Page::Login,
                 _ => models::page::Page::MyAlbums,
             };
@@ -141,6 +148,11 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                             orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(id)));
                         }
                     }
+					models::page::Page::Slideshow => {
+						if let Some(id) = opt_id {
+                            orders.send_msg(Msg::Slideshow(slideshow::Msg::InitComp(id)));
+                        }
+					}
                     models::page::Page::Login => (),
                 }
             }
@@ -160,7 +172,8 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::SetAuth(auth) => {
             orders.send_msg(Msg::EditAlbum(edit_album::Msg::SetAuth(auth.clone())));
             orders.send_msg(Msg::MyAlbums(my_albums::Msg::SetAuth(auth.clone())));
-            orders.send_msg(Msg::ViewAlbum(view_album::Msg::SetAuth(auth)));
+            orders.send_msg(Msg::ViewAlbum(view_album::Msg::SetAuth(auth.clone())));
+            orders.send_msg(Msg::Slideshow(slideshow::Msg::SetAuth(auth)));
         }
     }
 }
@@ -187,6 +200,8 @@ fn view(model: &Model) -> Node<Msg> {
                                     my_albums::view(&model.my_albums).map_msg(Msg::MyAlbums),
                                 models::page::Page::ViewAlbum =>
                                     view_album::view(&model.view_album).map_msg(Msg::ViewAlbum),
+								models::page::Page::Slideshow =>
+                                    slideshow::view(&model.slideshow).map_msg(Msg::Slideshow),
                                 models::page::Page::Login => empty!(),
                             }
                         ]

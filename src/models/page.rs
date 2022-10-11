@@ -11,11 +11,12 @@ pub const TITLE_EDIT_ALBUM: &str = "Edit album";
 pub const TITLE_SLIDESHOW: &str = "Slideshow";
 pub const TITLE_LOGIN: &str = "Sign in to your albums";
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Page {
     MyAlbums,
     NewAlbum,
     EditAlbum,
     ViewAlbum,
+	Slideshow,
     Login,
 }

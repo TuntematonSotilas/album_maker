@@ -61,12 +61,16 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
+	let menu_is_hidden = match model.page == Page::Slideshow {
+		true => "is-hidden",
+		false => "",
+	};
     let menu_is_active = match &model.is_menu_open {
         true => "is-active",
         false => "",
     };
     nav![
-        C!("navbar"),
+        C!["navbar", menu_is_hidden],
         attrs! { At::AriaLabel => "main navigation" },
         div![
             C!("navbar-brand"),
@@ -93,7 +97,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                 C![
                     "navbar-item",
                     "is-tab",
-                    IF!(matches!(model.page, Page::MyAlbums) => "is-active")
+                    IF!(model.page == Page::MyAlbums => "is-active")
                 ],
                 attrs! { At::Href => format!("/{}", LK_MY_ALBUMS) },
                 TITLE_MY_ALBUMS
