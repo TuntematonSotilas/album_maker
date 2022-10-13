@@ -7,7 +7,7 @@
 extern crate crypto;
 
 use crate::components::*;
-use models::{notif::Notif, page::LK_LOGIN};
+use models::{notif::Notif, page::{LK_LOGIN, Page}};
 use seed::{prelude::*, *};
 
 mod api;
@@ -182,17 +182,17 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 fn view(model: &Model) -> Node<Msg> {
-    div![
+	div![
         notification::view(&model.notification).map_msg(Msg::Notification),
         header::view(&model.header).map_msg(Msg::Header),
         div![
-            C!["container"],
+            C![IF!(model.page != Page::Slideshow => "container")],
             match &model.page {
                 models::page::Page::Login => login::view(&model.login).map_msg(Msg::Login),
                 _ => match &model.is_logged {
                     true => {
                         div![
-                            C!["columns", "is-centered", "m-1"],
+							C![IF!(model.page != Page::Slideshow => "columns is-centered m-1")],
                             match &model.page {
                                 models::page::Page::NewAlbum | models::page::Page::EditAlbum =>
                                     edit_album::view(&model.edit_album).map_msg(Msg::EditAlbum),

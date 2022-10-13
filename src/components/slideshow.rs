@@ -1,3 +1,5 @@
+use std::process::id;
+
 use crate::{
     api::apifn,
     models::{
@@ -32,6 +34,7 @@ pub enum Msg {
     InitComp(String),
     ErrorGet,
     Received(Album),
+	Fullscreen,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -57,6 +60,12 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::Received(album) => {
             model.album = album;
         }
+		Msg::Fullscreen => {
+			let ele = seed::document().get_element_by_id("slideshow");
+			if let Some(ele) = ele {
+				_ = ele.request_fullscreen();
+			}
+		}
     }
 }
 
@@ -64,14 +73,12 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
-    div![
-        C!["column", "is-two-thirds"],
-        div![
-            C!["column"],
-           	div![
-				C!["title", "is-5", "has-text-link"],
-				&model.album.title
-			]
-        ]
+    div![C!("slideshow"), id!("slideshow"),
+		button![
+			C!["button"],
+				span![C!("icon"), i![C!("ion-plus")]],
+				span!["Fullscreen"],
+			ev(Ev::Click, |_| Msg::Fullscreen),
+		],
     ]
 }
