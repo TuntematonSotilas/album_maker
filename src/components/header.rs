@@ -1,4 +1,4 @@
-use crate::models::page::{Page, LK_MY_ALBUMS, LK_NEW_ALBUM, TITLE_MY_ALBUMS, TITLE_NEW_ALBUM};
+use crate::models::page::{Page, LK_MY_ALBUMS, LK_NEW_ALBUM, TITLE_MY_ALBUMS, TITLE_NEW_ALBUM, LK_VIEW_ALBUM};
 use seed::{self, prelude::*, *};
 
 const TITLE: &str = "Album maker";
@@ -32,7 +32,6 @@ pub enum Msg {
     ClickLogInOrOut,
     LogInOrOut,
 	Fullscreen,
-	GoToAlbum,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -62,7 +61,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 				_ = ele.request_fullscreen();
 			}
 		},
-		Msg::GoToAlbum => ()
     }
 }
 
@@ -74,7 +72,7 @@ pub fn view(model: &Model) -> Node<Msg> {
         true => "navbar-slideshow",
         false => "",
     };
-    let menu_is_active = match &model.is_menu_open {
+	let menu_is_active = match &model.is_menu_open {
         true => "is-active",
         false => "",
     };
@@ -144,9 +142,9 @@ pub fn view(model: &Model) -> Node<Msg> {
 							],
 							a![
 								C!["button", "is-primary", "is-link", "is-light", "is-small"],
-									span![C!("icon"), i![C!("ion-close-circled")]],
-									span!["Close"],
-								ev(Ev::Click, |_| Msg::GoToAlbum),
+								attrs! { At::Href => format!("/{}", LK_VIEW_ALBUM) },
+								span![C!("icon"), i![C!("ion-close-circled")]],
+								span!["Close"],
 							]
 						]
 					} else {

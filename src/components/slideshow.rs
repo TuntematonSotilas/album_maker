@@ -1,5 +1,3 @@
-use std::process::id;
-
 use crate::{
     api::apifn,
     models::{
@@ -58,7 +56,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::Received(album) => {
             model.album = album;
-        }
+        },
     }
 }
 
@@ -67,6 +65,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
     div![C!("slideshow"), id!("slideshow"),
-		
+		h1![&model.album.title]
     ]
 }
