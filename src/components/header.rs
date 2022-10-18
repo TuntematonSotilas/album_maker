@@ -161,8 +161,6 @@ pub fn view(model: &Model) -> Node<Msg> {
 							]
 						]
 					}
-					
-					
                 ]
             ]
         ]

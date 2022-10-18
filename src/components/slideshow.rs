@@ -32,6 +32,7 @@ pub enum Msg {
     InitComp(String),
     ErrorGet,
     Received(Album),
+	Next,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -57,6 +58,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::Received(album) => {
             model.album = album;
         },
+		Msg::Next => {
+
+		}
     }
 }
 
@@ -65,6 +69,15 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
     div![C!("slideshow"), id!("slideshow"),
-		h1![&model.album.title]
+		div![
+			C!("container"),
+			div![C!("tile notification is-primary"),
+				h1![
+					C!["title", "is-1"], 
+					&model.album.title
+				],
+			]
+		],
+		ev(Ev::Click, |_| Msg::Next),
     ]
 }

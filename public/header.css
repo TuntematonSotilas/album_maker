@@ -12,3 +12,12 @@
 .navbar-slideshow {
 	background: black;
 }
+
+.navbar-slideshow .navbar-menu {
+	display: none;
+}
+
+
+.navbar-slideshow:hover .navbar-menu {
+	display: block;
+}
