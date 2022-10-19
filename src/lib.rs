@@ -186,7 +186,7 @@ fn view(model: &Model) -> Node<Msg> {
         notification::view(&model.notification).map_msg(Msg::Notification),
         header::view(&model.header).map_msg(Msg::Header),
         div![
-            C![IF!(model.page != Page::Slideshow => "container")],
+            C!(IF!(model.page != Page::Slideshow => "container")),
             match &model.page {
                 models::page::Page::Login => login::view(&model.login).map_msg(Msg::Login),
                 _ => match &model.is_logged {

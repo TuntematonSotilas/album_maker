@@ -68,14 +68,22 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
-    div![C!("slideshow"), id!("slideshow"),
+    div![
+		C!("slideshow"),
 		div![
 			C!("container"),
-			div![C!("tile notification is-primary"),
-				h1![
-					C!["title", "is-1"], 
-					&model.album.title
-				],
+			div![
+				C!("columns", "is-centered"),
+				div![
+					C!["column", "is-half", "is-link"],
+					article![
+						C!["message", "is-primary"],
+						div![
+							C!("message-body"),
+							&model.album.title
+						]
+					]
+				]
 			]
 		],
 		ev(Ev::Click, |_| Msg::Next),
