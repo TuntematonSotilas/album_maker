@@ -1,6 +1,15 @@
 .slideshow {
 	background-color: black;
 	width: 100vw;
-	height: 96vh;
+	height: 100vh;
 	margin: 0;
+}
+
+.slideshow-image {
+	height: 100%;
+}
+
+.slideshow-img {
+	height: 100% !important;
+	object-fit: contain;
 }

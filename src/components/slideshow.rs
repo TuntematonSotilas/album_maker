@@ -75,7 +75,24 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			if let Some(groups) = &model.album.groups {
 				let grp = groups.get(model.current_group);
 				if let Some(grp) = grp {
-					model.group_title = Some(grp.title.clone());
+					if model.group_title.is_none() {
+						model.group_title = Some(grp.title.clone());
+					} else {
+						model.is_title = false;
+						model.group_title = None;
+						if let Some(pictures) = &grp.pictures
+						{
+							if let Some(picture) = pictures.get(model.current_pic) 
+							{
+								log!("pic found");
+								model.picture = Some(picture.clone());
+								model.current_pic += 1;
+							} else {
+								model.current_group += 1;
+							}
+						}
+					}
+					
 				}
 			}
 		}
@@ -110,8 +127,9 @@ pub fn view(model: &Model) -> Node<Msg> {
 			]
 		} else if let Some(picture) = &model.picture {
 			figure![
-				C!["image", "is-128x128"],
+				C!["image", "slideshow-image"],
 				img![
+					C!("slideshow-img"),
 					attrs! { At::Src => format!("{}{}.{}", IMG_URI, picture.public_id, picture.format) }
 				]
 			]
