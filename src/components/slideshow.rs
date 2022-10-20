@@ -2,7 +2,7 @@ use crate::{
     api::apifn,
     models::{
         album::Album,
-        notif::{Notif, TypeNotifs},
+        notif::{Notif, TypeNotifs}, vars::IMG_URI, picture::Picture,
     },
 };
 use seed::{self, prelude::*, *};
@@ -13,6 +13,11 @@ use seed::{self, prelude::*, *};
 pub struct Model {
     auth_header: String,
     album: Album,
+	is_title: bool,
+	group_title: Option<String>,
+	picture: Option<Picture>,
+	current_group: usize,
+	current_pic: usize,
 }
 
 impl Model {
@@ -20,6 +25,11 @@ impl Model {
         Self {
             auth_header: String::new(),
             album: Album::new(),
+			is_title: true,
+			group_title: None,
+			picture: None,
+			current_group: 0,
+			current_pic: 0,
         }
     }
 }
@@ -48,6 +58,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     None => Msg::ErrorGet,
                 }
             });
+			model.is_title = true;
+			model.current_group = 0;
+			model.current_pic = 0;
         }
         Msg::ErrorGet => {
             orders.notify(Notif {
@@ -59,7 +72,12 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.album = album;
         },
 		Msg::Next => {
-
+			if let Some(groups) = &model.album.groups {
+				let grp = groups.get(model.current_group);
+				if let Some(grp) = grp {
+					model.group_title = Some(grp.title.clone());
+				}
+			}
 		}
     }
 }
@@ -70,21 +88,36 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 pub fn view(model: &Model) -> Node<Msg> {
     div![
 		C!("slideshow"),
-		div![
-			C!("container"),
+		if model.is_title || model.group_title.is_some() {
 			div![
+				C!("container"),
 				div![
 					C!["hero", "is-large"],
 					div![
 						C!("hero-body"),
 						div![
 							C!["is-flex", "is-justify-content-center", "has-text-centered"],
-							h1![C!["title", "has-text-link" ], &model.album.title],
+							h1![C!["title", "has-text-link" ], 
+								if let Some(group_title) = &model.group_title {
+									&group_title
+								} else {
+									&model.album.title
+								}
+							],
 						],
 					],
 				]
 			]
-		],
+		} else if let Some(picture) = &model.picture {
+			figure![
+				C!["image", "is-128x128"],
+				img![
+					attrs! { At::Src => format!("{}{}.{}", IMG_URI, picture.public_id, picture.format) }
+				]
+			]
+		} else {
+			empty!()
+		},
 		ev(Ev::Click, |_| Msg::Next),
     ]
 }
