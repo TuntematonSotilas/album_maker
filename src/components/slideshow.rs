@@ -80,11 +80,11 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 					} else {
 						model.is_title = false;
 						model.group_title = None;
+						
 						if let Some(pictures) = &grp.pictures
 						{
 							if let Some(picture) = pictures.get(model.current_pic) 
 							{
-								log!("pic found");
 								model.picture = Some(picture.clone());
 								model.current_pic += 1;
 							} else {
