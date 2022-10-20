@@ -73,16 +73,15 @@ pub fn view(model: &Model) -> Node<Msg> {
 		div![
 			C!("container"),
 			div![
-				C!("columns", "is-centered"),
 				div![
-					C!["column", "is-half", "is-link"],
-					article![
-						C!["message", "is-primary"],
+					C!["hero", "is-large"],
+					div![
+						C!("hero-body"),
 						div![
-							C!("message-body"),
-							&model.album.title
-						]
-					]
+							C!["is-flex", "is-justify-content-center", "has-text-centered"],
+							h1![C!["title", "has-text-link" ], &model.album.title],
+						],
+					],
 				]
 			]
 		],
