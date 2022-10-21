@@ -7,17 +7,22 @@ use crate::{
 };
 use seed::{self, prelude::*, *};
 
+#[derive(Debug, Clone)]
+struct Slide {
+	is_title: bool,
+	group_title: Option<String>,
+	picture: Option<Picture>,
+}
+
 // ------ ------
 //     Model
 // ------ -----
 pub struct Model {
     auth_header: String,
     album: Album,
-	is_title: bool,
-	group_title: Option<String>,
-	picture: Option<Picture>,
-	current_group: usize,
-	current_pic: usize,
+	slides: Vec<Slide>,
+	slide: Slide,
+	slide_id: usize,
 }
 
 impl Model {
@@ -25,11 +30,13 @@ impl Model {
         Self {
             auth_header: String::new(),
             album: Album::new(),
-			is_title: true,
-			group_title: None,
-			picture: None,
-			current_group: 0,
-			current_pic: 0,
+			slides: Vec::new(),
+			slide: Slide {
+				is_title: false,
+				group_title: None,
+				picture: None,
+			},
+			slide_id: 0,
         }
     }
 }
@@ -40,6 +47,7 @@ impl Model {
 pub enum Msg {
     SetAuth(String),
     InitComp(String),
+	InitSlides,
     ErrorGet,
     Received(Album),
 	Next,
@@ -58,11 +66,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     None => Msg::ErrorGet,
                 }
             });
-			model.is_title = true;
-			model.current_group = 0;
-			model.current_pic = 0;
+			model.slide_id = 0;
         }
-        Msg::ErrorGet => {
+		Msg::ErrorGet => {
             orders.notify(Notif {
                 notif_type: TypeNotifs::Error,
                 message: "Error getting album".to_string(),
@@ -70,30 +76,44 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::Received(album) => {
             model.album = album;
-        },
-		Msg::Next => {
-			if let Some(groups) = &model.album.groups {
-				let grp = groups.get(model.current_group);
-				if let Some(grp) = grp {
-					if model.group_title.is_none() {
-						model.group_title = Some(grp.title.clone());
-					} else {
-						model.is_title = false;
-						model.group_title = None;
-						
-						if let Some(pictures) = &grp.pictures
-						{
-							if let Some(picture) = pictures.get(model.current_pic) 
-							{
-								model.picture = Some(picture.clone());
-								model.current_pic += 1;
-							} else {
-								model.current_group += 1;
-							}
+			orders.send_msg(Msg::InitSlides);
+			orders.send_msg(Msg::Next);
+        }
+		Msg::InitSlides => {
+			model.slides.push(
+				Slide { 
+					is_title: true, 
+					group_title: None, 
+					picture: None,
+				}
+			);
+			if let Some(groups) = model.album.groups.clone() {
+				for group in groups.iter() {
+					model.slides.push(
+						Slide { 
+							is_title: false, 
+							group_title: Some(group.title.clone()), 
+							picture: None
+						}
+					);
+					if let Some(pictures) = group.pictures.clone() {
+						for picture in pictures {
+							model.slides.push(
+								Slide { 
+									is_title: false, 
+									group_title: None, 
+									picture: Some(picture)
+								});
 						}
 					}
-					
 				}
+			}
+			log!(model.slides);
+		}
+		Msg::Next => {
+			if let Some(slide) = model.slides.get(model.slide_id.clone()) {
+				model.slide = slide.clone();
+				model.slide_id += 1;
 			}
 		}
     }
@@ -105,7 +125,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 pub fn view(model: &Model) -> Node<Msg> {
     div![
 		C!("slideshow"),
-		if model.is_title || model.group_title.is_some() {
+		if model.slide.is_title || model.slide.group_title.is_some() {
 			div![
 				C!("container"),
 				div![
@@ -115,7 +135,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 						div![
 							C!["is-flex", "is-justify-content-center", "has-text-centered"],
 							h1![C!["title", "has-text-link" ], 
-								if let Some(group_title) = &model.group_title {
+								if let Some(group_title) = &model.slide.group_title {
 									&group_title
 								} else {
 									&model.album.title
@@ -125,7 +145,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 					],
 				]
 			]
-		} else if let Some(picture) = &model.picture {
+		} else if let Some(picture) = &model.slide.picture {
 			figure![
 				C!["image", "slideshow-image"],
 				img![
