@@ -108,7 +108,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 					}
 				}
 			}
-			log!(model.slides);
 		}
 		Msg::Next => {
 			if let Some(slide) = model.slides.get(model.slide_id.clone()) {
