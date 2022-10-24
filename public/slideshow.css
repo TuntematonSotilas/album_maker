@@ -11,5 +11,6 @@
 
 .slideshow-img {
 	height: 100% !important;
-	object-fit: contain;
+	/*object-fit: contain;*/
+	background-repeat: no-repeat;
 }

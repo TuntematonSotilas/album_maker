@@ -2,7 +2,7 @@ use crate::{
     api::apifn,
     models::{
         album::Album,
-        notif::{Notif, TypeNotifs}, vars::IMG_URI, picture::Picture,
+        notif::{Notif, TypeNotifs}, vars::{IMG_URI, LOW_URI}, picture::Picture,
     },
 };
 use seed::{self, prelude::*, *};
@@ -23,6 +23,7 @@ pub struct Model {
 	slides: Vec<Slide>,
 	slide: Slide,
 	slide_id: usize,
+	pic_loaded: bool,
 }
 
 impl Model {
@@ -37,6 +38,7 @@ impl Model {
 				picture: None,
 			},
 			slide_id: 0,
+			pic_loaded: false,
         }
     }
 }
@@ -51,6 +53,7 @@ pub enum Msg {
     ErrorGet,
     Received(Album),
 	Next,
+	PicLoadEnd,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -115,6 +118,10 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 				model.slide_id += 1;
 			}
 		}
+		Msg::PicLoadEnd => {
+			log!("LoadEnd");
+			model.pic_loaded = true;
+		}
     }
 }
 
@@ -122,7 +129,8 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
-    div![
+	div![
+		id!("slideshow"),
 		C!("slideshow"),
 		if model.slide.is_title || model.slide.group_title.is_some() {
 			div![
@@ -145,9 +153,16 @@ pub fn view(model: &Model) -> Node<Msg> {
 				]
 			]
 		} else if let Some(picture) = &model.slide.picture {
+			let mut s_pic_low = style! {};
+			if !model.pic_loaded {
+				s_pic_low.add(St::BackgroundImage, format!("url({}{}.{})", LOW_URI, picture.public_id, picture.format));
+			}
 			figure![
 				C!["image", "slideshow-image"],
-				img![
+				img![s_pic_low,
+					ev(Ev::LoadEnd, move |_| {
+						Msg::PicLoadEnd
+					}),
 					C!("slideshow-img"),
 					attrs! { At::Src => format!("{}{}.{}", IMG_URI, picture.public_id, picture.format) }
 				]
