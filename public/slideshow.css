@@ -12,3 +12,7 @@
 .slideshow-image {
     height: 100%;
 }
+
+.slideshow-caption {
+	position: absolute;
+}
