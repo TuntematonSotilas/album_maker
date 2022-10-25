@@ -119,6 +119,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 			}
 		}
 		Msg::PicLoadEnd => {
+			//orders.skip();
 			log!("LoadEnd");
 			model.pic_loaded = true;
 		}
@@ -153,18 +154,24 @@ pub fn view(model: &Model) -> Node<Msg> {
 				]
 			]
 		} else if let Some(picture) = &model.slide.picture {
-			let mut s_pic_low = style! {};
-			if !model.pic_loaded {
-				s_pic_low.add(St::BackgroundImage, format!("url({}{}.{})", LOW_URI, picture.public_id, picture.format));
+			let mut s_pic = style! {};
+			if model.pic_loaded {
+				s_pic.add(St::BackgroundImage, format!("url({}{}.{})", IMG_URI, picture.public_id, picture.format));
+			} else {
+				s_pic.add(St::BackgroundImage, format!("url({}{}.{})", LOW_URI, picture.public_id, picture.format));
 			}
-			figure![
-				C!["image", "slideshow-image"],
-				img![s_pic_low,
+			div![
+				C!("slideshow-image-container"),
+				div![
+					s_pic,
+					C!("slideshow-image"),
+				],
+				img![
+					C!("slideshow-hidden-image"),
+					attrs! { At::Src => format!("{}{}.{}", IMG_URI, picture.public_id, picture.format) },
 					ev(Ev::LoadEnd, move |_| {
 						Msg::PicLoadEnd
 					}),
-					C!("slideshow-img"),
-					attrs! { At::Src => format!("{}{}.{}", IMG_URI, picture.public_id, picture.format) }
 				]
 			]
 		} else {

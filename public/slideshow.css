@@ -5,12 +5,16 @@
 	margin: 0;
 }
 
-.slideshow-image {
+.slideshow-image-container {
 	height: 100%;
 }
 
-.slideshow-img {
-	height: 100% !important;
-	/*object-fit: contain;*/
+.slideshow-image {
 	background-repeat: no-repeat;
+	background-size: contain;
+    height: 100%;
+}
+
+.slideshow-hidden-image {
+	display: none;
 }
