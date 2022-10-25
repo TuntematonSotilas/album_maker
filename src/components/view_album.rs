@@ -15,6 +15,7 @@ use seed::{self, prelude::*, *};
 pub struct Model {
     auth_header: String,
     album: Album,
+	is_loaded: bool,
 }
 
 impl Model {
@@ -22,6 +23,7 @@ impl Model {
         Self {
             auth_header: String::new(),
             album: Album::new(),
+			is_loaded: false,
         }
     }
 }
@@ -57,6 +59,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             });
         }
         Msg::Received(album) => {
+			model.is_loaded = true;
             model.album = album;
         }
     }
@@ -66,52 +69,83 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
-    div![
-        C!["column", "is-two-thirds"],
-        div![
-            C!["column"],
-           	div![
-				C!["title", "is-5", "has-text-link"],
-				&model.album.title
-			],
-			div![C!("mb-2"),
-				a![
-					C!["button", "is-link", "is-light", "is-small", "ml-2"],
-					attrs! { At::Href => format!("/{}/{}", LK_EDIT_ALBUM, model.album.id) },
-					span![C!("icon"), i![C!("ion-edit")]],
-					span![TITLE_EDIT_ALBUM],
+	div![
+		C!["column", "is-two-thirds"],
+		if model.is_loaded {
+			div![
+				div![
+					C!["column"],
+					div![
+						C!["title", "is-5", "has-text-link"],
+						&model.album.title
+					],
+					div![C!("mb-2"),
+						a![
+							C!["button", "is-link", "is-light", "is-small", "ml-2"],
+							attrs! { At::Href => format!("/{}/{}", LK_EDIT_ALBUM, model.album.id) },
+							span![C!("icon"), i![C!("ion-edit")]],
+							span![TITLE_EDIT_ALBUM],
+						],
+						a![
+							C!["button", "is-primary", "is-light", "is-small", "ml-2"],
+							attrs! { At::Href => format!("/{}/{}", LK_SLIDESHOW, model.album.id) },
+							span![C!("icon"), i![C!("ion-play")]],
+							span![TITLE_SLIDESHOW],
+						]
+					]
 				],
-				a![
-					C!["button", "is-primary", "is-light", "is-small", "ml-2"],
-					attrs! { At::Href => format!("/{}/{}", LK_SLIDESHOW, model.album.id) },
-					span![C!("icon"), i![C!("ion-play")]],
-					span![TITLE_SLIDESHOW],
-				]
+				match &model.album.groups {
+					Some(groups) => div![groups.iter().map(|group| {
+						div![
+							C!("box"),
+							p![C!["title", "is-6", "has-text-link"], &group.title],
+							div![match &group.pictures {
+								Some(pictures) => div![
+										C!["is-flex", "is-flex-wrap-wrap", "is-justify-content-center"],
+										pictures.iter().map(|picture| {
+											div![
+												figure![
+													C!["image", "is-128x128", "m-1"],
+													img![attrs!{ At::Src => format!("{}{}.{}", THUMB_URI, picture.public_id, picture.format) }]
+												],
+												span![picture.caption.clone().unwrap_or_default()],
+											]
+										}
+									)],
+								None => empty![],
+							}]
+						]
+					})],
+					None => empty![],
+				}
 			]
-        ],
-        match &model.album.groups {
-            Some(groups) => div![groups.iter().map(|group| {
-                div![
-                    C!("box"),
-                    p![C!["title", "is-6", "has-text-link"], &group.title],
-                    div![match &group.pictures {
-                        Some(pictures) => div![
-								C!["is-flex", "is-flex-wrap-wrap", "is-justify-content-center"],
-								pictures.iter().map(|picture| {
-									div![
-										figure![
-											C!["image", "is-128x128", "m-1"],
-											img![attrs!{ At::Src => format!("{}{}.{}", THUMB_URI, picture.public_id, picture.format) }]
-										],
-										span![picture.caption.clone().unwrap_or_default()],
-									]
-								}
-							)],
-                        None => empty![],
-                    }]
-                ]
-            })],
-            None => empty![],
-        },
-    ]
+		} else {
+			div![
+				div![
+					C!["column", "is-two-fifths", "mb-4"],
+					progress![
+						C!["progress", "is-small", "table-progress"],
+						attrs! { At::Max => 100 }
+					]
+				],
+				div![
+					C!("box"),
+					div![
+						C!["column", "is-one-third"],
+						progress![
+							C!["progress", "is-small", "table-progress"],
+							attrs! { At::Max => 100 }
+						]
+					],
+					figure![
+						C!["image", "is-128x128", "m-4"],
+						progress![
+							C!["progress", "picture-progress"],
+							attrs! { At::Max => 100 }
+						],
+					],
+				],
+			]
+		}
+	]
 }
