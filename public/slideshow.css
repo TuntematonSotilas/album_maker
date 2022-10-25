@@ -10,11 +10,5 @@
 }
 
 .slideshow-image {
-	background-repeat: no-repeat;
-	background-size: contain;
     height: 100%;
-}
-
-.slideshow-hidden-image {
-	display: none;
 }

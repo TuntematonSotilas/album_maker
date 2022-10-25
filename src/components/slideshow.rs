@@ -154,21 +154,14 @@ pub fn view(model: &Model) -> Node<Msg> {
 				]
 			]
 		} else if let Some(picture) = &model.slide.picture {
-			let mut s_pic = style! {};
-			if model.pic_loaded {
-				s_pic.add(St::BackgroundImage, format!("url({}{}.{})", IMG_URI, picture.public_id, picture.format));
-			} else {
-				s_pic.add(St::BackgroundImage, format!("url({}{}.{})", LOW_URI, picture.public_id, picture.format));
-			}
-			div![
-				C!("slideshow-image-container"),
-				div![
-					s_pic,
-					C!("slideshow-image"),
-				],
+			let src = match model.pic_loaded { 
+				true => format!("{}{}.{}", IMG_URI, picture.public_id, picture.format),
+				false => format!("{}{}.{}", LOW_URI, picture.public_id, picture.format),
+			};
+			div![C!["is-flex", "is-justify-content-center", "slideshow-image-container"],
 				img![
-					C!("slideshow-hidden-image"),
-					attrs! { At::Src => format!("{}{}.{}", IMG_URI, picture.public_id, picture.format) },
+					C!("slideshow-image"),
+					attrs! { At::Src => src },
 					ev(Ev::LoadEnd, move |_| {
 						Msg::PicLoadEnd
 					}),
