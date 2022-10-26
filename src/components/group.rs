@@ -18,6 +18,8 @@ pub enum Msg {
     Upload(upload::Msg),
     Picture(picture::Msg),
     BeginDeleteGroup(Uuid),
+	Drop,
+	DragEnded,
 }
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
@@ -90,6 +92,12 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             picture::update(msg, &mut orders.proxy(Msg::Picture));
         }
         Msg::UpdateGroup(_) | Msg::BeginDeleteGroup(_) => (),
+		Msg::Drop => {
+			log!("Drop");
+		}
+		Msg::DragEnded => {
+			log!("DragEnded");
+		}
     }
 }
 
@@ -137,9 +145,14 @@ pub fn view(album_id: String, group: Group, state_opt: Option<&State>) -> Node<M
                     ],
                 ],
                 div![
+					ev(Ev::Drop, |_| { Msg::Drop }),
                     match gr_p.pictures.clone() {
                         Some(pictures) => div![pictures.iter().map(|picture| {
-                            picture::view(gr_p.id, picture.clone()).map_msg(Msg::Picture)
+							div![
+								attrs!{ At::Draggable => true },
+								ev(Ev::DragEnd, move |_| { Msg::DragEnded }),
+								picture::view(gr_p.id, picture.clone()).map_msg(Msg::Picture),
+							]
                         })],
                         None => empty![],
                     },
