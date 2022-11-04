@@ -24,6 +24,7 @@ pub struct Model {
     auth_header: String,
     album: Album,
     states: HashMap<String, State>,
+	id_pic_drag: String,
 }
 
 impl Model {
@@ -33,6 +34,7 @@ impl Model {
             auth_header: String::new(),
             album: Album::new(),
             states: HashMap::new(),
+			id_pic_drag: String::new(),
         }
     }
     pub fn is_not_valid(&self) -> bool {
@@ -150,6 +152,23 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     );
                     orders.send_msg(Msg::DeleteGroup(id));
                 }
+				group::Msg::DragEnded(ref id_pic_drag) => {
+					model.id_pic_drag = id_pic_drag.clone();
+				}
+				group::Msg::Drop(group_id, ref id_pic_drop) => {
+					let id_pic_drag = &model.id_pic_drag;
+					if let Some(groups) = &mut model.album.groups {
+                        if let Some(group) = groups.iter_mut().find(|g| g.id == group_id) {
+							if let Some(pictures) = &mut group.pictures {
+								let pos1 = pictures.iter().position(|p| p.asset_id == *id_pic_drag);
+								let pos2 = pictures.iter().position(|p| p.asset_id == id_pic_drop.clone());
+								if pos1.is_some() && pos2.is_some() {
+									pictures.swap(pos1.unwrap(), pos2.unwrap());
+								}
+							}	
+						}
+                    }
+				}
                 _ => (),
             }
             group::update(msg, &mut orders.proxy(Msg::Group));
