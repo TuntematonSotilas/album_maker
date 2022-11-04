@@ -54,9 +54,9 @@ pub fn view(group_id: Uuid, picture: Picture) -> Node<Msg> {
         C!["container", "columns", "is-vcentered", "is-mobile"],
         div![
             C!["column", "is-flex-grow-0"],
-			span![C!("icon"), i![C!("ion-drag")]],
-		],
-		div![
+            span![C!("icon"), i![C!("ion-drag")]],
+        ],
+        div![
             C!["column", "is-flex-grow-0"],
             figure![
                 C!["image", "is-128x128"],

@@ -24,7 +24,7 @@ pub struct Model {
     auth_header: String,
     album: Album,
     states: HashMap<String, State>,
-	id_pic_drag: String,
+    id_pic_drag: String,
 }
 
 impl Model {
@@ -34,7 +34,7 @@ impl Model {
             auth_header: String::new(),
             album: Album::new(),
             states: HashMap::new(),
-			id_pic_drag: String::new(),
+            id_pic_drag: String::new(),
         }
     }
     pub fn is_not_valid(&self) -> bool {
@@ -72,26 +72,23 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::SetAuth(auth_header) => model.auth_header = auth_header,
         Msg::InitComp(id_opt) => {
-			model.states = HashMap::new();
-			match id_opt {
-				Some(id) => {
-					model.is_new = false;
-					orders.send_msg(Msg::GetAlbum(id));
-				}
-				None => {
-					model.album = Album::new();
-				}
-			}
-        },
+            model.states = HashMap::new();
+            match id_opt {
+                Some(id) => {
+                    model.is_new = false;
+                    orders.send_msg(Msg::GetAlbum(id));
+                }
+                None => {
+                    model.album = Album::new();
+                }
+            }
+        }
         Msg::GetAlbum(id) => {
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
             orders.perform_cmd(async {
                 let opt_album = apifn::get_album(id, auth).await;
-                match opt_album {
-                    Some(album) => Msg::Received(album),
-                    None => Msg::ErrorGet,
-                }
+                opt_album.map_or(Msg::ErrorGet, Msg::Received)
             });
         }
         Msg::ErrorGet => {
@@ -109,10 +106,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             let album = model.album.clone();
             orders.perform_cmd(async {
                 let opt_id = apifn::update_album(album, auth).await;
-                match opt_id {
-                    Some(id) => Msg::NotifySuccess(id),
-                    None => Msg::NotifyError,
-                }
+                opt_id.map_or(Msg::NotifyError, Msg::NotifySuccess)
             });
         }
         Msg::NotifySuccess(id) => {
@@ -152,23 +146,25 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     );
                     orders.send_msg(Msg::DeleteGroup(id));
                 }
-				group::Msg::DragEnded(ref id_pic_drag) => {
-					model.id_pic_drag = id_pic_drag.clone();
-				}
-				group::Msg::Drop(group_id, ref id_pic_drop) => {
-					let id_pic_drag = &model.id_pic_drag;
-					if let Some(groups) = &mut model.album.groups {
+                group::Msg::DragEnded(ref id_pic_drag) => {
+                    model.id_pic_drag = id_pic_drag.clone();
+                }
+                group::Msg::Drop(group_id, ref id_pic_drop) => {
+                    let id_pic_drag = &model.id_pic_drag;
+                    if let Some(groups) = &mut model.album.groups {
                         if let Some(group) = groups.iter_mut().find(|g| g.id == group_id) {
-							if let Some(pictures) = &mut group.pictures {
-								let pos1 = pictures.iter().position(|p| p.asset_id == *id_pic_drag);
-								let pos2 = pictures.iter().position(|p| p.asset_id == id_pic_drop.clone());
-								if pos1.is_some() && pos2.is_some() {
-									pictures.swap(pos1.unwrap(), pos2.unwrap());
-								}
-							}	
-						}
+                            if let Some(pictures) = &mut group.pictures {
+                                let pos1 = pictures.iter().position(|p| p.asset_id == *id_pic_drag);
+                                let pos2 = pictures
+                                    .iter()
+                                    .position(|p| p.asset_id == id_pic_drop.clone());
+                                if let (Some(pos1), Some(pos2)) = (pos1, pos2) {
+                                    pictures.swap(pos1, pos2);
+                                }
+                            }
+                        }
                     }
-				}
+                }
                 _ => (),
             }
             group::update(msg, &mut orders.proxy(Msg::Group));
@@ -300,13 +296,14 @@ pub fn view(model: &Model) -> Node<Msg> {
                 ]
             ]
         ],
-        match &model.album.groups {
-            Some(groups) => div![groups.iter().map(|group| {
+        &model
+            .album
+            .groups
+            .as_ref()
+            .map_or(empty!(), |groups| div![groups.iter().map(|group| {
                 let state_opt = model.states.get(&group.id.to_string());
                 group::view(model.album.id.clone(), group.clone(), state_opt).map_msg(Msg::Group)
-            })],
-            None => empty![],
-        },
+            })],),
         div![
             C!["mt-5"],
             button![

@@ -7,7 +7,10 @@
 extern crate crypto;
 
 use crate::components::*;
-use models::{notif::Notif, page::{LK_LOGIN, Page}};
+use models::{
+    notif::Notif,
+    page::{Page, LK_LOGIN},
+};
 use seed::{prelude::*, *};
 
 mod api;
@@ -33,7 +36,7 @@ fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
         my_albums: my_albums::Model::default(),
         edit_album: edit_album::Model::new(),
         view_album: view_album::Model::new(),
-		slideshow: slideshow::Model::new(),
+        slideshow: slideshow::Model::new(),
         page: login_page,
         login: login::Model::default(),
     }
@@ -49,7 +52,7 @@ struct Model {
     my_albums: my_albums::Model,
     edit_album: edit_album::Model,
     view_album: view_album::Model,
-	slideshow: slideshow::Model,
+    slideshow: slideshow::Model,
     notification: notification::Model,
     login: login::Model,
 }
@@ -62,7 +65,7 @@ enum Msg {
     MyAlbums(my_albums::Msg),
     EditAlbum(edit_album::Msg),
     ViewAlbum(view_album::Msg),
-	Slideshow(slideshow::Msg),
+    Slideshow(slideshow::Msg),
     Login(login::Msg),
     UrlChanged(subs::UrlChanged),
     InitComp(Option<String>),
@@ -77,7 +80,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::Header(msg) => {
             if let header::Msg::LogInOrOut = msg {
                 if model.is_logged {
-                    orders.send_msg(Msg::SetAuth("".to_string()));
+                    orders.send_msg(Msg::SetAuth(String::new()));
                     model.is_logged = false;
                 }
                 let url = Url::new().add_path_part(LK_LOGIN);
@@ -112,15 +115,15 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 &mut orders.proxy(Msg::ViewAlbum),
             );
         }
-		Msg::Slideshow(msg) => {
-			slideshow::update(msg, &mut model.slideshow, &mut orders.proxy(Msg::Slideshow))
-		}
+        Msg::Slideshow(msg) => {
+            slideshow::update(msg, &mut model.slideshow, &mut orders.proxy(Msg::Slideshow));
+        }
         Msg::UrlChanged(subs::UrlChanged(mut url)) => {
             let page = match url.next_path_part() {
                 Some(models::page::LK_NEW_ALBUM) => models::page::Page::NewAlbum,
                 Some(models::page::LK_VIEW_ALBUM) => models::page::Page::ViewAlbum,
                 Some(models::page::LK_EDIT_ALBUM) => models::page::Page::EditAlbum,
-				Some(models::page::LK_SLIDESHOW) => models::page::Page::Slideshow,
+                Some(models::page::LK_SLIDESHOW) => models::page::Page::Slideshow,
                 Some(models::page::LK_LOGIN) => models::page::Page::Login,
                 _ => models::page::Page::MyAlbums,
             };
@@ -133,28 +136,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::InitComp(opt_id) => {
             if model.is_logged {
-                match model.page {
-                    models::page::Page::MyAlbums => {
-                        orders.send_msg(Msg::MyAlbums(my_albums::Msg::InitComp));
-                    }
-                    models::page::Page::NewAlbum => {
-                        orders.send_msg(Msg::EditAlbum(edit_album::Msg::InitComp(None)));
-                    }
-                    models::page::Page::EditAlbum => {
-                        orders.send_msg(Msg::EditAlbum(edit_album::Msg::InitComp(opt_id)));
-                    }
-                    models::page::Page::ViewAlbum => {
-                        if let Some(id) = opt_id {
-                            orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(id)));
-                        }
-                    }
-					models::page::Page::Slideshow => {
-						if let Some(id) = opt_id {
-                            orders.send_msg(Msg::Slideshow(slideshow::Msg::InitComp(id)));
-                        }
-					}
-                    models::page::Page::Login => (),
-                }
+                init_comp(&model.page, opt_id, orders);
             }
         }
         Msg::Login(msg) => {
@@ -178,11 +160,36 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     }
 }
 
+fn init_comp(page: &Page, opt_id: Option<String>, orders: &mut impl Orders<Msg>) {
+    match page {
+        models::page::Page::MyAlbums => {
+            orders.send_msg(Msg::MyAlbums(my_albums::Msg::InitComp));
+        }
+        models::page::Page::NewAlbum => {
+            orders.send_msg(Msg::EditAlbum(edit_album::Msg::InitComp(None)));
+        }
+        models::page::Page::EditAlbum => {
+            orders.send_msg(Msg::EditAlbum(edit_album::Msg::InitComp(opt_id)));
+        }
+        models::page::Page::ViewAlbum => {
+            if let Some(id) = opt_id {
+                orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(id)));
+            }
+        }
+        models::page::Page::Slideshow => {
+            if let Some(id) = opt_id {
+                orders.send_msg(Msg::Slideshow(slideshow::Msg::InitComp(id)));
+            }
+        }
+        models::page::Page::Login => (),
+    }
+}
+
 // ------ ------
 //     View
 // ------ ------
 fn view(model: &Model) -> Node<Msg> {
-	div![
+    div![
         notification::view(&model.notification).map_msg(Msg::Notification),
         header::view(&model.header).map_msg(Msg::Header),
         div![
@@ -192,7 +199,7 @@ fn view(model: &Model) -> Node<Msg> {
                 _ => match &model.is_logged {
                     true => {
                         div![
-							C![IF!(model.page != Page::Slideshow => "columns is-centered m-1")],
+                            C![IF!(model.page != Page::Slideshow => "columns is-centered m-1")],
                             match &model.page {
                                 models::page::Page::NewAlbum | models::page::Page::EditAlbum =>
                                     edit_album::view(&model.edit_album).map_msg(Msg::EditAlbum),
@@ -200,7 +207,7 @@ fn view(model: &Model) -> Node<Msg> {
                                     my_albums::view(&model.my_albums).map_msg(Msg::MyAlbums),
                                 models::page::Page::ViewAlbum =>
                                     view_album::view(&model.view_album).map_msg(Msg::ViewAlbum),
-								models::page::Page::Slideshow =>
+                                models::page::Page::Slideshow =>
                                     slideshow::view(&model.slideshow).map_msg(Msg::Slideshow),
                                 models::page::Page::Login => empty!(),
                             }

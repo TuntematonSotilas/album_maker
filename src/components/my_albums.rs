@@ -48,10 +48,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             let auth = model.auth_header.clone();
             orders.perform_cmd(async {
                 let albums_opt = apifn::get_my_ablums(auth).await;
-                match albums_opt {
-                    Some(albums) => Msg::Received(albums),
-                    None => Msg::ErrorGet,
-                }
+                albums_opt.map_or(Msg::ErrorGet, Msg::Received)
             });
         }
         Msg::ErrorGet => {

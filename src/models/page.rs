@@ -17,6 +17,6 @@ pub enum Page {
     NewAlbum,
     EditAlbum,
     ViewAlbum,
-	Slideshow,
+    Slideshow,
     Login,
 }

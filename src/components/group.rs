@@ -18,9 +18,9 @@ pub enum Msg {
     Upload(upload::Msg),
     Picture(picture::Msg),
     BeginDeleteGroup(Uuid),
-	Drop(Uuid, String),
-	DragEnded(String),
-	DragOver,
+    Drop(Uuid, String),
+    DragEnded(String),
+    DragOver,
 }
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
@@ -92,17 +92,18 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             }
             picture::update(msg, &mut orders.proxy(Msg::Picture));
         }
-        Msg::UpdateGroup(_) | Msg::BeginDeleteGroup(_) => (),
-		Msg::Drop(_, _) => (),
-		Msg::DragEnded(_) => (),
-		Msg::DragOver => ()
+        Msg::UpdateGroup(_)
+        | Msg::BeginDeleteGroup(_)
+        | Msg::Drop(_, _)
+        | Msg::DragEnded(_)
+        | Msg::DragOver => (),
     }
 }
 
 pub fn view(album_id: String, group: Group, state_opt: Option<&State>) -> Node<Msg> {
     let gr_t = group.clone();
     let gr_d = group.clone();
-	let gr_dd = group.clone();
+    let gr_dd = group.clone();
     let gr_p = group;
 
     div![
@@ -144,32 +145,27 @@ pub fn view(album_id: String, group: Group, state_opt: Option<&State>) -> Node<M
                     ],
                 ],
                 div![
-                    match gr_p.pictures.clone() {
-                        Some(pictures) => {
-							let pictures_cl = pictures.clone();
-							div![
-								pictures_cl.iter().map(|picture| {
-									let pic_cl = picture.clone();
-									let pic_id = picture.asset_id.clone();
-									let pic_idd = picture.asset_id.clone();
-									let gr_dd = gr_dd.clone().id;
-									div![
-										attrs!{ At::Draggable => true },
-										ev(Ev::DragEnd, move |_| { Msg::DragEnded(pic_id) }),
-										ev(Ev::Drop, move |_| { Msg::Drop(gr_dd, pic_idd) }),
-										drag_ev(Ev::DragOver, |event| {
-											event.stop_propagation();
-           									event.prevent_default();
-											event.data_transfer().unwrap().set_drop_effect("move");
-											Msg::DragOver
-										}),
-										picture::view(gr_p.id, pic_cl.clone()).map_msg(Msg::Picture),
-									]
-                        		})
-							]
-						},
-                        None => empty![],
-                    },
+                    gr_p.pictures.as_ref().map_or(empty![], |pictures| {
+                        let pictures_cl = pictures.clone();
+                        div![pictures_cl.iter().map(|picture| {
+                            let pic_cl = picture.clone();
+                            let pic_id = picture.asset_id.clone();
+                            let pic_idd = picture.asset_id.clone();
+                            let gr_dd = gr_dd.clone().id;
+                            div![
+                                attrs! { At::Draggable => true },
+                                ev(Ev::DragEnd, move |_| { Msg::DragEnded(pic_id) }),
+                                ev(Ev::Drop, move |_| { Msg::Drop(gr_dd, pic_idd) }),
+                                drag_ev(Ev::DragOver, |event| {
+                                    event.stop_propagation();
+                                    event.prevent_default();
+                                    event.data_transfer().unwrap().set_drop_effect("move");
+                                    Msg::DragOver
+                                }),
+                                picture::view(gr_p.id, pic_cl).map_msg(Msg::Picture),
+                            ]
+                        })]
+                    }),
                     (0..gr_p.count_fake_pictures).map(|_| {
                         figure![
                             C!["image", "is-128x128", "m-1"],

@@ -50,10 +50,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             orders.skip(); // No need to rerender
             orders.perform_cmd(async move {
                 let pic_opt = apifn::upload_picture(form_data).await;
-                match pic_opt {
-                    Some(picture) => Msg::Success(picture, group_id),
-                    None => Msg::Error,
-                }
+                pic_opt.map_or(Msg::Error, |picture| Msg::Success(picture, group_id))
             });
         }
         Msg::RenderFakePictures(_, _) | Msg::Success(_, _) => (),
