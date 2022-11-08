@@ -14,5 +14,107 @@
 }
 
 .slideshow-caption {
+	padding: 0.2em 0.8em;
 	position: absolute;
+	text-transform: uppercase;
+}
+
+.caption-round {
+	color: white;
+	background-color: black;
+	border-radius: 0.8em;
+}
+
+.caption-square {
+	color: white;
+	background-color: black;
+	transform: skew(-15deg);
+	box-shadow: -0.12em -0.1em white;
+}
+
+.dot {
+	margin: 0.1em;
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	border: solid 2px white;
+	box-shadow: 1px 1px 3px rgba(139, 139, 139, 0.8);
+}
+
+/* https://www.materialpalette.com */
+
+.red {
+	background-color: #FF5252;
+}
+
+.pink {
+	background-color: #E91E63;
+}
+
+.purple {
+	background-color: #9C27B0;
+}
+
+.deep-pruple {
+	background-color: #673AB7;
+}
+
+.indigo {
+	background-color: #536DFE;
+}
+
+.blue {
+	background-color: #2196F3;
+}
+
+.light-blue {
+	background-color: #03A9F4;
+}
+
+.cyan {
+	background-color: #00BCD4;
+}
+
+.teal {
+	background-color: #009688;
+}
+
+.green {
+	background-color: #4CAF50;
+}
+
+.light-green {
+	background-color: #8BC34A;
+}
+
+.lime {
+	background-color: #CDDC39;
+}
+
+.yellow {
+	background-color: #FFEB3B;
+}
+
+.amber {
+	background-color: #FFC107
+}
+
+.orange {
+	background-color: #FF9800;
+}
+
+.deep-orange {
+	background-color: #FF5722;
+}
+
+.brown {
+	background-color: #795548;
+}
+
+.grey {
+	background-color: #9E9E9E;
+}
+
+.blue-grey {
+	background-color: #607D8B;
 }
