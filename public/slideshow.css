@@ -17,6 +17,9 @@
 	padding: 0.2em 0.8em;
 	position: absolute;
 	text-transform: uppercase;
+	animation: caption-fade-in 0.3s;
+	animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+
 }
 
 .caption-round {
@@ -117,4 +120,15 @@
 
 .blue-grey {
 	background-color: #607D8B;
+}
+
+@keyframes caption-fade-in {
+	from {
+		transform: scale(0); 
+		opacity: 0;
+	}
+	to {
+		transform: scale(1); 
+		opacity: 1;
+	}
 }
