@@ -4,7 +4,7 @@ use crate::{
         album::Album,
         notif::{Notif, TypeNotifs},
         picture::Picture,
-        vars::{IMG_URI, LOW_URI},
+        vars::{IMG_URI, LOW_URI, VERY_LOW_URI},
     },
 };
 use seed::{self, prelude::*, *};
@@ -113,8 +113,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
         }
         Msg::PicLoadEnd => {
-            //orders.skip();
-            log!("LoadEnd");
             model.pic_loaded = true;
         }
     }
@@ -124,9 +122,17 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
+    let mut s_bkg = style!{};
+    if let Some(picture) = &model.slide.picture {
+        s_bkg = style!{
+            St::BackgroundImage => format!("url({}{}.{})", VERY_LOW_URI, picture.public_id, picture.format),
+        }
+    }
+
     div![
         id!("slideshow"),
         C!("slideshow"),
+        s_bkg,
         if model.slide.is_title || model.slide.group_title.is_some() {
             div![
                 C!("container"),
