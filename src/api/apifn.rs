@@ -137,5 +137,3 @@ pub async fn delete_picture(public_id: String) -> bool {
     }
     res
 }
-
-

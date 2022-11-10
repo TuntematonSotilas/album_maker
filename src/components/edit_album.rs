@@ -150,20 +150,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     model.id_pic_drag = id_pic_drag.clone();
                 }
                 group::Msg::Drop(group_id, ref id_pic_drop) => {
-                    let id_pic_drag = &model.id_pic_drag;
-                    if let Some(groups) = &mut model.album.groups {
-                        if let Some(group) = groups.iter_mut().find(|g| g.id == group_id) {
-                            if let Some(pictures) = &mut group.pictures {
-                                let pos1 = pictures.iter().position(|p| p.asset_id == *id_pic_drag);
-                                let pos2 = pictures
-                                    .iter()
-                                    .position(|p| p.asset_id == id_pic_drop.clone());
-                                if let (Some(pos1), Some(pos2)) = (pos1, pos2) {
-                                    pictures.swap(pos1, pos2);
-                                }
-                            }
-                        }
-                    }
+                    drop_pic(model, group_id, id_pic_drop);
                 }
                 _ => (),
             }
@@ -177,6 +164,21 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::ErrorDeleteOnePic => {
             error!("Error deleting picture");
+        }
+    }
+}
+
+fn drop_pic(model: &mut Model, group_id: Uuid, id_pic_drop: &str) {
+    let id_pic_drag = &model.id_pic_drag;
+    if let Some(groups) = &mut model.album.groups {
+        if let Some(group) = groups.iter_mut().find(|g| g.id == group_id) {
+            if let Some(pictures) = &mut group.pictures {
+                let pos1 = pictures.iter().position(|p| p.asset_id == *id_pic_drag);
+                let pos2 = pictures.iter().position(|p| p.asset_id == id_pic_drop);
+                if let (Some(pos1), Some(pos2)) = (pos1, pos2) {
+                    pictures.swap(pos1, pos2);
+                }
+            }
         }
     }
 }
