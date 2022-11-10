@@ -5,8 +5,9 @@ use crate::models::{
     picture::Picture,
     vars::{BASE_URI, DESTROY_URI, UPLOAD_URI},
 };
-use crypto::{digest::Digest, sha1::Sha1};
+use hex::ToHex;
 use load_dotenv::load_dotenv;
+use ring::digest;
 use seed::prelude::*;
 use web_sys::FormData;
 
@@ -106,9 +107,10 @@ pub async fn delete_picture(public_id: String) -> bool {
     let ts = js_sys::Date::now().to_string();
 
     let to_hash = format!("public_id={}&timestamp={}{}", public_id, ts, secret);
-    let mut hasher = Sha1::new();
-    hasher.input_str(&to_hash);
-    let signature = hasher.result_str();
+    let digest = digest::digest(&digest::SHA1_FOR_LEGACY_USE_ONLY, to_hash.as_bytes());
+
+    let hash = digest.as_ref();
+    let signature = hash.to_hex();
 
     if let Ok(form_data) = FormData::new() {
         let pub_id_res = form_data.append_with_str("public_id", &public_id);
@@ -135,3 +137,5 @@ pub async fn delete_picture(public_id: String) -> bool {
     }
     res
 }
+
+

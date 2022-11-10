@@ -4,8 +4,6 @@
 #![allow(clippy::wildcard_imports)]
 #![allow(clippy::unused_unit)]
 
-extern crate crypto;
-
 use crate::components::*;
 use models::{
     notif::Notif,
