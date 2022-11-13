@@ -147,7 +147,6 @@ pub fn view(album_id: String, group: &Group, state_opt: Option<&State>) -> Node<
                             let asset_id2 = picture.asset_id.clone();
                             let grp_id = group.id;
                             div![
-                                attrs! { At::Draggable => true },
                                 ev(Ev::DragEnd, move |_| Msg::DragEnded(asset_id)),
                                 ev(Ev::Drop, move |_| Msg::Drop(grp_id, asset_id2)),
                                 drag_ev(Ev::DragOver, |event| {
