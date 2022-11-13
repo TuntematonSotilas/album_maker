@@ -304,7 +304,7 @@ pub fn view(model: &Model) -> Node<Msg> {
             .as_ref()
             .map_or(empty!(), |groups| div![groups.iter().map(|group| {
                 let state_opt = model.states.get(&group.id.to_string());
-                group::view(model.album.id.clone(), group.clone(), state_opt).map_msg(Msg::Group)
+                group::view(model.album.id.clone(), group, state_opt).map_msg(Msg::Group)
             })],),
         div![
             C!["mt-5"],

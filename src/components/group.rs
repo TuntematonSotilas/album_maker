@@ -100,12 +100,8 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     }
 }
 
-pub fn view(album_id: String, group: Group, state_opt: Option<&State>) -> Node<Msg> {
-    let gr_t = group.clone();
-    let gr_d = group.clone();
-    let gr_dd = group.clone();
-    let gr_p = group;
-
+pub fn view(album_id: String, group: &Group, state_opt: Option<&State>) -> Node<Msg> {
+    let grp_id = group.id;
     div![
         C!["box group"],
         if state_opt.is_some() {
@@ -125,48 +121,46 @@ pub fn view(album_id: String, group: Group, state_opt: Option<&State>) -> Node<M
                             "Group name",
                             button![
                                 C!["delete", "delete-group"],
-                                ev(Ev::Click, move |_| Msg::BeginDeleteGroup(gr_d.id)),
+                                ev(Ev::Click, move |_| Msg::BeginDeleteGroup(grp_id)),
                             ],
                         ],
                         input![
                             C![
                                 "input",
                                 "is-small",
-                                IF!(gr_t.title.is_empty() => "is-danger")
+                                IF!(group.title.is_empty() => "is-danger")
                             ],
                             attrs! {
                                 At::Type => "text",
                                 At::Name => "title",
                                 At::Placeholder => "Group name",
-                                At::Value => gr_t.title,
+                                At::Value => group.title,
                             },
-                            input_ev(Ev::Input, move |input| Msg::TitleChanged(input, gr_t.id)),
+                            input_ev(Ev::Input, move |input| Msg::TitleChanged(input, grp_id)),
                         ],
                     ],
                 ],
                 div![
-                    gr_p.pictures.as_ref().map_or(empty![], |pictures| {
-                        let pictures_cl = pictures.clone();
-                        div![pictures_cl.iter().map(|picture| {
-                            let pic_cl = picture.clone();
-                            let pic_id = picture.asset_id.clone();
-                            let pic_idd = picture.asset_id.clone();
-                            let gr_dd = gr_dd.clone().id;
+                    group.pictures.as_ref().map_or(empty![], |pictures| {
+                        div![pictures.iter().map(|picture| {
+                            let asset_id = picture.asset_id.clone();
+                            let asset_id2 = picture.asset_id.clone();
+                            let grp_id = group.id;
                             div![
                                 attrs! { At::Draggable => true },
-                                ev(Ev::DragEnd, move |_| { Msg::DragEnded(pic_id) }),
-                                ev(Ev::Drop, move |_| { Msg::Drop(gr_dd, pic_idd) }),
+                                ev(Ev::DragEnd, move |_| Msg::DragEnded(asset_id)),
+                                ev(Ev::Drop, move |_| Msg::Drop(grp_id, asset_id2)),
                                 drag_ev(Ev::DragOver, |event| {
                                     event.stop_propagation();
                                     event.prevent_default();
                                     event.data_transfer().unwrap().set_drop_effect("move");
                                     Msg::DragOver
                                 }),
-                                picture::view(gr_p.id, pic_cl).map_msg(Msg::Picture),
+                                picture::view(group.id, picture).map_msg(Msg::Picture),
                             ]
                         })]
                     }),
-                    (0..gr_p.count_fake_pictures).map(|_| {
+                    (0..group.count_fake_pictures).map(|_| {
                         figure![
                             C!["image", "is-128x128", "m-1"],
                             progress![
@@ -176,7 +170,7 @@ pub fn view(album_id: String, group: Group, state_opt: Option<&State>) -> Node<M
                         ]
                     }),
                 ],
-                upload::view(album_id, gr_p.id).map_msg(Msg::Upload),
+                upload::view(album_id, group.id).map_msg(Msg::Upload),
             ]
         }
     ]

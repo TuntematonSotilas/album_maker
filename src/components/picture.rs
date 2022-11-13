@@ -14,7 +14,7 @@ use crate::{
 //    Update
 // ------ ------
 pub enum Msg {
-    CaptionChanged(Uuid, String, Picture),
+    CaptionChanged(Uuid, String, String),
     UpdateCaption(Uuid, String, String),
     DeletePicture(Uuid, String, String),
     DeletePictureSuccess(Uuid, String),
@@ -23,9 +23,8 @@ pub enum Msg {
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::CaptionChanged(group_id, input, mut picture) => {
-            picture.caption = Some(input.clone());
-            orders.send_msg(Msg::UpdateCaption(group_id, input, picture.asset_id));
+        Msg::CaptionChanged(group_id, input, asset_id) => {
+            orders.send_msg(Msg::UpdateCaption(group_id, input, asset_id));
         }
         Msg::DeletePicture(group_id, public_id, asset_id) => {
             orders.skip(); // No need to rerender
@@ -48,8 +47,10 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     }
 }
 
-pub fn view(group_id: Uuid, picture: Picture) -> Node<Msg> {
-    let pic_del = picture.clone();
+pub fn view(group_id: Uuid, picture: &Picture) -> Node<Msg> {
+    let asset_id = picture.asset_id.clone();
+    let asset_id2 = picture.asset_id.clone();
+    let public_id = picture.clone().public_id;
     div![
         C!["container", "columns", "is-vcentered", "is-mobile"],
         div![
@@ -78,10 +79,10 @@ pub fn view(group_id: Uuid, picture: Picture) -> Node<Msg> {
                             At::Type => "text",
                             At::Name => "caption",
                             At::Placeholder => "Caption",
-                            At::Value => picture.clone().caption.unwrap_or_default(),
+                            At::Value => picture.caption.clone().unwrap_or_default(),
                         },
                         input_ev(Ev::Input, move |input| Msg::CaptionChanged(
-                            group_id, input, picture
+                            group_id, input, asset_id
                         )),
                     ]
                 ]
@@ -93,9 +94,7 @@ pub fn view(group_id: Uuid, picture: Picture) -> Node<Msg> {
                     span![C!("icon"), i![C!("ion-close-circled")]],
                     span!["Delete"],
                     ev(Ev::Click, move |_| Msg::DeletePicture(
-                        group_id,
-                        pic_del.public_id,
-                        pic_del.asset_id
+                        group_id, public_id, asset_id2
                     ))
                 ]
             ]
