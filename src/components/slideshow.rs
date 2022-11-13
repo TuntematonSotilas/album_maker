@@ -122,9 +122,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
-    let mut s_bkg = style!{};
+    let mut s_bkg = style! {};
     if let Some(picture) = &model.slide.picture {
-        s_bkg = style!{
+        s_bkg = style! {
             St::BackgroundImage => format!("url({}{}.{})", VERY_LOW_URI, picture.public_id, picture.format),
         }
     }
