@@ -12,7 +12,7 @@ use crate::{
         group_update::{GroupUpdate, UpdateType},
         notif::{Notif, TypeNotifs},
         page::{TITLE_EDIT_ALBUM, TITLE_NEW_ALBUM},
-        state::{State, TypeDel},
+        state::{State, TypeDel}, caption::CaptionStyle,
     },
 };
 
@@ -296,7 +296,28 @@ pub fn view(model: &Model) -> Node<Msg> {
                         attrs! { At::Disabled => model.is_not_valid().as_at_value() },
                     ]
                 ]
-            ]
+            ],
+			label![C!("label"), "Caption style"],
+			label![
+				C!["radio", "album-edit-radio"],
+				input![C!("mr-1"),
+					attrs! {
+						At::Type => "radio",
+						At::Name => "caption_style",
+					}
+				],
+				CaptionStyle::Round.to_string()
+			],
+			label![
+				C!["radio", "album-edit-radio"],
+				input![C!("mr-1"),
+					attrs! {
+						At::Type => "radio",
+						At::Name => "caption_style",
+					}
+				],
+				CaptionStyle::Square.to_string()
+			]
         ],
         &model
             .album

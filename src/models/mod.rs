@@ -1,4 +1,5 @@
 pub mod album;
+pub mod caption;
 pub mod group;
 pub mod group_update;
 pub mod notif;

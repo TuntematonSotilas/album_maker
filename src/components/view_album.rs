@@ -101,7 +101,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 									C!["is-flex", "is-flex-wrap-wrap", "is-justify-content-center"],
 									pictures.iter().map(|picture| {
 										div![
-											C!["mr-1", "view-picture"],
+											C!["mr-1", "album-view-picture"],
 											figure![
 												C!["image", "is-128x128", "m-1"],
 												img![attrs!{ At::Src => format!("{}{}.{}", THUMB_URI, picture.public_id, picture.format) }]
