@@ -1,0 +1,90 @@
+.caption-round {
+	color: white;
+	background-color: black;
+	border-radius: 0.8em;
+}
+
+.caption-square {
+	color: white;
+	background-color: black;
+	transform: skew(-15deg);
+	box-shadow: -0.12em -0.1em white;
+}
+
+/* Colors : https://www.materialpalette.com */
+
+.Red {
+	background-color: #FF5252;
+}
+
+.Pink {
+	background-color: #E91E63;
+}
+
+.Purple {
+	background-color: #9C27B0;
+}
+
+.DeepPurple {
+	background-color: #673AB7;
+}
+
+.Indigo {
+	background-color: #536DFE;
+}
+
+.Blue {
+	background-color: #2196F3;
+}
+
+.LightBlue {
+	background-color: #03A9F4;
+}
+
+.Cyan {
+	background-color: #00BCD4;
+}
+
+.Teal {
+	background-color: #009688;
+}
+
+.Green {
+	background-color: #4CAF50;
+}
+
+.LightGreen {
+	background-color: #8BC34A;
+}
+
+.Lime {
+	background-color: #CDDC39;
+}
+
+.Yellow {
+	background-color: #FFEB3B;
+}
+
+.Amber {
+	background-color: #FFC107
+}
+
+.Orange {
+	background-color: #FF9800;
+}
+
+.DeepOrange {
+	background-color: #FF5722;
+}
+
+.Brown {
+	background-color: #795548;
+}
+
+.Grey {
+	background-color: #9E9E9E;
+}
+
+.BlueGrey {
+	background-color: #607D8B;
+}

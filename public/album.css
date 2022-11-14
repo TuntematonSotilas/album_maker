@@ -5,3 +5,12 @@
 .album-edit-radio {
 	font-size: .75em;
 }
+
+.album-edit-color-dot {
+	margin: 0.1em;
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	border: solid 2px white;
+	box-shadow: 1px 1px 3px rgba(139, 139, 139, 0.8);
+}

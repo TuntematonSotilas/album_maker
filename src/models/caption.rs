@@ -19,7 +19,7 @@ pub enum CaptionColor {
     Red,
 	Pink,
 	Purple,
-	DeepPruple,
+	DeepPurple,
 	Indigo,
 	Blue,
 	LightBlue,
