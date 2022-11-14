@@ -12,7 +12,7 @@ use crate::{
         group_update::{GroupUpdate, UpdateType},
         notif::{Notif, TypeNotifs},
         page::{TITLE_EDIT_ALBUM, TITLE_NEW_ALBUM},
-        state::{State, TypeDel}, caption::CaptionStyle,
+        state::{State, TypeDel}, caption::{CaptionStyle, COLORS},
     },
 };
 
@@ -304,6 +304,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 					attrs! {
 						At::Type => "radio",
 						At::Name => "caption_style",
+                        At::Checked => model.album.caption_style == CaptionStyle::Round,
 					}
 				],
 				CaptionStyle::Round.to_string()
@@ -314,10 +315,22 @@ pub fn view(model: &Model) -> Node<Msg> {
 					attrs! {
 						At::Type => "radio",
 						At::Name => "caption_style",
+                        At::Checked => model.album.caption_style == CaptionStyle::Square,
 					}
 				],
 				CaptionStyle::Square.to_string()
-			]
+			],
+            label![C!("label"), "Caption color"],
+            div![
+                C!("is-flex"),
+                COLORS.iter().map(|c| {
+                    let c_selected = match &model.album.caption_color == c {
+                        true => "album-edit-color-selected",
+                        false => ""
+                    };
+                    span![C!["album-edit-color", "mr-1", c.to_string(), c_selected]]
+                })
+            ]
         ],
         &model
             .album

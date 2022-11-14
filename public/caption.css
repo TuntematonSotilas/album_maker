@@ -13,6 +13,14 @@
 
 /* Colors : https://www.materialpalette.com */
 
+.Black {
+	background-color: #000;
+}
+
+.White {
+	background-color: #fff;
+}
+
 .Red {
 	background-color: #FF5252;
 }

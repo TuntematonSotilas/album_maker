@@ -6,11 +6,13 @@
 	font-size: .75em;
 }
 
-.album-edit-color-dot {
-	margin: 0.1em;
-	width: 1.5em;
-	height: 1.5em;
-	border-radius: 100%;
-	border: solid 2px white;
-	box-shadow: 1px 1px 3px rgba(139, 139, 139, 0.8);
+.album-edit-color {
+	width: 1em;
+	height: 1em;
+	border-radius: 20%;
+	border: solid 1px rgba(0, 0, 0, .20);
+}
+
+.album-edit-color-selected {
+	outline: solid 2px rgb(131, 154, 255)
 }
