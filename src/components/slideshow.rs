@@ -166,7 +166,10 @@ pub fn view(model: &Model) -> Node<Msg> {
                     "slideshow-image-container"
                 ],
                 h2![
-                    C!["slideshow-caption", "title", "is-3", "mt-5"],
+                    C!["slideshow-caption", "title", "is-4", "mt-5", 
+                        &model.album.caption_color.to_string(), 
+                        &model.album.caption_style.to_string() 
+                    ],
                     &picture.caption
                 ],
                 img![

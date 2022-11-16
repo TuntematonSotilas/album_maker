@@ -1,10 +1,10 @@
-.caption-round {
+.Round {
 	color: white;
 	background-color: black;
 	border-radius: 0.8em;
 }
 
-.caption-square {
+.Square {
 	color: white;
 	background-color: black;
 	transform: skew(-15deg);

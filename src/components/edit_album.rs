@@ -8,7 +8,7 @@ use crate::{
     components::group,
     models::{
         album::Album,
-        caption::{Style, COLORS},
+        caption::{Style, COLORS, Color},
         group::Group,
         group_update::{GroupUpdate, UpdateType},
         notif::{Notif, TypeNotifs},
@@ -60,6 +60,8 @@ pub enum Msg {
     Received(Album),
     Submit,
     TitleChanged(String),
+    StyleChanged(Style),
+    ColorChanged(Color),
     AddGroup,
     Group(group::Msg),
     NotifySuccess(String),
@@ -124,6 +126,8 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             });
         }
         Msg::TitleChanged(title) => model.album.title = title,
+        Msg::StyleChanged(style) => model.album.caption_style = style,
+        Msg::ColorChanged(color) => model.album.caption_color = color,
         Msg::AddGroup => {
             if let Some(groups) = &mut model.album.groups {
                 groups.push(Group::new());
@@ -306,8 +310,9 @@ pub fn view(model: &Model) -> Node<Msg> {
                     attrs! {
                         At::Type => "radio",
                         At::Name => "caption_style",
-                        At::Checked => model.album.caption_style == Style::Round,
-                    }
+                        At::Checked => (model.album.caption_style == Style::Round).as_at_value(),
+                    },
+                    ev(Ev::Click, |_| Msg::StyleChanged(Style::Round)),
                 ],
                 Style::Round.to_string()
             ],
@@ -318,21 +323,26 @@ pub fn view(model: &Model) -> Node<Msg> {
                     attrs! {
                         At::Type => "radio",
                         At::Name => "caption_style",
-                        At::Checked => model.album.caption_style == Style::Square,
-                    }
+                        At::Checked => (model.album.caption_style == Style::Square).as_at_value(),
+                    },
+                    ev(Ev::Click, |_| Msg::StyleChanged(Style::Square)),
                 ],
                 Style::Square.to_string()
             ],
             label![C!("label"), "Caption color"],
             div![
                 C!("is-flex"),
-                COLORS.iter().map(|c| {
-                    let c_selected = if &model.album.caption_color == c {
+                COLORS.iter().map(|color| {
+                    let c_selected = if &model.album.caption_color == color {
                         "album-edit-color-selected"
                     } else {
                         ""
                     };
-                    span![C!["album-edit-color", "mr-1", c.to_string(), c_selected]]
+                    let color = color.clone();
+                    span![
+                        C!["album-edit-color", "mr-1", color.to_string(), c_selected],
+                        ev(Ev::Click, |_| Msg::ColorChanged(color)),    
+                    ]
                 })
             ]
         ],
@@ -350,6 +360,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                 C!["button", "is-link", "is-light", "is-small"],
                 span![C!("icon"), i![C!("ion-plus")]],
                 span!["Add group"],
+                attrs! { At::Disabled => model.album.id.is_empty().as_at_value() },
                 ev(Ev::Click, |_| Msg::AddGroup),
             ],
         ],
