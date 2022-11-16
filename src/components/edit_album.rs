@@ -8,11 +8,12 @@ use crate::{
     components::group,
     models::{
         album::Album,
+        caption::{Style, COLORS},
         group::Group,
         group_update::{GroupUpdate, UpdateType},
         notif::{Notif, TypeNotifs},
         page::{TITLE_EDIT_ALBUM, TITLE_NEW_ALBUM},
-        state::{State, TypeDel}, caption::{CaptionStyle, COLORS},
+        state::{State, TypeDel},
     },
 };
 
@@ -297,36 +298,39 @@ pub fn view(model: &Model) -> Node<Msg> {
                     ]
                 ]
             ],
-			label![C!("label"), "Caption style"],
-			label![
-				C!["radio", "album-edit-radio"],
-				input![C!("mr-1"),
-					attrs! {
-						At::Type => "radio",
-						At::Name => "caption_style",
-                        At::Checked => model.album.caption_style == CaptionStyle::Round,
-					}
-				],
-				CaptionStyle::Round.to_string()
-			],
-			label![
-				C!["radio", "album-edit-radio"],
-				input![C!("mr-1"),
-					attrs! {
-						At::Type => "radio",
-						At::Name => "caption_style",
-                        At::Checked => model.album.caption_style == CaptionStyle::Square,
-					}
-				],
-				CaptionStyle::Square.to_string()
-			],
+            label![C!("label"), "Caption style"],
+            label![
+                C!["radio", "album-edit-radio"],
+                input![
+                    C!("mr-1"),
+                    attrs! {
+                        At::Type => "radio",
+                        At::Name => "caption_style",
+                        At::Checked => model.album.caption_style == Style::Round,
+                    }
+                ],
+                Style::Round.to_string()
+            ],
+            label![
+                C!["radio", "album-edit-radio"],
+                input![
+                    C!("mr-1"),
+                    attrs! {
+                        At::Type => "radio",
+                        At::Name => "caption_style",
+                        At::Checked => model.album.caption_style == Style::Square,
+                    }
+                ],
+                Style::Square.to_string()
+            ],
             label![C!("label"), "Caption color"],
             div![
                 C!("is-flex"),
                 COLORS.iter().map(|c| {
-                    let c_selected = match &model.album.caption_color == c {
-                        true => "album-edit-color-selected",
-                        false => ""
+                    let c_selected = if &model.album.caption_color == c {
+                        "album-edit-color-selected"
+                    } else {
+                        ""
                     };
                     span![C!["album-edit-color", "mr-1", c.to_string(), c_selected]]
                 })

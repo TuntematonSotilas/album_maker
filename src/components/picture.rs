@@ -54,7 +54,7 @@ pub fn view(group_id: Uuid, picture: &Picture) -> Node<Msg> {
     div![
         C!["container", "columns", "is-vcentered", "is-mobile"],
         div![
-			attrs! { At::Draggable => true },
+            attrs! { At::Draggable => true },
             C!["column", "is-flex-grow-0"],
             span![C!("icon"), i![C!("ion-drag")]],
         ],

@@ -1,14 +1,17 @@
 use serde::{Deserialize, Serialize};
 
-use super::{group::Group, caption::{CaptionStyle, CaptionColor}};
+use super::{
+    caption::{Color, Style},
+    group::Group,
+};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Album {
     #[serde(rename(deserialize = "_id"))]
     pub id: String,
     pub title: String,
-	pub caption_style: CaptionStyle,
-	pub caption_color: CaptionColor, 
+    pub caption_style: Style,
+    pub caption_color: Color,
     pub groups: Option<Vec<Group>>,
 }
 
@@ -17,8 +20,8 @@ impl Album {
         Self {
             id: String::new(),
             title: String::new(),
-			caption_style: CaptionStyle::Round,
-			caption_color: CaptionColor::Black,
+            caption_style: Style::Round,
+            caption_color: Color::Black,
             groups: Some(Vec::new()),
         }
     }
