@@ -13,6 +13,7 @@ pub struct Album {
     pub caption_style: Style,
     pub caption_color: Color,
     pub groups: Option<Vec<Group>>,
+    pub cover: String,
 }
 
 impl Album {
@@ -23,6 +24,7 @@ impl Album {
             caption_style: Style::Round,
             caption_color: Color::Black,
             groups: Some(Vec::new()),
+            cover: String::new()
         }
     }
 }

@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use super::picture;
 use super::upload;
-use crate::models::state::State;
+use crate::models::state::TypeDel;
 use crate::models::{
     group::Group,
     group_update::{GroupUpdate, UpdateType},
@@ -34,6 +34,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                 count_fake_pictures: None,
                 asset_id: None,
                 caption: None,
+                del_state: None,
             }));
         }
         Msg::Upload(msg) => {
@@ -47,6 +48,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                         count_fake_pictures: None,
                         asset_id: None,
                         caption: None,
+                        del_state: None,
                     }));
                 }
                 upload::Msg::RenderFakePictures(count, group_id) => {
@@ -58,6 +60,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                         count_fake_pictures: Some(count),
                         asset_id: None,
                         caption: None,
+                        del_state: None,
                     }));
                 }
                 _ => (),
@@ -75,6 +78,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                         count_fake_pictures: None,
                         asset_id: Some(asset_id.clone()),
                         caption: Some(caption.clone()),
+                        del_state: None,
                     }));
                 }
                 picture::Msg::DeletePictureSuccess(group_id, ref asset_id) => {
@@ -86,26 +90,38 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                         count_fake_pictures: None,
                         asset_id: Some(asset_id.clone()),
                         caption: None,
+                        del_state: None,
                     }));
                 }
                 _ => (),
             }
             picture::update(msg, &mut orders.proxy(Msg::Picture));
         }
+        Msg::BeginDeleteGroup(group_id) => {
+            orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+                upd_type: UpdateType::DelState,
+                id: group_id,
+                picture: None,
+                grp_data: None,
+                count_fake_pictures: None,
+                asset_id: None,
+                caption: None,
+                del_state: Some(TypeDel::Deleting),
+            }));
+        }
         Msg::UpdateGroup(_)
-        | Msg::BeginDeleteGroup(_)
         | Msg::Drop(_, _)
         | Msg::DragEnded(_)
         | Msg::DragOver => (),
     }
 }
 
-pub fn view(album_id: String, group: &Group, state_opt: Option<&State>) -> Node<Msg> {
+pub fn view(album_id: String, group: &Group) -> Node<Msg> {
     let grp_id = group.id;
     div![
         C!["box group"],
-        if state_opt.is_some() {
-            let state = state_opt.unwrap();
+        if group.state.is_some() {
+            let state = group.state.clone().unwrap();
             progress![
                 C!["progress", "is-danger"],
                 attrs! { At::Value => state.current, At::Max => state.total }

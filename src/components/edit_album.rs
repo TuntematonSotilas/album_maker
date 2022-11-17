@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use seed::{self, prelude::*, *};
 use uuid::Uuid;
 
@@ -24,7 +22,6 @@ pub struct Model {
     is_new: bool,
     auth_header: String,
     album: Album,
-    states: HashMap<String, State>,
     id_pic_drag: String,
 }
 
@@ -34,7 +31,6 @@ impl Model {
             is_new: true,
             auth_header: String::new(),
             album: Album::new(),
-            states: HashMap::new(),
             id_pic_drag: String::new(),
         }
     }
@@ -68,14 +64,13 @@ pub enum Msg {
     NotifyError,
     DeleteGroup(Uuid),
     ErrorDeleteOnePic,
-    SuccessDeleteOnePic(String),
+    SuccessDeleteOnePic(Uuid),
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::SetAuth(auth_header) => model.auth_header = auth_header,
         Msg::InitComp(id_opt) => {
-            model.states = HashMap::new();
             match id_opt {
                 Some(id) => {
                     model.is_new = false;
@@ -137,19 +132,8 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             match msg {
                 group::Msg::UpdateGroup(ref group_update) => {
                     if let Some(groups) = &mut model.album.groups {
-                        update_group(group_update, groups);
+                        update_group(group_update, groups, orders);
                     }
-                }
-                group::Msg::BeginDeleteGroup(id) => {
-                    model.states.insert(
-                        id.to_string(),
-                        State {
-                            del_state: TypeDel::Deleting,
-                            total: 0,
-                            current: 0,
-                        },
-                    );
-                    orders.send_msg(Msg::DeleteGroup(id));
                 }
                 group::Msg::DragEnded(ref id_pic_drag) => {
                     model.id_pic_drag = id_pic_drag.clone();
@@ -162,9 +146,19 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             group::update(msg, &mut orders.proxy(Msg::Group));
         }
         Msg::DeleteGroup(id) => delete_group(model, orders, id),
-        Msg::SuccessDeleteOnePic(id) => {
-            if let Some(delete_state) = model.states.get_mut(&id) {
-                delete_state.current += 1;
+        Msg::SuccessDeleteOnePic(group_id) => {
+            if let Some(groups) = &mut model.album.groups {
+                let group_update = GroupUpdate {
+                    upd_type: UpdateType::DelState,
+                    id: group_id,
+                    picture: None,
+                    grp_data: None,
+                    count_fake_pictures: None,
+                    asset_id: None,
+                    caption: None,
+                    del_state: Some(TypeDel::Deleting),
+                };
+                update_group(&group_update, groups, orders);
             }
         }
         Msg::ErrorDeleteOnePic => {
@@ -189,7 +183,6 @@ fn drop_pic(model: &mut Model, group_id: Uuid, id_pic_drop: &str) {
 }
 
 fn delete_group(model: &mut Model, orders: &mut impl Orders<Msg>, group_id: Uuid) {
-    let album_id = model.album.id.clone();
     if let Some(groups) = &mut model.album.groups {
         if let Some(group) = groups.iter().find(|g| g.id == group_id) {
             // Delete all pics
@@ -197,12 +190,10 @@ fn delete_group(model: &mut Model, orders: &mut impl Orders<Msg>, group_id: Uuid
                 pictures.iter().map(|p| p.public_id.clone()).collect()
             });
             for pic_id in pic_ids {
-                let album_id = album_id.clone();
                 orders.perform_cmd(async move {
-                    let album_id = album_id.clone();
                     let res = apifn::delete_picture(pic_id).await;
                     if res {
-                        Msg::SuccessDeleteOnePic(album_id)
+                        Msg::SuccessDeleteOnePic(group_id)
                     } else {
                         Msg::ErrorDeleteOnePic
                     }
@@ -215,7 +206,7 @@ fn delete_group(model: &mut Model, orders: &mut impl Orders<Msg>, group_id: Uuid
     }
 }
 
-fn update_group(group_update: &GroupUpdate, groups: &mut [Group]) {
+fn update_group(group_update: &GroupUpdate, groups: &mut [Group], orders: &mut impl Orders<Msg>) {
     if let Some(group) = groups.iter_mut().find(|g| g.id == group_update.id) {
         let grp_upd = group_update.clone();
         match group_update.upd_type {
@@ -249,6 +240,30 @@ fn update_group(group_update: &GroupUpdate, groups: &mut [Group]) {
                         p.asset_id == group_update.clone().asset_id.unwrap_or_default()
                     }) {
                         pictures.remove(pos);
+                    }
+                }
+            }
+            UpdateType::DelState => {
+                if let Some(del_state) = &group_update.del_state {
+                    let mut total = 0;
+                    if let Some(pictures) = &mut group.pictures {
+                        total = pictures.len();
+                    }
+                    let mut current = 0;
+                    if let Some(state) = &mut group.state {
+                        current = state.current + 1;
+                    } else {
+                        orders.send_msg(Msg::DeleteGroup(group.id));
+                    }
+                    match del_state {
+                        TypeDel::Deleting => {
+                            group.state = Some(State {
+                                del_state: TypeDel::Deleting,
+                                total: total,
+                                current: current,
+                            });
+                        },
+                        _ => ()
                     }
                 }
             }
@@ -351,8 +366,7 @@ pub fn view(model: &Model) -> Node<Msg> {
             .groups
             .as_ref()
             .map_or(empty!(), |groups| div![groups.iter().map(|group| {
-                let state_opt = model.states.get(&group.id.to_string());
-                group::view(model.album.id.clone(), group, state_opt).map_msg(Msg::Group)
+                group::view(model.album.id.clone(), group).map_msg(Msg::Group)
             })],),
         div![
             C!["mt-5"],
