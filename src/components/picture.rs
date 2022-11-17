@@ -89,6 +89,14 @@ pub fn view(group_id: Uuid, picture: &Picture) -> Node<Msg> {
                 ]
             ],
             div![
+                C!("field"),
+                    input![
+                        C!["switch", "is-outlined", "is-small", "is-info"],
+                        attrs!{ At::Type => "checkbox" }
+                    ],
+                    label!["Set as cover"]
+            ],
+            div![
                 C!("control"),
                 button![
                     C!["button", "is-link", "is-light", "is-small"],
