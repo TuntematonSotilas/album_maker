@@ -15,6 +15,9 @@
 
 .slideshow-caption {
 	padding: 0.2em 0.8em;
+}
+
+.slideshow-caption-anim {
 	position: absolute;
 	text-transform: uppercase;
 	animation: slideshow-fade-in 0.3s;

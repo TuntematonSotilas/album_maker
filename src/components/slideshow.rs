@@ -63,12 +63,17 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::SetAuth(auth_header) => model.auth_header = auth_header,
         Msg::InitComp(id) => {
             orders.skip(); // No need to rerender
+            model.slide_id = 0;
+            model.slide = Slide {
+                is_title: false,
+                group_title: None,
+                picture: None,
+            };
             let auth = model.auth_header.clone();
             orders.perform_cmd(async {
                 let opt_album = apifn::get_album(id, auth).await;
                 opt_album.map_or(Msg::ErrorGet, Msg::Received)
             });
-            model.slide_id = 0;
         }
         Msg::ErrorGet => {
             orders.notify(Notif {
@@ -165,12 +170,15 @@ pub fn view(model: &Model) -> Node<Msg> {
                     "is-justify-content-center",
                     "slideshow-image-container"
                 ],
-                h2![
-                    C!["slideshow-caption", "title", "is-4", "mt-5", 
-                        &model.album.caption_color.to_string(), 
-                        &model.album.caption_style.to_string() 
+                div![
+                    C!("slideshow-caption-anim"),
+                    h2![
+                        C!["slideshow-caption", "title", "is-4", "mt-5", 
+                            &model.album.caption_color.to_string(), 
+                            &model.album.caption_style.to_string() 
+                        ],
+                        &picture.caption
                     ],
-                    &picture.caption
                 ],
                 img![
                     C!("slideshow-image"),
