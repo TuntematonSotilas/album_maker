@@ -70,31 +70,48 @@ pub fn view(group_id: Uuid, picture: &Picture) -> Node<Msg> {
         div![
             C!("column"),
             div![
-                C!("field"),
-                label![C!("label"), "Caption"],
-                div![
-                    C!("control"),
-                    input![
-                        C!["input", "is-small"],
-                        attrs! {
-                            At::Type => "text",
-                            At::Name => "caption",
-                            At::Placeholder => "Caption",
-                            At::Value => picture.caption.clone().unwrap_or_default(),
-                        },
-                        input_ev(Ev::Input, move |input| Msg::CaptionChanged(
-                            group_id, input, asset_id
-                        )),
-                    ]
-                ]
+                C!["field", "is-horizontal"],
+				div![
+					C!["field-label", "is-normal"],
+					label![C!("label"), "Caption"],
+				],
+				div![
+					C!("field-body"),
+					div![
+						C!("field"),
+						div![
+							C!("control"),
+							input![
+								C!["input", "is-small"],
+								attrs! {
+									At::Type => "text",
+									At::Name => "caption",
+									At::Placeholder => "Caption",
+									At::Value => picture.caption.clone().unwrap_or_default(),
+								},
+								input_ev(Ev::Input, move |input| Msg::CaptionChanged(
+									group_id, input, asset_id
+								)),
+							]
+						]
+					]	
+				]
             ],
             div![
                 C!("field"),
-                    input![
-                        C!["switch", "is-outlined", "is-small", "is-info"],
-                        attrs!{ At::Type => "checkbox" }
-                    ],
-                    label!["Set as cover"]
+				input![
+					C!["switch", "is-outlined", "is-small", "is-info"],
+					attrs!{ At::Type => "checkbox" }
+				],
+				label!["Album cover"]
+            ],
+			div![
+                C!("field"),
+				input![
+					C!["switch", "is-outlined", "is-small", "is-info"],
+					attrs!{ At::Type => "checkbox" }
+				],
+				label!["Group cover"]
             ],
             div![
                 C!("control"),
