@@ -152,7 +152,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 				asset_id: None,
 				caption: None,
 				del_state: Some(TypeDel::Deleting),
-				cover: None,
 			};
             update_group(&group_update, &mut model.album, orders);
         }
@@ -212,11 +211,19 @@ fn update_group(group_update: &GroupUpdate, album: &mut Album, orders: &mut impl
 				UpdateType::Title => {
 					group.title = grp_upd.grp_data.unwrap_or_default();
 				}
-				UpdateType::GroupCover => {
-					album.cover = grp_upd.cover.unwrap_or_default();
+				UpdateType::SetAlbumCover => {
+					if album.cover == grp_upd.asset_id.unwrap_or_default() {
+						album.cover = String::new();	
+					} else {
+						album.cover = group_update.clone().asset_id.unwrap_or_default();
+					}
 				}
-				UpdateType::AlbumCover => {
-					group.cover = grp_upd.cover.unwrap_or_default();
+				UpdateType::SetGroupCover => {
+					if group.cover == grp_upd.asset_id.unwrap_or_default() {
+						group.cover = String::new();	
+					} else {
+						group.cover = group_update.clone().asset_id.unwrap_or_default();
+					}
 				}
 				UpdateType::AddPicture => {
 					let picture = grp_upd.picture.unwrap_or_default();
@@ -368,7 +375,7 @@ pub fn view(model: &Model) -> Node<Msg> {
             .groups
             .as_ref()
             .map_or(empty!(), |groups| div![groups.iter().map(|group| {
-                group::view(model.album.id.clone(), group).map_msg(Msg::Group)
+                group::view(model.album.id.clone(), model.album.cover.clone(), group).map_msg(Msg::Group)
             })],),
         div![
             C!["mt-5"],

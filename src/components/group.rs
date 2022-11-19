@@ -35,7 +35,6 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                 asset_id: None,
                 caption: None,
                 del_state: None,
-				cover: None,
             }));
         }
         Msg::Upload(msg) => {
@@ -50,7 +49,6 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                         asset_id: None,
                         caption: None,
                         del_state: None,
-						cover: None,
                     }));
                 }
                 upload::Msg::RenderFakePictures(count, group_id) => {
@@ -63,7 +61,6 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                         asset_id: None,
                         caption: None,
                         del_state: None,
-						cover: None,
                     }));
                 }
                 _ => (),
@@ -82,7 +79,6 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                         asset_id: Some(asset_id.clone()),
                         caption: Some(caption.clone()),
                         del_state: None,
-						cover: None,
                     }));
                 }
                 picture::Msg::DeletePictureSuccess(group_id, ref asset_id) => {
@@ -95,7 +91,30 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                         asset_id: Some(asset_id.clone()),
                         caption: None,
                         del_state: None,
-						cover: None,
+                    }));
+                }
+				picture::Msg::SetAlbumCover(group_id, ref asset_id) => {
+                    orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+                        upd_type: UpdateType::SetAlbumCover,
+                        id: group_id,
+                        picture: None,
+                        grp_data: None,
+                        count_fake_pictures: None,
+                        asset_id: Some(asset_id.clone()),
+                        caption: None,
+                        del_state: None,
+                    }));
+                }
+				picture::Msg::SetGroupCover(group_id, ref asset_id) => {
+                    orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+                        upd_type: UpdateType::SetGroupCover,
+                        id: group_id,
+                        picture: None,
+                        grp_data: None,
+                        count_fake_pictures: None,
+                        asset_id: Some(asset_id.clone()),
+                        caption: None,
+                        del_state: None,
                     }));
                 }
                 _ => (),
@@ -112,7 +131,6 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                 asset_id: None,
                 caption: None,
                 del_state: Some(TypeDel::Deleting),
-				cover: None,
             }));
         }
         Msg::UpdateGroup(_)
@@ -122,7 +140,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     }
 }
 
-pub fn view(album_id: String, group: &Group) -> Node<Msg> {
+pub fn view(album_id: String, album_cover: String, group: &Group) -> Node<Msg> {
     let grp_id = group.id;
     div![
         C!["box group"],
@@ -177,7 +195,7 @@ pub fn view(album_id: String, group: &Group) -> Node<Msg> {
                                     event.data_transfer().unwrap().set_drop_effect("move");
                                     Msg::DragOver
                                 }),
-                                picture::view(group.id, picture).map_msg(Msg::Picture),
+                                picture::view(group.id, picture, album_cover.clone(), group.cover.clone()).map_msg(Msg::Picture),
                             ]
                         })]
                     }),

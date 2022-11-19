@@ -14,18 +14,16 @@ use crate::{
 //    Update
 // ------ ------
 pub enum Msg {
-    CaptionChanged(Uuid, String, String),
     UpdateCaption(Uuid, String, String),
     DeletePicture(Uuid, String, String),
     DeletePictureSuccess(Uuid, String),
     DeleteFail,
+	SetAlbumCover(Uuid, String),
+	SetGroupCover(Uuid, String),
 }
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::CaptionChanged(group_id, input, asset_id) => {
-            orders.send_msg(Msg::UpdateCaption(group_id, input, asset_id));
-        }
         Msg::DeletePicture(group_id, public_id, asset_id) => {
             orders.skip(); // No need to rerender
             orders.perform_cmd(async move {
@@ -37,7 +35,10 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                 }
             });
         }
-        Msg::DeletePictureSuccess(_, _) | Msg::UpdateCaption(_, _, _) => (),
+        Msg::DeletePictureSuccess(_, _) 
+			| Msg::UpdateCaption(_, _, _) 
+			| Msg::SetAlbumCover(_, _)
+			| Msg::SetGroupCover(_, _)=> (),
         Msg::DeleteFail => {
             orders.notify(Notif {
                 notif_type: TypeNotifs::Error,
@@ -47,9 +48,11 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
     }
 }
 
-pub fn view(group_id: Uuid, picture: &Picture) -> Node<Msg> {
+pub fn view(group_id: Uuid, picture: &Picture, album_cover :String, group_cover: String ) -> Node<Msg> {
     let asset_id = picture.asset_id.clone();
     let asset_id2 = picture.asset_id.clone();
+	let asset_id3 = picture.asset_id.clone();
+	let asset_id4 = picture.asset_id.clone();
     let public_id = picture.clone().public_id;
     div![
         C!["container", "columns", "is-vcentered", "is-mobile"],
@@ -82,26 +85,34 @@ pub fn view(group_id: Uuid, picture: &Picture) -> Node<Msg> {
                             At::Placeholder => "Caption",
                             At::Value => picture.caption.clone().unwrap_or_default(),
                         },
-                        input_ev(Ev::Input, move |input| Msg::CaptionChanged(
-                            group_id, input, asset_id
-                        )),
+                        input_ev(Ev::Input, move |input| Msg::UpdateCaption(group_id, input, asset_id)),
                     ]
                 ],
 				div![
 					C!("field"),
 					input![
 						C!["switch", "is-outlined", "is-small", "is-info"],
-						attrs!{ At::Type => "checkbox" }
+						attrs!{ 
+							At::Type => "checkbox" ,
+							At::Checked => (album_cover == picture.asset_id.clone()).as_at_value()
+						},
 					],
-					label!["Album cover"]
-				],
-				div![
-					C!("field"),
+					label![
+						C!("mr-2"),
+						"Album cover",
+						ev(Ev::Click, move |_| Msg::SetAlbumCover(group_id, asset_id2)),
+					],
 					input![
 						C!["switch", "is-outlined", "is-small", "is-info"],
-						attrs!{ At::Type => "checkbox" }
+						attrs!{ 
+							At::Type => "checkbox",
+							At::Checked => (group_cover == picture.asset_id.clone()).as_at_value()
+						},
 					],
-					label!["Group cover"]
+					label![
+						"Group cover",
+						ev(Ev::Click, move |_| Msg::SetGroupCover(group_id, asset_id3)),
+					]
 				],
 				div![
 					C!("control"),
@@ -109,9 +120,7 @@ pub fn view(group_id: Uuid, picture: &Picture) -> Node<Msg> {
 						C!["button", "is-link", "is-light", "is-small"],
 						span![C!("icon"), i![C!("ion-close-circled")]],
 						span!["Delete"],
-						ev(Ev::Click, move |_| Msg::DeletePicture(
-							group_id, public_id, asset_id2
-						))
+						ev(Ev::Click, move |_| Msg::DeletePicture(group_id, public_id, asset_id4))
 					]
 				]
 			]

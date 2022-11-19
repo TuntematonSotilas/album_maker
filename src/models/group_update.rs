@@ -9,8 +9,8 @@ pub enum UpdateType {
     DeletePicture,
     Caption,
     DelState,
-	GroupCover,
-	AlbumCover,
+	SetGroupCover,
+	SetAlbumCover,
 }
 
 #[derive(Debug, Clone)]
@@ -23,5 +23,4 @@ pub struct GroupUpdate {
     pub asset_id: Option<String>,
     pub caption: Option<String>,
     pub del_state: Option<TypeDel>,
-	pub cover: Option<String>,
 }
