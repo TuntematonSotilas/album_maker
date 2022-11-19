@@ -5,7 +5,7 @@ use crate::{
     api::apifn,
     components::group,
     models::{
-        album::{Album, self},
+        album::Album,
         caption::{Style, COLORS, Color},
         group::Group,
         group_update::{GroupUpdate, UpdateType},
@@ -38,10 +38,8 @@ impl Model {
         if self.album.title.is_empty() {
             return true;
         }
-        if let Some(groups) = &self.album.groups {
-            return groups.iter().any(|g| g.title.is_empty());
-        }
-        false
+        let groups = self.album.groups.clone().unwrap_or_default();
+        return groups.iter().any(|g| g.title.is_empty());
     }
 }
 
@@ -221,27 +219,26 @@ fn update_group(group_update: &GroupUpdate, album: &mut Album, orders: &mut impl
 					group.cover = grp_upd.cover.unwrap_or_default();
 				}
 				UpdateType::AddPicture => {
-					if let Some(picture) = grp_upd.picture {
-						if let Some(pictures) = &mut group.pictures {
-							pictures.push(picture);
-							group.count_fake_pictures -= 1;
-						}
+					let picture = grp_upd.picture.unwrap_or_default();
+					if let Some(pictures) = &mut group.pictures {
+						pictures.push(picture);
+						group.count_fake_pictures -= 1;
 					}
 				}
 				UpdateType::Caption => {
 					if let Some(pictures) = &mut group.pictures {
 						if let Some(picture) = pictures
 							.iter_mut()
-							.find(|p| p.asset_id == group_update.clone().asset_id.unwrap_or_default())
+							.find(|p| p.asset_id == grp_upd.clone().asset_id.unwrap_or_default())
 						{
-							picture.caption = Some(group_update.clone().caption.unwrap_or_default());
+							picture.caption = grp_upd.caption;
 						}
 					}
 				}
 				UpdateType::DeletePicture => {
 					if let Some(pictures) = &mut group.pictures {
 						if let Some(pos) = pictures.iter().position(|p| {
-							p.asset_id == group_update.clone().asset_id.unwrap_or_default()
+							p.asset_id == grp_upd.clone().asset_id.unwrap_or_default()
 						}) {
 							pictures.remove(pos);
 						}

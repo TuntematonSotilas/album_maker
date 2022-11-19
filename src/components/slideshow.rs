@@ -92,23 +92,22 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 group_title: None,
                 picture: None,
             });
-            if let Some(groups) = model.album.groups.clone() {
-                for group in &groups {
-                    model.slides.push(Slide {
-                        is_title: false,
-                        group_title: Some(group.title.clone()),
-                        picture: None,
-                    });
-                    if let Some(pictures) = group.pictures.clone() {
-                        for picture in pictures {
-                            model.slides.push(Slide {
-                                is_title: false,
-                                group_title: None,
-                                picture: Some(picture),
-                            });
-                        }
-                    }
-                }
+            let groups = model.album.groups.clone().unwrap_or_default();
+			for group in &groups {
+				model.slides.push(Slide {
+					is_title: false,
+					group_title: Some(group.title.clone()),
+					picture: None,
+				});
+				if let Some(pictures) = group.pictures.clone() {
+					for picture in pictures {
+						model.slides.push(Slide {
+							is_title: false,
+							group_title: None,
+							picture: Some(picture),
+						});
+					}
+				}
             }
         }
         Msg::Next => {
@@ -127,12 +126,10 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
-    let mut s_bkg = style! {};
-    if let Some(picture) = &model.slide.picture {
-        s_bkg = style! {
-            St::BackgroundImage => format!("url({}{}.{})", VERY_LOW_URI, picture.public_id, picture.format),
-        }
-    }
+    let picture = &model.slide.picture.clone().unwrap_or_default();
+	let s_bkg = style! {
+		St::BackgroundImage => format!("url({}{}.{})", VERY_LOW_URI, picture.public_id, picture.format),
+    };
 
     div![
         id!("slideshow"),
@@ -170,16 +167,18 @@ pub fn view(model: &Model) -> Node<Msg> {
                     "is-justify-content-center",
                     "slideshow-image-container"
                 ],
-                div![
-                    C!("slideshow-caption-anim"),
-                    h2![
-                        C!["slideshow-caption", "title", "is-4", "mt-5", 
-                            &model.album.caption_color.to_string(), 
-                            &model.album.caption_style.to_string() 
-                        ],
-                        &picture.caption
-                    ],
-                ],
+				IF!(!picture.caption.is_some() =>
+					div![
+						C!("slideshow-caption-anim"),
+						h2![
+							C!["slideshow-caption", "title", "is-4", "mt-5", 
+								&model.album.caption_color.to_string(), 
+								&model.album.caption_style.to_string() 
+							],
+							&picture.caption
+						],
+					]
+				),
                 img![
                     C!("slideshow-image"),
                     attrs! { At::Src => src },

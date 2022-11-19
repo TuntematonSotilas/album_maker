@@ -106,7 +106,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 												C!["image", "is-128x128", "m-1"],
 												img![attrs!{ At::Src => format!("{}{}.{}", THUMB_URI, picture.public_id, picture.format) }]
 											],
-											span![picture.caption.clone().unwrap_or_default()],
+											span![picture.caption.clone()],
 										]
 									}
 								)])]
