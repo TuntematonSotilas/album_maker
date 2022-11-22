@@ -87,11 +87,24 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.send_msg(Msg::Next);
         }
         Msg::InitSlides => {
+            
+            // Cover
+            let mut picture: Option<Picture> = None;
+            let grps = model.album.groups.clone().unwrap_or_default();
+            for grp in grps.iter() {
+                if let Some(pic) = grp.pictures.clone().unwrap_or_default().iter().find(|p| p.asset_id == model.album.cover)
+                {
+                    picture = Some(pic.clone());
+                    break;
+                }
+            }
+
             model.slides.push(Slide {
                 is_title: true,
                 group_title: None,
-                picture: None,
+                picture: picture,
             });
+
             let groups = model.album.groups.clone().unwrap_or_default();
 			for group in &groups {
 				model.slides.push(Slide {
