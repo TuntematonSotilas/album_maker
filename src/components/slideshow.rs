@@ -126,10 +126,12 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
-    let picture = &model.slide.picture.clone().unwrap_or_default();
-	let s_bkg = style! {
-		St::BackgroundImage => format!("url({}{}.{})", VERY_LOW_URI, picture.public_id, picture.format),
-    };
+    let mut s_bkg = style! {};
+    if let Some(picture) = &model.slide.picture {
+        s_bkg = style! {
+            St::BackgroundImage => format!("url({}{}.{})", VERY_LOW_URI, picture.public_id, picture.format),
+        };
+    }
 
     div![
         id!("slideshow"),
@@ -167,7 +169,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                     "is-justify-content-center",
                     "slideshow-image-container"
                 ],
-				IF!(!picture.caption.is_some() =>
+				IF!(picture.caption.is_some() =>
 					div![
 						C!("slideshow-caption-anim"),
 						h2![
