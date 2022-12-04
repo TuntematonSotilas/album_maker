@@ -89,12 +89,12 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::InitSlides => {
             
             // Cover
-            let mut picture: Option<Picture> = None;
+            let mut cover: Option<Picture> = None;
             let grps = model.album.groups.clone().unwrap_or_default();
             for grp in grps.iter() {
                 if let Some(pic) = grp.pictures.clone().unwrap_or_default().iter().find(|p| p.asset_id == model.album.cover)
                 {
-                    picture = Some(pic.clone());
+                    cover = Some(pic.clone());
                     break;
                 }
             }
@@ -102,15 +102,21 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.slides.push(Slide {
                 is_title: true,
                 group_title: None,
-                picture: picture,
+                picture: cover,
             });
 
             let groups = model.album.groups.clone().unwrap_or_default();
 			for group in &groups {
+				// Cover
+				let mut grp_cover: Option<Picture> = None;
+				if let Some(pic) = group.pictures.clone().unwrap_or_default().iter().find(|p| p.asset_id == group.cover)
+                {
+                    grp_cover = Some(pic.clone());
+                }
 				model.slides.push(Slide {
 					is_title: false,
 					group_title: Some(group.title.clone()),
-					picture: None,
+					picture: grp_cover,
 				});
 				if let Some(pictures) = group.pictures.clone() {
 					for picture in pictures {

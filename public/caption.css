@@ -19,6 +19,7 @@
 
 .White {
 	background-color: #fff;
+	color: black;
 }
 
 .Red {
@@ -67,14 +68,17 @@
 
 .Lime {
 	background-color: #CDDC39;
+	color: black;
 }
 
 .Yellow {
 	background-color: #FFEB3B;
+	color: black;
 }
 
 .Amber {
-	background-color: #FFC107
+	background-color: #FFC107;
+	color: black;
 }
 
 .Orange {
