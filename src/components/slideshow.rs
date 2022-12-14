@@ -164,13 +164,19 @@ pub fn view(model: &Model) -> Node<Msg> {
                         C!("hero-body"),
                         div![
                             C!["is-flex", "is-justify-content-center", "has-text-centered"],
-                            h1![
-                                C!["title", "has-text-link"],
-                                model
-                                    .slide
-                                    .group_title
-                                    .as_ref()
-                                    .map_or(&model.album.title, |group_title| group_title)
+                            div![
+                                C!("slideshow-caption-anim"),
+                                h2![
+                                    C!["slideshow-caption", "title", "is-4", "mt-5", 
+                                        &model.album.caption_color.to_string(), 
+                                        &model.album.caption_style.to_string() 
+                                    ],
+                                    model
+                                        .slide
+                                        .group_title
+                                        .as_ref()
+                                        .map_or(&model.album.title, |group_title| group_title)
+                                ],
                             ],
                         ],
                     ],
@@ -187,7 +193,12 @@ pub fn view(model: &Model) -> Node<Msg> {
                     "is-justify-content-center",
                     "slideshow-image-container"
                 ],
-				IF!(picture.caption.is_some() =>
+                img![
+                    C!("slideshow-image"),
+                    attrs! { At::Src => src },
+                    ev(Ev::LoadEnd, move |_| { Msg::PicLoadEnd }),
+                ],
+                IF!(picture.caption.is_some() =>
 					div![
 						C!("slideshow-caption-anim"),
 						h2![
@@ -199,11 +210,6 @@ pub fn view(model: &Model) -> Node<Msg> {
 						],
 					]
 				),
-                img![
-                    C!("slideshow-image"),
-                    attrs! { At::Src => src },
-                    ev(Ev::LoadEnd, move |_| { Msg::PicLoadEnd }),
-                ]
             ]
         } else {
             empty!()
