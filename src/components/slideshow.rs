@@ -151,7 +151,6 @@ pub fn view(model: &Model) -> Node<Msg> {
             St::BackgroundImage => format!("url({}{}.{})", VERY_LOW_URI, picture.public_id, picture.format),
         };
     }
-
     div![
         id!("slideshow"),
         C!("slideshow"),

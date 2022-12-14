@@ -3,6 +3,17 @@
 	width: 100vw;
 	height: 100vh;
 	margin: 0;
+	position: fixed;
+}
+
+.slideshow::before {
+	content: '';
+	width: inherit;
+	height: inherit;
+	position: inherit;
+	background-image: inherit;
+	background-size: cover;
+	filter: blur(10px);
 }
 
 .slideshow-image-container {
@@ -10,6 +21,7 @@
 }
 
 .slideshow-image {
+	position: fixed;
     height: 100%;
 }
 
