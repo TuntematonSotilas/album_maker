@@ -26,6 +26,7 @@ pub struct Model {
     slide: Slide,
     slide_id: usize,
     pic_loaded: bool,
+    caption_animate: bool,
 }
 
 impl Model {
@@ -41,6 +42,7 @@ impl Model {
             },
             slide_id: 0,
             pic_loaded: false,
+            caption_animate: false,
         }
     }
 }
@@ -56,6 +58,7 @@ pub enum Msg {
     Received(Album),
     Next,
     PicLoadEnd,
+    ShowAnim,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -130,13 +133,21 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
         }
         Msg::Next => {
+            
+
             if let Some(slide) = model.slides.get(model.slide_id) {
                 model.slide = slide.clone();
                 model.slide_id += 1;
+                model.caption_animate = false;
+                orders.perform_cmd(cmds::timeout(1, || Msg::ShowAnim));
             }
+            
         }
         Msg::PicLoadEnd => {
             model.pic_loaded = true;
+        }
+        Msg::ShowAnim => {
+            model.caption_animate = true;
         }
     }
 }
@@ -151,36 +162,30 @@ pub fn view(model: &Model) -> Node<Msg> {
             St::BackgroundImage => format!("url({}{}.{})", VERY_LOW_URI, picture.public_id, picture.format),
         };
     }
+    let caption_anim = match model.caption_animate {
+        true => "slideshow-caption-anim",
+        false => "slideshow-caption-hide"
+    };
+        
     div![
         id!("slideshow"),
         C!("slideshow"),
         s_bkg,
         if model.slide.is_title || model.slide.group_title.is_some() {
             div![
-                C!("container"),
-                div![
-                    C!["hero", "is-large"],
-                    div![
-                        C!("hero-body"),
-                        div![
-                            C!["is-flex", "is-justify-content-center", "has-text-centered"],
-                            div![
-                                C!("slideshow-caption-anim"),
-                                h2![
-                                    C!["slideshow-caption", "title", "is-4", "mt-5", 
-                                        &model.album.caption_color.to_string(), 
-                                        &model.album.caption_style.to_string() 
-                                    ],
-                                    model
-                                        .slide
-                                        .group_title
-                                        .as_ref()
-                                        .map_or(&model.album.title, |group_title| group_title)
-                                ],
-                            ],
-                        ],
+                C!["is-flex", "is-justify-content-center"],
+                h2![
+                    C!["slideshow-caption", "title", "is-4", "mt-5", 
+                        &model.album.caption_color.to_string(), 
+                        &model.album.caption_style.to_string(),
+                        caption_anim
                     ],
-                ]
+                    model
+                        .slide
+                        .group_title
+                        .as_ref()
+                        .map_or(&model.album.title, |group_title| group_title)
+                ],
             ]
         } else if let Some(picture) = &model.slide.picture {
             let src = match &model.pic_loaded {
@@ -200,11 +205,12 @@ pub fn view(model: &Model) -> Node<Msg> {
                 ],
                 IF!(picture.caption.is_some() =>
 					div![
-						C!("slideshow-caption-anim"),
+                        C!["is-flex", "is-justify-content-center"],
 						h2![
-							C!["slideshow-caption", "title", "is-4", "mt-5", 
+							C!["slideshow-caption", "title", "is-4", "mt-5",
 								&model.album.caption_color.to_string(), 
-								&model.album.caption_style.to_string() 
+								&model.album.caption_style.to_string(),
+                                caption_anim
 							],
 							&picture.caption
 						],

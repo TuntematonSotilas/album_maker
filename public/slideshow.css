@@ -27,13 +27,16 @@
 
 .slideshow-caption {
 	padding: 0.2em 0.8em;
+	text-transform: uppercase;
+	position: fixed;
+	top: 2rem;
+	opacity: 0;
 }
 
 .slideshow-caption-anim {
-	position: absolute;
-	text-transform: uppercase;
 	animation: slideshow-fade-in 0.3s;
 	animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+	opacity: 1;
 }
 
 @keyframes slideshow-fade-in {
