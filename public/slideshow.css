@@ -25,11 +25,14 @@
     height: 100%;
 }
 
+.slideshow-caption-ctn {
+	height: 100%;
+}
+
 .slideshow-caption {
 	padding: 0.2em 0.8em;
 	text-transform: uppercase;
 	position: fixed;
-	top: 2rem;
 	opacity: 0;
 }
 

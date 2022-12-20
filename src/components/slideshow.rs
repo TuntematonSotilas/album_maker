@@ -133,17 +133,15 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
         }
         Msg::Next => {
-            
-
             if let Some(slide) = model.slides.get(model.slide_id) {
                 model.slide = slide.clone();
                 model.slide_id += 1;
                 model.caption_animate = false;
                 orders.perform_cmd(cmds::timeout(1, || Msg::ShowAnim));
             }
-            
         }
         Msg::PicLoadEnd => {
+			log!("PicLoadEnd");
             model.pic_loaded = true;
         }
         Msg::ShowAnim => {
@@ -173,9 +171,9 @@ pub fn view(model: &Model) -> Node<Msg> {
         s_bkg,
         if model.slide.is_title || model.slide.group_title.is_some() {
             div![
-                C!["is-flex", "is-justify-content-center"],
+                C!["is-flex", "is-justify-content-center", "is-align-items-center", "slideshow-caption-ctn"],
                 h2![
-                    C!["slideshow-caption", "title", "is-4", "mt-5", 
+                    C!["slideshow-caption", "title", "is-4", 
                         &model.album.caption_color.to_string(), 
                         &model.album.caption_style.to_string(),
                         caption_anim
