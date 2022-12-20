@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use load_dotenv::load_dotenv;
 use seed::{self, prelude::*, *};
 use uuid::Uuid;
@@ -17,7 +19,7 @@ use crate::{
 pub enum Msg {
     FilesChanged(Option<FileList>, String, Uuid),
     RenderFakePictures(u32, Uuid),
-    SendUpload(FormData, Uuid),
+    SendUpload(FormData, String, Uuid),
     Success(Picture, Uuid),
     Error,
 }
@@ -39,18 +41,26 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                                 form_data.append_with_str("upload_preset", upload_preset);
                             let folder_res = form_data.append_with_str("folder", folder.as_str());
                             if file_res.is_ok() && preset_res_.is_ok() && folder_res.is_ok() {
-                                orders.send_msg(Msg::SendUpload(form_data, group_id));
+                                orders.send_msg(Msg::SendUpload(form_data, file.name(), group_id));
                             }
                         }
                     }
                 }
             }
         }
-        Msg::SendUpload(form_data, group_id) => {
+        Msg::SendUpload(form_data, name, group_id) => {
             orders.skip(); // No need to rerender
             orders.perform_cmd(async move {
                 let pic_opt = apifn::upload_picture(form_data).await;
-                pic_opt.map_or(Msg::Error, |picture| Msg::Success(picture, group_id))
+				match pic_opt {
+					Some(mut pic) => {
+						let name = Path::new(&name).file_stem().unwrap_or_default();
+						let name = name.to_str().unwrap_or_default().to_string();
+						pic.caption = Some(name);
+						Msg::Success(pic, group_id)
+					}
+					None => Msg::Error
+				}
             });
         }
         Msg::RenderFakePictures(_, _) | Msg::Success(_, _) => (),
