@@ -25,8 +25,8 @@ pub struct Model {
     slides: Vec<Slide>,
     slide: Slide,
     slide_id: usize,
-    pic_loaded: bool,
     caption_animate: bool,
+	pic_loaded: bool,
 }
 
 impl Model {
@@ -41,8 +41,8 @@ impl Model {
                 picture: None,
             },
             slide_id: 0,
-            pic_loaded: false,
             caption_animate: false,
+            pic_loaded: false,
         }
     }
 }
@@ -58,6 +58,7 @@ pub enum Msg {
     Received(Album),
     Next,
     PicLoadEnd,
+	ErrorGetPic,
     ShowAnim,
 }
 
@@ -137,12 +138,34 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 model.slide = slide.clone();
                 model.slide_id += 1;
                 model.caption_animate = false;
+				model.pic_loaded = false;
+
                 orders.perform_cmd(cmds::timeout(1, || Msg::ShowAnim));
+				
+				if !model.slide.is_title && model.slide.group_title.is_none() {
+					if let Some(pic) = slide.picture.clone() {
+						orders.skip();
+						orders.perform_cmd(async move {
+							let url = format!("url({}{}.{})", IMG_URI, pic.public_id, pic.format);
+							let response = fetch(url).await.expect("HTTP request failed");
+							if response.status().is_ok() {
+								Msg::PicLoadEnd
+							} else {
+								Msg::ErrorGetPic
+							}
+						});
+					}
+				}
             }
         }
         Msg::PicLoadEnd => {
-			log!("PicLoadEnd");
-            model.pic_loaded = true;
+			model.pic_loaded = true;			
+        }
+		Msg::ErrorGetPic => {
+            orders.notify(Notif {
+                notif_type: TypeNotifs::Error,
+                message: "Error getting album".to_string(),
+            });
         }
         Msg::ShowAnim => {
             model.caption_animate = true;
@@ -199,7 +222,6 @@ pub fn view(model: &Model) -> Node<Msg> {
                 img![
                     C!("slideshow-image"),
                     attrs! { At::Src => src },
-                    ev(Ev::LoadEnd, move |_| { Msg::PicLoadEnd }),
                 ],
                 IF!(picture.caption.is_some() =>
 					div![
