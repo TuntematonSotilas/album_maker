@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use seed::{self, prelude::*, *};
 
 use crate::{
-    api::apifn,
+    api::albumapi,
     models::{
         album::Album,
         notif::{Notif, TypeNotifs},
@@ -47,7 +47,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
             orders.perform_cmd(async {
-                let albums_opt = apifn::get_my_ablums(auth).await;
+                let albums_opt = albumapi::get_my_ablums(auth).await;
                 albums_opt.map_or(Msg::ErrorGet, Msg::Received)
             });
         }
@@ -86,7 +86,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             let auth = model.auth_header.clone();
             let id_del = id.clone();
             orders.perform_cmd(async {
-                let success = apifn::delete_ablum(id_del, auth).await;
+                let success = albumapi::delete_ablum(id_del, auth).await;
                 if success {
                     Msg::SuccessDelete(id)
                 } else {
@@ -128,7 +128,7 @@ fn delete_all_pics(model: &mut Model, orders: &mut impl Orders<Msg>, album_id: &
                     for pic_id in pic_ids {
                         let id_success = album_id.to_string();
                         orders.perform_cmd(async move {
-                            let res = apifn::delete_picture(pic_id).await;
+                            let res = albumapi::delete_picture(pic_id).await;
                             if res {
                                 Msg::SuccessDeleteOnePic(id_success)
                             } else {
@@ -180,7 +180,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 									a![
 										attrs! {
 											At::Title => "Open",
-											At::Href => format!("/{}/{}", LK_VIEW_ALBUM, id_del),
+											At::Href => format!("/{LK_VIEW_ALBUM}/{id_del}"),
 										},
 										&album.title
 									]

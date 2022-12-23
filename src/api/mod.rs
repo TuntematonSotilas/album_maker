@@ -1,1 +1,1 @@
-pub mod apifn;
+pub mod albumapi;

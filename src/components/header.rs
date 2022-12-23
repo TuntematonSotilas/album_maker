@@ -112,7 +112,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                         "is-tab",
                         IF!(model.page == Page::MyAlbums => "is-active")
                     ],
-                    attrs! { At::Href => format!("/{}", LK_MY_ALBUMS) },
+                    attrs! { At::Href => format!("/{LK_MY_ALBUMS}") },
                     TITLE_MY_ALBUMS
                 ]
             ),
@@ -123,7 +123,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                         C!("buttons"),
                         a![
                             C!["button", "is-primary"],
-                            attrs! { At::Href => format!("/{}", LK_NEW_ALBUM) },
+                            attrs! { At::Href => format!("/{LK_NEW_ALBUM}") },
                             span![C!("icon"), i![C!("ion-plus")]],
                             span![TITLE_NEW_ALBUM],
                         ],
@@ -145,7 +145,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                             ],
                             a![
                                 C!["button", "is-primary", "is-link", "is-light", "is-small"],
-                                attrs! { At::Href => format!("/{}", LK_VIEW_ALBUM) },
+                                attrs! { At::Href => format!("/{LK_VIEW_ALBUM}") },
                                 span![C!("icon"), i![C!("ion-close-circled")]],
                                 span!["Close"],
                             ]

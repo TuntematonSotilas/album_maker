@@ -6,7 +6,7 @@ use uuid::Uuid;
 use web_sys::{self, FileList, FormData};
 
 use crate::{
-    api::apifn,
+    api::albumapi,
     models::{
         notif::{Notif, TypeNotifs},
         picture::Picture,
@@ -35,7 +35,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                     if let Some(file) = files.get(i) {
                         if let Ok(form_data) = FormData::new() {
                             let upload_preset = env!("CLD_UPLOAD_PRESET");
-                            let folder = format!("amaker/{}", album_id);
+                            let folder = format!("amaker/{album_id}");
                             let file_res = form_data.append_with_blob("file", &file);
                             let preset_res_ =
                                 form_data.append_with_str("upload_preset", upload_preset);
@@ -51,16 +51,16 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
         Msg::SendUpload(form_data, name, group_id) => {
             orders.skip(); // No need to rerender
             orders.perform_cmd(async move {
-                let pic_opt = apifn::upload_picture(form_data).await;
-				match pic_opt {
-					Some(mut pic) => {
-						let name = Path::new(&name).file_stem().unwrap_or_default();
-						let name = name.to_str().unwrap_or_default().to_string();
-						pic.caption = Some(name);
-						Msg::Success(pic, group_id)
-					}
-					None => Msg::Error
-				}
+                let pic_opt = albumapi::upload_picture(form_data).await;
+                match pic_opt {
+                    Some(mut pic) => {
+                        let name = Path::new(&name).file_stem().unwrap_or_default();
+                        let name = name.to_str().unwrap_or_default().to_string();
+                        pic.caption = Some(name);
+                        Msg::Success(pic, group_id)
+                    }
+                    None => Msg::Error,
+                }
             });
         }
         Msg::RenderFakePictures(_, _) | Msg::Success(_, _) => (),

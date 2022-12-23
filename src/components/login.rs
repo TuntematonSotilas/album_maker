@@ -30,8 +30,8 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::Submit => {
             orders.skip(); // No need to rerender
             let uri = BASE_URI.to_string() + "login";
-            let b64 = base64::encode(format!("{0}:{1}", model.username, model.password));
-            let auth = format!("Basic {0}", b64);
+            let b64 = base64::encode(format!("{}:{}", model.username, model.password));
+            let auth = format!("Basic {b64}");
 
             let request = Request::new(uri)
                 .method(Method::Post)

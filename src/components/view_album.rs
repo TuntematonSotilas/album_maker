@@ -1,5 +1,5 @@
 use crate::{
-    api::apifn,
+    api::albumapi,
     models::{
         album::Album,
         notif::{Notif, TypeNotifs},
@@ -45,7 +45,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
             orders.perform_cmd(async {
-                let opt_album = apifn::get_album(id, auth).await;
+                let opt_album = albumapi::get_album(id, auth).await;
                 opt_album.map_or(Msg::ErrorGet, Msg::Received)
             });
         }
@@ -77,13 +77,13 @@ pub fn view(model: &Model) -> Node<Msg> {
                         C!("mb-2"),
                         a![
                             C!["button", "is-link", "is-light", "is-small", "ml-2"],
-                            attrs! { At::Href => format!("/{}/{}", LK_EDIT_ALBUM, model.album.id) },
+                            attrs! { At::Href => format!("/{LK_EDIT_ALBUM}/{}", model.album.id) },
                             span![C!("icon"), i![C!("ion-edit")]],
                             span![TITLE_EDIT_ALBUM],
                         ],
                         a![
                             C!["button", "is-primary", "is-light", "is-small", "ml-2"],
-                            attrs! { At::Href => format!("/{}/{}", LK_SLIDESHOW, model.album.id) },
+                            attrs! { At::Href => format!("/{LK_SLIDESHOW}/{}", model.album.id) },
                             span![C!("icon"), i![C!("ion-play")]],
                             span![TITLE_SLIDESHOW],
                         ]
@@ -104,7 +104,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 											C!["mr-1", "album-view-picture"],
 											figure![
 												C!["image", "is-128x128", "m-1"],
-												img![attrs!{ At::Src => format!("{}{}.{}", THUMB_URI, picture.public_id, picture.format) }]
+												img![attrs!{ At::Src => format!("{THUMB_URI}{}.{}", picture.public_id, picture.format) }]
 											],
 											span![picture.caption.clone()],
 										]

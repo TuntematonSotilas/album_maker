@@ -67,60 +67,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             }
             upload::update(msg, &mut orders.proxy(Msg::Upload));
         }
-        Msg::Picture(msg) => {
-            match msg {
-                picture::Msg::UpdateCaption(group_id, ref caption, ref asset_id) => {
-                    orders.send_msg(Msg::UpdateGroup(GroupUpdate {
-                        upd_type: UpdateType::Caption,
-                        id: group_id,
-                        picture: None,
-                        grp_data: None,
-                        count_fake_pictures: None,
-                        asset_id: Some(asset_id.clone()),
-                        caption: Some(caption.clone()),
-                        del_state: None,
-                    }));
-                }
-                picture::Msg::DeletePictureSuccess(group_id, ref asset_id) => {
-                    orders.send_msg(Msg::UpdateGroup(GroupUpdate {
-                        upd_type: UpdateType::DeletePicture,
-                        id: group_id,
-                        picture: None,
-                        grp_data: None,
-                        count_fake_pictures: None,
-                        asset_id: Some(asset_id.clone()),
-                        caption: None,
-                        del_state: None,
-                    }));
-                }
-				picture::Msg::SetAlbumCover(group_id, ref asset_id) => {
-                    orders.send_msg(Msg::UpdateGroup(GroupUpdate {
-                        upd_type: UpdateType::SetAlbumCover,
-                        id: group_id,
-                        picture: None,
-                        grp_data: None,
-                        count_fake_pictures: None,
-                        asset_id: Some(asset_id.clone()),
-                        caption: None,
-                        del_state: None,
-                    }));
-                }
-				picture::Msg::SetGroupCover(group_id, ref asset_id) => {
-                    orders.send_msg(Msg::UpdateGroup(GroupUpdate {
-                        upd_type: UpdateType::SetGroupCover,
-                        id: group_id,
-                        picture: None,
-                        grp_data: None,
-                        count_fake_pictures: None,
-                        asset_id: Some(asset_id.clone()),
-                        caption: None,
-                        del_state: None,
-                    }));
-                }
-                _ => (),
-            }
-            picture::update(msg, &mut orders.proxy(Msg::Picture));
-        }
+        Msg::Picture(msg) => update_picture(msg, orders),
         Msg::BeginDeleteGroup(group_id) => {
             orders.send_msg(Msg::UpdateGroup(GroupUpdate {
                 upd_type: UpdateType::DelState,
@@ -133,14 +80,66 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                 del_state: Some(TypeDel::Deleting),
             }));
         }
-        Msg::UpdateGroup(_)
-        | Msg::Drop(_, _)
-        | Msg::DragEnded(_)
-        | Msg::DragOver => (),
+        Msg::UpdateGroup(_) | Msg::Drop(_, _) | Msg::DragEnded(_) | Msg::DragOver => (),
     }
 }
 
-pub fn view(album_id: String, album_cover: String, group: &Group) -> Node<Msg> {
+fn update_picture(msg: picture::Msg, orders: &mut impl Orders<Msg>) {
+    match msg {
+        picture::Msg::UpdateCaption(group_id, ref caption, ref asset_id) => {
+            orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+                upd_type: UpdateType::Caption,
+                id: group_id,
+                picture: None,
+                grp_data: None,
+                count_fake_pictures: None,
+                asset_id: Some(asset_id.clone()),
+                caption: Some(caption.clone()),
+                del_state: None,
+            }));
+        }
+        picture::Msg::DeletePictureSuccess(group_id, ref asset_id) => {
+            orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+                upd_type: UpdateType::DeletePicture,
+                id: group_id,
+                picture: None,
+                grp_data: None,
+                count_fake_pictures: None,
+                asset_id: Some(asset_id.clone()),
+                caption: None,
+                del_state: None,
+            }));
+        }
+        picture::Msg::SetAlbumCover(group_id, ref asset_id) => {
+            orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+                upd_type: UpdateType::SetAlbumCover,
+                id: group_id,
+                picture: None,
+                grp_data: None,
+                count_fake_pictures: None,
+                asset_id: Some(asset_id.clone()),
+                caption: None,
+                del_state: None,
+            }));
+        }
+        picture::Msg::SetGroupCover(group_id, ref asset_id) => {
+            orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+                upd_type: UpdateType::SetGroupCover,
+                id: group_id,
+                picture: None,
+                grp_data: None,
+                count_fake_pictures: None,
+                asset_id: Some(asset_id.clone()),
+                caption: None,
+                del_state: None,
+            }));
+        }
+        _ => (),
+    }
+    picture::update(msg, &mut orders.proxy(Msg::Picture));
+}
+
+pub fn view(album_id: String, album_cover: &str, group: &Group) -> Node<Msg> {
     let grp_id = group.id;
     div![
         C!["box group"],
@@ -195,7 +194,8 @@ pub fn view(album_id: String, album_cover: String, group: &Group) -> Node<Msg> {
                                     event.data_transfer().unwrap().set_drop_effect("move");
                                     Msg::DragOver
                                 }),
-                                picture::view(group.id, picture, album_cover.clone(), group.cover.clone()).map_msg(Msg::Picture),
+                                picture::view(group.id, picture, album_cover, group.cover.as_str())
+                                    .map_msg(Msg::Picture),
                             ]
                         })]
                     }),

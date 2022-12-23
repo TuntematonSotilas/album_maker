@@ -2,11 +2,11 @@ use seed::{self, prelude::*, *};
 use uuid::Uuid;
 
 use crate::{
-    api::apifn,
+    api::albumapi,
     components::group,
     models::{
         album::Album,
-        caption::{Style, COLORS, Color},
+        caption::{Color, Style, COLORS},
         group::Group,
         group_update::{GroupUpdate, UpdateType},
         notif::{Notif, TypeNotifs},
@@ -26,7 +26,7 @@ pub struct Model {
 }
 
 impl Model {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             is_new: true,
             auth_header: String::new(),
@@ -68,22 +68,20 @@ pub enum Msg {
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::SetAuth(auth_header) => model.auth_header = auth_header,
-        Msg::InitComp(id_opt) => {
-            match id_opt {
-                Some(id) => {
-                    model.is_new = false;
-                    orders.send_msg(Msg::GetAlbum(id));
-                }
-                None => {
-                    model.album = Album::new();
-                }
+        Msg::InitComp(id_opt) => match id_opt {
+            Some(id) => {
+                model.is_new = false;
+                orders.send_msg(Msg::GetAlbum(id));
             }
-        }
+            None => {
+                model.album = Album::new();
+            }
+        },
         Msg::GetAlbum(id) => {
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
             orders.perform_cmd(async {
-                let opt_album = apifn::get_album(id, auth).await;
+                let opt_album = albumapi::get_album(id, auth).await;
                 opt_album.map_or(Msg::ErrorGet, Msg::Received)
             });
         }
@@ -101,7 +99,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             let auth = model.auth_header.clone();
             let album = model.album.clone();
             orders.perform_cmd(async {
-                let opt_id = apifn::update_album(album, auth).await;
+                let opt_id = albumapi::update_album(album, auth).await;
                 opt_id.map_or(Msg::NotifyError, Msg::NotifySuccess)
             });
         }
@@ -143,16 +141,16 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::DeleteGroup(id) => delete_group(model, orders, id),
         Msg::SuccessDeleteOnePic(group_id) => {
-			let group_update = GroupUpdate {
-				upd_type: UpdateType::DelState,
-				id: group_id,
-				picture: None,
-				grp_data: None,
-				count_fake_pictures: None,
-				asset_id: None,
-				caption: None,
-				del_state: Some(TypeDel::Deleting),
-			};
+            let group_update = GroupUpdate {
+                upd_type: UpdateType::DelState,
+                id: group_id,
+                picture: None,
+                grp_data: None,
+                count_fake_pictures: None,
+                asset_id: None,
+                caption: None,
+                del_state: Some(TypeDel::Deleting),
+            };
             update_group(&group_update, &mut model.album, orders);
         }
         Msg::ErrorDeleteOnePic => {
@@ -185,7 +183,7 @@ fn delete_group(model: &mut Model, orders: &mut impl Orders<Msg>, group_id: Uuid
             });
             for pic_id in pic_ids {
                 orders.perform_cmd(async move {
-                    let res = apifn::delete_picture(pic_id).await;
+                    let res = albumapi::delete_picture(pic_id).await;
                     if res {
                         Msg::SuccessDeleteOnePic(group_id)
                     } else {
@@ -201,82 +199,82 @@ fn delete_group(model: &mut Model, orders: &mut impl Orders<Msg>, group_id: Uuid
 }
 
 fn update_group(group_update: &GroupUpdate, album: &mut Album, orders: &mut impl Orders<Msg>) {
-	if let Some(groups) = &mut album.groups {
+    if let Some(groups) = &mut album.groups {
         if let Some(group) = groups.iter_mut().find(|g| g.id == group_update.id) {
-			let grp_upd = group_update.clone();
-			match group_update.upd_type {
-				UpdateType::CountFakePictures => {
-					group.count_fake_pictures = grp_upd.count_fake_pictures.unwrap_or_default();
-				}
-				UpdateType::Title => {
-					group.title = grp_upd.grp_data.unwrap_or_default();
-				}
-				UpdateType::SetAlbumCover => {
-					if album.cover == grp_upd.asset_id.unwrap_or_default() {
-						album.cover = String::new();	
-					} else {
-						album.cover = group_update.clone().asset_id.unwrap_or_default();
-					}
-				}
-				UpdateType::SetGroupCover => {
-					if group.cover == grp_upd.asset_id.unwrap_or_default() {
-						group.cover = String::new();	
-					} else {
-						group.cover = group_update.clone().asset_id.unwrap_or_default();
-					}
-				}
-				UpdateType::AddPicture => {
-					let picture = grp_upd.picture.unwrap_or_default();
-					if let Some(pictures) = &mut group.pictures {
-						pictures.push(picture);
-						group.count_fake_pictures -= 1;
-					}
-				}
-				UpdateType::Caption => {
-					if let Some(pictures) = &mut group.pictures {
-						if let Some(picture) = pictures
-							.iter_mut()
-							.find(|p| p.asset_id == grp_upd.clone().asset_id.unwrap_or_default())
-						{
-							picture.caption = grp_upd.caption;
-						}
-					}
-				}
-				UpdateType::DeletePicture => {
-					if let Some(pictures) = &mut group.pictures {
-						if let Some(pos) = pictures.iter().position(|p| {
-							p.asset_id == grp_upd.clone().asset_id.unwrap_or_default()
-						}) {
-							pictures.remove(pos);
-						}
-					}
-				}
-				UpdateType::DelState => {
-					if let Some(del_state) = &group_update.del_state {
-						let mut total = 0;
-						if let Some(pictures) = &mut group.pictures {
-							total = pictures.len();
-						}
-						let mut current = 0;
-						if let Some(state) = &mut group.state {
-							current = state.current + 1;
-						} else {
-							orders.send_msg(Msg::DeleteGroup(group.id));
-						}
-						match del_state {
-							TypeDel::Deleting => {
-								group.state = Some(State {
-									del_state: TypeDel::Deleting,
-									total: total,
-									current: current,
-								});
-							},
-							_ => ()
-						}
-					}
-				}
-			}
-		}
+            let grp_upd = group_update.clone();
+            match group_update.upd_type {
+                UpdateType::CountFakePictures => {
+                    group.count_fake_pictures = grp_upd.count_fake_pictures.unwrap_or_default();
+                }
+                UpdateType::Title => {
+                    group.title = grp_upd.grp_data.unwrap_or_default();
+                }
+                UpdateType::SetAlbumCover => {
+                    if album.cover == grp_upd.asset_id.unwrap_or_default() {
+                        album.cover = String::new();
+                    } else {
+                        album.cover = group_update.clone().asset_id.unwrap_or_default();
+                    }
+                }
+                UpdateType::SetGroupCover => {
+                    if group.cover == grp_upd.asset_id.unwrap_or_default() {
+                        group.cover = String::new();
+                    } else {
+                        group.cover = group_update.clone().asset_id.unwrap_or_default();
+                    }
+                }
+                UpdateType::AddPicture => {
+                    let picture = grp_upd.picture.unwrap_or_default();
+                    if let Some(pictures) = &mut group.pictures {
+                        pictures.push(picture);
+                        group.count_fake_pictures -= 1;
+                    }
+                }
+                UpdateType::Caption => {
+                    if let Some(pictures) = &mut group.pictures {
+                        if let Some(picture) = pictures
+                            .iter_mut()
+                            .find(|p| p.asset_id == grp_upd.clone().asset_id.unwrap_or_default())
+                        {
+                            picture.caption = grp_upd.caption;
+                        }
+                    }
+                }
+                UpdateType::DeletePicture => {
+                    if let Some(pictures) = &mut group.pictures {
+                        if let Some(pos) = pictures.iter().position(|p| {
+                            p.asset_id == grp_upd.clone().asset_id.unwrap_or_default()
+                        }) {
+                            pictures.remove(pos);
+                        }
+                    }
+                }
+                UpdateType::DelState => {
+                    if let Some(del_state) = &group_update.del_state {
+                        let mut total = 0;
+                        if let Some(pictures) = &mut group.pictures {
+                            total = pictures.len();
+                        }
+                        let mut current = 0;
+                        if let Some(state) = &mut group.state {
+                            current = state.current + 1;
+                        } else {
+                            orders.send_msg(Msg::DeleteGroup(group.id));
+                        }
+                        match del_state {
+                            TypeDel::Deleting => {
+                                group.state = Some(State {
+                                    del_state: TypeDel::Deleting,
+                                    total,
+                                    current,
+                                });
+                            }
+                            TypeDel::AskDelete => (),
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -326,56 +324,15 @@ pub fn view(model: &Model) -> Node<Msg> {
                     ]
                 ]
             ],
-            label![C!("label"), "Caption style"],
-            label![
-                C!["radio", "album-edit-radio"],
-                input![
-                    C!("mr-1"),
-                    attrs! {
-                        At::Type => "radio",
-                        At::Name => "caption_style",
-                        At::Checked => (model.album.caption_style == Style::Round).as_at_value(),
-                    },
-                    ev(Ev::Click, |_| Msg::StyleChanged(Style::Round)),
-                ],
-                Style::Round.to_string()
-            ],
-            label![
-                C!["radio", "album-edit-radio"],
-                input![
-                    C!("mr-1"),
-                    attrs! {
-                        At::Type => "radio",
-                        At::Name => "caption_style",
-                        At::Checked => (model.album.caption_style == Style::Square).as_at_value(),
-                    },
-                    ev(Ev::Click, |_| Msg::StyleChanged(Style::Square)),
-                ],
-                Style::Square.to_string()
-            ],
-            label![C!("label"), "Caption color"],
-            div![
-                C!("is-flex"),
-                COLORS.iter().map(|color| {
-                    let c_selected = if &model.album.caption_color == color {
-                        "album-edit-color-selected"
-                    } else {
-                        ""
-                    };
-                    let color = color.clone();
-                    span![
-                        C!["album-edit-color", "mr-1", color.to_string(), c_selected],
-                        ev(Ev::Click, |_| Msg::ColorChanged(color)),    
-                    ]
-                })
-            ]
+            caption_view(model),
         ],
         &model
             .album
             .groups
             .as_ref()
             .map_or(empty!(), |groups| div![groups.iter().map(|group| {
-                group::view(model.album.id.clone(), model.album.cover.clone(), group).map_msg(Msg::Group)
+                group::view(model.album.id.clone(), model.album.cover.as_str(), group)
+                    .map_msg(Msg::Group)
             })],),
         div![
             C!["mt-5"],
@@ -387,5 +344,53 @@ pub fn view(model: &Model) -> Node<Msg> {
                 ev(Ev::Click, |_| Msg::AddGroup),
             ],
         ],
+    ]
+}
+
+fn caption_view(model: &Model) -> Node<Msg> {
+    div![
+        label![C!("label"), "Caption style"],
+        label![
+            C!["radio", "album-edit-radio"],
+            input![
+                C!("mr-1"),
+                attrs! {
+                    At::Type => "radio",
+                    At::Name => "caption_style",
+                    At::Checked => (model.album.caption_style == Style::Round).as_at_value(),
+                },
+                ev(Ev::Click, |_| Msg::StyleChanged(Style::Round)),
+            ],
+            Style::Round.to_string()
+        ],
+        label![
+            C!["radio", "album-edit-radio"],
+            input![
+                C!("mr-1"),
+                attrs! {
+                    At::Type => "radio",
+                    At::Name => "caption_style",
+                    At::Checked => (model.album.caption_style == Style::Square).as_at_value(),
+                },
+                ev(Ev::Click, |_| Msg::StyleChanged(Style::Square)),
+            ],
+            Style::Square.to_string()
+        ],
+        label![C!("label"), "Caption color"],
+        div![
+            C!("is-flex"),
+            COLORS.iter().map(|color| {
+                let c_selected = if &model.album.caption_color == color {
+                    "album-edit-color-selected"
+                } else {
+                    ""
+                };
+                let color = color.clone();
+                span![
+                    C!["album-edit-color", "mr-1", color.to_string(), c_selected],
+                    ev(Ev::Click, |_| Msg::ColorChanged(color)),
+                ]
+            })
+        ]
     ]
 }

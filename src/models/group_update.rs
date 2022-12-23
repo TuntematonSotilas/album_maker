@@ -9,8 +9,8 @@ pub enum UpdateType {
     DeletePicture,
     Caption,
     DelState,
-	SetGroupCover,
-	SetAlbumCover,
+    SetGroupCover,
+    SetAlbumCover,
 }
 
 #[derive(Debug, Clone)]

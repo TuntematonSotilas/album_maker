@@ -24,7 +24,7 @@ impl Album {
             caption_style: Style::Round,
             caption_color: Color::Black,
             groups: Some(Vec::new()),
-            cover: String::new()
+            cover: String::new(),
         }
     }
 }

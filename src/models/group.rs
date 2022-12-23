@@ -23,7 +23,7 @@ impl Group {
             pictures: Some(Vec::new()),
             cover: String::new(),
             count_fake_pictures: 0,
-            state: None
+            state: None,
         }
     }
 }

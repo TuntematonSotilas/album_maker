@@ -32,7 +32,7 @@ pub async fn get_my_ablums(auth: String) -> Option<Vec<Album>> {
 }
 
 pub async fn get_album(id: String, auth: String) -> Option<Album> {
-    let uri = format!("{}getalbum?id={}", BASE_URI, id);
+    let uri = format!("{BASE_URI}getalbum?id={id}");
     let response = Request::new(uri)
         .header(Header::authorization(auth))
         .fetch()
@@ -72,7 +72,7 @@ pub async fn update_album(album: Album, auth: String) -> Option<String> {
 }
 
 pub async fn delete_ablum(id: String, auth: String) -> bool {
-    let delete_uri = format!("{}deletealbum?id={}", BASE_URI, id);
+    let delete_uri = format!("{BASE_URI}deletealbum?id={id}");
     let delete_request = Request::new(delete_uri)
         .header(Header::authorization(auth))
         .method(Method::Delete);
@@ -106,7 +106,7 @@ pub async fn delete_picture(public_id: String) -> bool {
     let secret = env!("CLD_API_SECRET");
     let ts = js_sys::Date::now().to_string();
 
-    let to_hash = format!("public_id={}&timestamp={}{}", public_id, ts, secret);
+    let to_hash = format!("public_id={public_id}&timestamp={ts}{secret}");
     let digest = digest::digest(&digest::SHA1_FOR_LEGACY_USE_ONLY, to_hash.as_bytes());
 
     let hash = digest.as_ref();
