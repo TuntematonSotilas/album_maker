@@ -17,4 +17,5 @@ impl Notif {
 pub enum TypeNotifs {
     Success,
     Error,
+    Share,
 }

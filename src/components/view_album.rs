@@ -1,10 +1,10 @@
 use crate::{
-    api::albumapi,
+    api::{albumapi, sharingapi},
     models::{
         album::Album,
         notif::{Notif, TypeNotifs},
         page::{LK_EDIT_ALBUM, LK_SLIDESHOW, TITLE_EDIT_ALBUM, TITLE_SLIDESHOW},
-        vars::THUMB_URI,
+        vars::THUMB_URI, sharing::Sharing,
     },
 };
 use seed::{self, prelude::*, *};
@@ -36,6 +36,9 @@ pub enum Msg {
     InitComp(String),
     ErrorGet,
     Received(Album),
+    Share,
+    ShareSuccess(String),
+    ShareError,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -59,6 +62,35 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.is_loaded = true;
             model.album = album;
         }
+        Msg::Share => {
+            orders.skip(); // No need to rerender
+            let auth = model.auth_header.clone();
+            let album = model.album.clone();
+            orders.perform_cmd(async {
+                let sharing = Sharing {
+                    id: String::new(),
+                    album_id: album.id,
+                    album_name: String::new(),
+                    nb_like: 0,
+                    nb_view: 0
+                };
+                let opt_id = sharingapi::add_sharing(auth, sharing).await;
+                opt_id.map_or(Msg::ShareError, Msg::ShareSuccess)
+            });
+        }
+        Msg::ShareError => {
+            orders.notify(Notif {
+                notif_type: TypeNotifs::Error,
+                message: "Error sharing".to_string(),
+            });
+        }
+        Msg::ShareSuccess(id) => {
+            let base_url = web_sys::window().unwrap().location().origin().unwrap();
+            orders.notify(Notif {
+                notif_type: TypeNotifs::Share,
+                message: format!("Share your album with this URL : {base_url}/share/{id}"),
+            });
+        }
     }
 }
 
@@ -81,12 +113,18 @@ pub fn view(model: &Model) -> Node<Msg> {
                             span![C!("icon"), i![C!("ion-edit")]],
                             span![TITLE_EDIT_ALBUM],
                         ],
+                        button![
+                            C!["button", "is-link", "is-light", "is-small", "ml-2"],
+                            span![C!("icon"), i![C!("ion-android-share-alt")]],
+                            span!["Share"],
+                            ev(Ev::Click, |_| Msg::Share),
+                        ],
                         a![
                             C!["button", "is-primary", "is-light", "is-small", "ml-2"],
                             attrs! { At::Href => format!("/{LK_SLIDESHOW}/{}", model.album.id) },
                             span![C!("icon"), i![C!("ion-play")]],
                             span![TITLE_SLIDESHOW],
-                        ]
+                        ],
                     ]
                 ],
                 model

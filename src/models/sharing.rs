@@ -6,7 +6,6 @@ pub struct Sharing {
     pub id: String,
     pub album_id: String,
     pub album_name: String,
-    pub token: String,
-    pub nb_views: String,
-    pub locations: Vec<String>,
+    pub nb_like: u32,
+    pub nb_view: u32,
 }

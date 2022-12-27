@@ -31,7 +31,11 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::Show(notif) => {
             model.is_visible = true;
             model.notif = notif;
-            orders.perform_cmd(cmds::timeout(3000, || Msg::Hide));
+            let time = match model.notif.notif_type {
+                TypeNotifs::Share => 20000,
+                _ => 3000
+            };
+            orders.perform_cmd(cmds::timeout(time, || Msg::Hide));
         }
         Msg::Hide => model.is_visible = false,
     }
@@ -43,7 +47,7 @@ pub fn view(model: &Model) -> Node<Msg> {
         _ => "",
     };
     let c_type = match &model.notif.notif_type {
-        TypeNotifs::Success => "is-success",
+        TypeNotifs::Success | TypeNotifs::Share => "is-success",
         TypeNotifs::Error => "is-danger",
     };
     div![
