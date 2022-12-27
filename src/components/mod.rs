@@ -9,3 +9,4 @@ pub mod picture;
 pub mod slideshow;
 pub mod upload;
 pub mod view_album;
+pub mod my_sharings;

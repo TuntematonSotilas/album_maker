@@ -1,5 +1,5 @@
 use crate::models::page::{
-    Page, LK_MY_ALBUMS, LK_NEW_ALBUM, LK_VIEW_ALBUM, TITLE_MY_ALBUMS, TITLE_NEW_ALBUM,
+    Page, LK_MY_ALBUMS, LK_NEW_ALBUM, LK_VIEW_ALBUM, LK_MY_SHARINGS, TITLE_MY_ALBUMS, TITLE_NEW_ALBUM, TITLE_MY_SHARINGS,
 };
 use seed::{self, prelude::*, *};
 
@@ -106,28 +106,37 @@ pub fn view(model: &Model) -> Node<Msg> {
         div![
             C!["navbar-menu", menu_is_active],
             IF!(model.page != Page::Slideshow =>
-                a![
-                    C![
-                        "navbar-item",
-                        "is-tab",
-                        IF!(model.page == Page::MyAlbums => "is-active")
-                    ],
-                    attrs! { At::Href => format!("/{LK_MY_ALBUMS}") },
-                    TITLE_MY_ALBUMS
-                ]
-            ),
-            IF!(model.page != Page::Slideshow =>
-                div![
-                    C!("navbar-item"),
-                    div![
-                        C!("buttons"),
-                        a![
-                            C!["button", "is-primary"],
-                            attrs! { At::Href => format!("/{LK_NEW_ALBUM}") },
-                            span![C!("icon"), i![C!("ion-plus")]],
-                            span![TITLE_NEW_ALBUM],
+                div![C!("is-flex"),
+                    a![
+                        C![
+                            "navbar-item",
+                            "is-tab",
+                            IF!(model.page == Page::MyAlbums => "is-active")
                         ],
+                        attrs! { At::Href => format!("/{LK_MY_ALBUMS}") },
+                        TITLE_MY_ALBUMS
                     ],
+                    a![
+                        C![
+                            "navbar-item",
+                            "is-tab",
+                            IF!(model.page == Page::MySharings => "is-active")
+                        ],
+                        attrs! { At::Href => format!("/{LK_MY_SHARINGS}") },
+                        TITLE_MY_SHARINGS
+                    ],
+                    div![
+                        C!("navbar-item"),
+                        div![
+                            C!("buttons"),
+                            a![
+                                C!["button", "is-primary"],
+                                attrs! { At::Href => format!("/{LK_NEW_ALBUM}") },
+                                span![C!("icon"), i![C!("ion-plus")]],
+                                span![TITLE_NEW_ALBUM],
+                            ]
+                        ]
+                    ]
                 ]
             ),
             div![
@@ -148,7 +157,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                                 attrs! { At::Href => format!("/{LK_VIEW_ALBUM}") },
                                 span![C!("icon"), i![C!("ion-close-circled")]],
                                 span!["Close"],
-                            ]
+                            ],
                         ]
                     } else {
                         div![

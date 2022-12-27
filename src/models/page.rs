@@ -4,8 +4,10 @@ pub const LK_VIEW_ALBUM: &str = "album";
 pub const LK_EDIT_ALBUM: &str = "edit-album";
 pub const LK_SLIDESHOW: &str = "slideshow";
 pub const LK_LOGIN: &str = "login";
+pub const LK_MY_SHARINGS: &str = "my-sharings";
 
 pub const TITLE_MY_ALBUMS: &str = "My albums";
+pub const TITLE_MY_SHARINGS: &str = "My sharings";
 pub const TITLE_NEW_ALBUM: &str = "New album";
 pub const TITLE_EDIT_ALBUM: &str = "Edit album";
 pub const TITLE_SLIDESHOW: &str = "Slideshow";
@@ -19,4 +21,5 @@ pub enum Page {
     ViewAlbum,
     Slideshow,
     Login,
+    MySharings,
 }

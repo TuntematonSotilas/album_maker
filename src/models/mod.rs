@@ -7,3 +7,4 @@ pub mod page;
 pub mod picture;
 pub mod state;
 pub mod vars;
+pub mod sharing;

@@ -63,7 +63,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
     div![
-        C!["columns", "is-centered"],
+        C!["columns", "is-centered", "mt-5"],
         div![
             C!["column", "is-half"],
             div![

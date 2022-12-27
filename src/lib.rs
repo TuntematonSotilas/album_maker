@@ -37,6 +37,7 @@ fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
         slideshow: slideshow::Model::new(),
         page: login_page,
         login: login::Model::default(),
+        my_sharings: my_sharings::Model::default(),
     }
 }
 
@@ -53,6 +54,7 @@ struct Model {
     slideshow: slideshow::Model,
     notification: notification::Model,
     login: login::Model,
+    my_sharings: my_sharings::Model,
 }
 
 // ------ ------
@@ -71,6 +73,7 @@ enum Msg {
     Notification(notification::Msg),
     SetIsLogged,
     ShowNotif(Notif),
+    MySharings(my_sharings::Msg),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -123,6 +126,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 Some(models::page::LK_EDIT_ALBUM) => models::page::Page::EditAlbum,
                 Some(models::page::LK_SLIDESHOW) => models::page::Page::Slideshow,
                 Some(models::page::LK_LOGIN) => models::page::Page::Login,
+                Some(models::page::LK_MY_SHARINGS) => models::page::Page::MySharings,
                 _ => models::page::Page::MyAlbums,
             };
             model.page = page.clone();
@@ -153,7 +157,11 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.send_msg(Msg::EditAlbum(edit_album::Msg::SetAuth(auth.clone())));
             orders.send_msg(Msg::MyAlbums(my_albums::Msg::SetAuth(auth.clone())));
             orders.send_msg(Msg::ViewAlbum(view_album::Msg::SetAuth(auth.clone())));
-            orders.send_msg(Msg::Slideshow(slideshow::Msg::SetAuth(auth)));
+            orders.send_msg(Msg::Slideshow(slideshow::Msg::SetAuth(auth.clone())));
+            orders.send_msg(Msg::MySharings(my_sharings::Msg::SetAuth(auth)));
+        }
+        Msg::MySharings(msg) => {
+            my_sharings::update(msg, &mut model.my_sharings, &mut orders.proxy(Msg::MySharings));
         }
     }
 }
@@ -178,6 +186,9 @@ fn init_comp(page: &Page, opt_id: Option<String>, orders: &mut impl Orders<Msg>)
             if let Some(id) = opt_id {
                 orders.send_msg(Msg::Slideshow(slideshow::Msg::InitComp(id)));
             }
+        }
+        models::page::Page::MySharings => {
+            orders.send_msg(Msg::MySharings(my_sharings::Msg::InitComp));
         }
         models::page::Page::Login => (),
     }
@@ -207,6 +218,8 @@ fn view(model: &Model) -> Node<Msg> {
                                     view_album::view(&model.view_album).map_msg(Msg::ViewAlbum),
                                 models::page::Page::Slideshow =>
                                     slideshow::view(&model.slideshow).map_msg(Msg::Slideshow),
+                                models::page::Page::MySharings =>
+                                    my_sharings::view(&model.my_sharings).map_msg(Msg::MySharings),
                                 models::page::Page::Login => empty!(),
                             }
                         ]
