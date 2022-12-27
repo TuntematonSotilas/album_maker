@@ -3,7 +3,7 @@ use crate::{
     models::{
         album::Album,
         notif::{Notif, TypeNotifs},
-        page::{LK_EDIT_ALBUM, LK_SLIDESHOW, TITLE_EDIT_ALBUM, TITLE_SLIDESHOW},
+        page::{LK_EDIT_ALBUM, LK_SLIDESHOW, TITLE_EDIT_ALBUM, TITLE_SLIDESHOW, LK_SHARESLIDE},
         vars::THUMB_URI, sharing::Sharing,
     },
 };
@@ -16,6 +16,7 @@ pub struct Model {
     auth_header: String,
     album: Album,
     is_loaded: bool,
+	share_id: Option<String>,
 }
 
 impl Model {
@@ -24,6 +25,7 @@ impl Model {
             auth_header: String::new(),
             album: Album::new(),
             is_loaded: false,
+			share_id: None,
         }
     }
 }
@@ -47,6 +49,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::InitComp(id, share_id) => {
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
+			model.share_id = share_id.clone();
             orders.perform_cmd(async {
                 let opt_album = albumapi::get_album(id, share_id, auth).await;
                 opt_album.map_or(Msg::ErrorGet, Msg::Received)
@@ -98,6 +101,12 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
+
+	let mut lk_slideshow = format!("/{LK_SLIDESHOW}/{}", model.album.id);
+	if let Some(share_id) = &model.share_id {
+		lk_slideshow = format!("/{LK_SHARESLIDE}/{share_id}");
+	}
+
     div![
         C!["column", "is-two-thirds"],
         if model.is_loaded {
@@ -106,22 +115,26 @@ pub fn view(model: &Model) -> Node<Msg> {
                     C!["column"],
                     div![C!["title", "is-5", "has-text-link"], &model.album.title],
                     div![
-                        C!("mb-2"),
+                        C!["is-flex", "mb-2"],
+						IF!(!model.share_id.is_some() =>
+							div![
+								a![
+									C!["button", "is-link", "is-light", "is-small", "mr-2"],
+									attrs! { At::Href => format!("/{LK_EDIT_ALBUM}/{}", model.album.id) },
+									span![C!("icon"), i![C!("ion-edit")]],
+									span![TITLE_EDIT_ALBUM],
+								],
+								button![
+									C!["button", "is-link", "is-light", "is-small", "mr-2"],
+									span![C!("icon"), i![C!("ion-android-share-alt")]],
+									span!["Share"],
+									ev(Ev::Click, |_| Msg::Share),
+								]
+							]
+						),
                         a![
-                            C!["button", "is-link", "is-light", "is-small", "ml-2"],
-                            attrs! { At::Href => format!("/{LK_EDIT_ALBUM}/{}", model.album.id) },
-                            span![C!("icon"), i![C!("ion-edit")]],
-                            span![TITLE_EDIT_ALBUM],
-                        ],
-                        button![
-                            C!["button", "is-link", "is-light", "is-small", "ml-2"],
-                            span![C!("icon"), i![C!("ion-android-share-alt")]],
-                            span!["Share"],
-                            ev(Ev::Click, |_| Msg::Share),
-                        ],
-                        a![
-                            C!["button", "is-primary", "is-light", "is-small", "ml-2"],
-                            attrs! { At::Href => format!("/{LK_SLIDESHOW}/{}", model.album.id) },
+                            C!["button", "is-primary", "is-light", "is-small"],
+                            attrs! { At::Href => lk_slideshow },
                             span![C!("icon"), i![C!("ion-play")]],
                             span![TITLE_SLIDESHOW],
                         ],

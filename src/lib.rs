@@ -127,10 +127,11 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 Some(models::page::LK_LOGIN) => models::page::Page::Login,
                 Some(models::page::LK_MY_SHARINGS) => models::page::Page::MySharings,
                 Some(models::page::LK_SHARE) => models::page::Page::Share,
+				Some(models::page::LK_SHARESLIDE) => models::page::Page::ShareSlide,
                 _ => models::page::Page::MyAlbums,
             };
 
-            log!("UrlChanged", page);
+			log!(page);
 
             model.page = page.clone();
 
@@ -140,7 +141,8 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.send_msg(Msg::InitComp(opt_id));
         }
         Msg::InitComp(opt_id) => {
-            if model.page == Page::Share || model.is_logged {
+			log!("InitComp");
+            if model.is_logged || model.page == Page::Share || model.page == Page::ShareSlide {
                 init_comp(&model.page, opt_id, orders);
             }
         }
@@ -181,23 +183,19 @@ fn init_comp(page: &Page, opt_id: Option<String>, orders: &mut impl Orders<Msg>)
             orders.send_msg(Msg::EditAlbum(edit_album::Msg::InitComp(opt_id)));
         }
         models::page::Page::ViewAlbum => {
-            if let Some(id) = opt_id {
-                orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(Some(id), None)));
-            }
+            orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(opt_id, None)));
         }
         models::page::Page::Slideshow => {
-            if let Some(id) = opt_id {
-                orders.send_msg(Msg::Slideshow(slideshow::Msg::InitComp(id)));
-            }
+            orders.send_msg(Msg::Slideshow(slideshow::Msg::InitComp(opt_id, None)));
         }
         models::page::Page::MySharings => {
             orders.send_msg(Msg::MySharings(my_sharings::Msg::InitComp));
         }
         models::page::Page::Share => {
-            log!("init_comp - share");
-            if let Some(share_id) = opt_id {
-                orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(None, Some(share_id))));
-            }
+            orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(None, opt_id)));
+        }
+		models::page::Page::ShareSlide => {
+           orders.send_msg(Msg::Slideshow(slideshow::Msg::InitComp(None, opt_id)));
         }
         models::page::Page::Login => (),
     }
@@ -207,21 +205,27 @@ fn init_comp(page: &Page, opt_id: Option<String>, orders: &mut impl Orders<Msg>)
 //     View
 // ------ ------
 fn view(model: &Model) -> Node<Msg> {
+	let mut c_cont = "";
+	if model.page != Page::Slideshow && model.page != Page::ShareSlide {
+		c_cont = "columns is-centered m-1";
+	}
     div![
         notification::view(&model.notification).map_msg(Msg::Notification),
         header::view(&model.header).map_msg(Msg::Header),
         div![
-            C!(IF!(model.page != Page::Slideshow => "container")),
             match &model.page {
                 models::page::Page::Login => login::view(&model.login).map_msg(Msg::Login),
                 models::page::Page::Share =>  div![
                     C!("columns is-centered m-1"),
                     view_album::view(&model.view_album).map_msg(Msg::ViewAlbum) 
                 ],
+				models::page::Page::ShareSlide =>  div![
+					slideshow::view(&model.slideshow).map_msg(Msg::Slideshow)
+                ],
                 _ => match &model.is_logged {
                     true => {
                         div![
-                            C![IF!(model.page != Page::Slideshow => "columns is-centered m-1")],
+							C!(c_cont),
                             match &model.page {
                                 models::page::Page::NewAlbum | models::page::Page::EditAlbum =>
                                     edit_album::view(&model.edit_album).map_msg(Msg::EditAlbum),
@@ -229,10 +233,10 @@ fn view(model: &Model) -> Node<Msg> {
                                     my_albums::view(&model.my_albums).map_msg(Msg::MyAlbums),
                                 models::page::Page::ViewAlbum =>
                                     view_album::view(&model.view_album).map_msg(Msg::ViewAlbum),
-                                models::page::Page::Slideshow =>
-                                    slideshow::view(&model.slideshow).map_msg(Msg::Slideshow),
                                 models::page::Page::MySharings =>
                                     my_sharings::view(&model.my_sharings).map_msg(Msg::MySharings),
+								models::page::Page::Slideshow =>
+                                    slideshow::view(&model.slideshow).map_msg(Msg::Slideshow),
                                 _ => empty!(),
                             }
                         ]

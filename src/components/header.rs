@@ -70,7 +70,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
-    let c_slide = if model.page == Page::Slideshow {
+    let c_slide = if model.page == Page::Slideshow || model.page == Page::ShareSlide  {
         "navbar-slideshow"
     } else {
         ""
@@ -82,7 +82,7 @@ pub fn view(model: &Model) -> Node<Msg> {
     nav![
         C!["navbar", c_slide],
         attrs! { At::AriaLabel => "main navigation" },
-        IF!(model.page != Page::Slideshow =>
+        IF!(model.page != Page::Slideshow && model.page != Page::ShareSlide =>
             div![
                 C!("navbar-brand"),
                 a![
@@ -105,7 +105,7 @@ pub fn view(model: &Model) -> Node<Msg> {
         ),
         div![
             C!["navbar-menu", menu_is_active],
-            IF!(model.page != Page::Slideshow =>
+            IF!(model.page != Page::Slideshow && model.page != Page::ShareSlide =>
                 div![C!("is-flex"),
                     a![
                         C![
@@ -143,7 +143,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                 C!("navbar-end"),
                 div![
                     C!("navbar-item"),
-                    if model.page == Page::Slideshow {
+                    if model.page == Page::Slideshow || model.page == Page::ShareSlide {
                         div![
                             C!("buttons"),
                             a![

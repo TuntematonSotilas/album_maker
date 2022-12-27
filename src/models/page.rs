@@ -6,6 +6,7 @@ pub const LK_SLIDESHOW: &str = "slideshow";
 pub const LK_LOGIN: &str = "login";
 pub const LK_MY_SHARINGS: &str = "my-sharings";
 pub const LK_SHARE: &str = "share";
+pub const LK_SHARESLIDE: &str = "shareslide";
 
 pub const TITLE_MY_ALBUMS: &str = "My albums";
 pub const TITLE_MY_SHARINGS: &str = "My sharings";
@@ -24,4 +25,5 @@ pub enum Page {
     Login,
     MySharings,
     Share,
+	ShareSlide,
 }
