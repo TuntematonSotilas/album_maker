@@ -33,7 +33,7 @@ impl Model {
 // ------ ------
 pub enum Msg {
     SetAuth(String),
-    InitComp(String),
+    InitComp(Option<String>, Option<String>),
     ErrorGet,
     Received(Album),
     Share,
@@ -44,11 +44,11 @@ pub enum Msg {
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::SetAuth(auth_header) => model.auth_header = auth_header,
-        Msg::InitComp(id) => {
+        Msg::InitComp(id, share_id) => {
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
             orders.perform_cmd(async {
-                let opt_album = albumapi::get_album(id, auth).await;
+                let opt_album = albumapi::get_album(id, share_id, auth).await;
                 opt_album.map_or(Msg::ErrorGet, Msg::Received)
             });
         }

@@ -18,12 +18,11 @@ mod models;
 // ------ ------
 //     Init
 // ------ ------
-fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
+fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.subscribe(Msg::ShowNotif);
     orders.subscribe(Msg::UrlChanged);
 
-    let login_url = Url::new().add_path_part(LK_LOGIN);
-    orders.notify(subs::UrlRequested::new(login_url));
+    orders.notify(subs::UrlRequested::new(url));
 
     let login_page = models::page::Page::Login;
 
@@ -127,8 +126,12 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 Some(models::page::LK_SLIDESHOW) => models::page::Page::Slideshow,
                 Some(models::page::LK_LOGIN) => models::page::Page::Login,
                 Some(models::page::LK_MY_SHARINGS) => models::page::Page::MySharings,
+                Some(models::page::LK_SHARE) => models::page::Page::Share,
                 _ => models::page::Page::MyAlbums,
             };
+
+            log!("UrlChanged", page);
+
             model.page = page.clone();
 
             orders.send_msg(Msg::Header(header::Msg::SetPage(page)));
@@ -137,7 +140,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.send_msg(Msg::InitComp(opt_id));
         }
         Msg::InitComp(opt_id) => {
-            if model.is_logged {
+            if model.page == Page::Share || model.is_logged {
                 init_comp(&model.page, opt_id, orders);
             }
         }
@@ -179,7 +182,7 @@ fn init_comp(page: &Page, opt_id: Option<String>, orders: &mut impl Orders<Msg>)
         }
         models::page::Page::ViewAlbum => {
             if let Some(id) = opt_id {
-                orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(id)));
+                orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(Some(id), None)));
             }
         }
         models::page::Page::Slideshow => {
@@ -189,6 +192,12 @@ fn init_comp(page: &Page, opt_id: Option<String>, orders: &mut impl Orders<Msg>)
         }
         models::page::Page::MySharings => {
             orders.send_msg(Msg::MySharings(my_sharings::Msg::InitComp));
+        }
+        models::page::Page::Share => {
+            log!("init_comp - share");
+            if let Some(share_id) = opt_id {
+                orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(None, Some(share_id))));
+            }
         }
         models::page::Page::Login => (),
     }
@@ -205,6 +214,10 @@ fn view(model: &Model) -> Node<Msg> {
             C!(IF!(model.page != Page::Slideshow => "container")),
             match &model.page {
                 models::page::Page::Login => login::view(&model.login).map_msg(Msg::Login),
+                models::page::Page::Share =>  div![
+                    C!("columns is-centered m-1"),
+                    view_album::view(&model.view_album).map_msg(Msg::ViewAlbum) 
+                ],
                 _ => match &model.is_logged {
                     true => {
                         div![
@@ -220,7 +233,7 @@ fn view(model: &Model) -> Node<Msg> {
                                     slideshow::view(&model.slideshow).map_msg(Msg::Slideshow),
                                 models::page::Page::MySharings =>
                                     my_sharings::view(&model.my_sharings).map_msg(Msg::MySharings),
-                                models::page::Page::Login => empty!(),
+                                _ => empty!(),
                             }
                         ]
                     }

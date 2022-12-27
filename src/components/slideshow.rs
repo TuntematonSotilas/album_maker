@@ -75,7 +75,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             };
             let auth = model.auth_header.clone();
             orders.perform_cmd(async {
-                let opt_album = albumapi::get_album(id, auth).await;
+                let opt_album = albumapi::get_album(Some(id), None, auth).await;
                 opt_album.map_or(Msg::ErrorGet, Msg::Received)
             });
         }

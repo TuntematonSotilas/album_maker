@@ -5,6 +5,7 @@ pub const LK_EDIT_ALBUM: &str = "edit-album";
 pub const LK_SLIDESHOW: &str = "slideshow";
 pub const LK_LOGIN: &str = "login";
 pub const LK_MY_SHARINGS: &str = "my-sharings";
+pub const LK_SHARE: &str = "share";
 
 pub const TITLE_MY_ALBUMS: &str = "My albums";
 pub const TITLE_MY_SHARINGS: &str = "My sharings";
@@ -22,4 +23,5 @@ pub enum Page {
     Slideshow,
     Login,
     MySharings,
+    Share,
 }

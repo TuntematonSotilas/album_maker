@@ -101,7 +101,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                                 &sharing.nb_like
                             ],
                             div![
-                                C!["has-text-grey", "is-size-7", "ml-2"],
+                                C!["has-text-grey", "is-size-7", "ml-3"],
                                 format!("{base_url}/share/{}", &sharing.id)],
                             div![
                                 C!["is-align-content-flex-end"],
