@@ -66,7 +66,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::SetAuth(auth_header) => model.auth_header = auth_header,
         Msg::InitComp(id, share_id) => {
-			log!("InitComp slide");
             orders.skip(); // No need to rerender
             model.slide_id = 0;
             model.slide = Slide {

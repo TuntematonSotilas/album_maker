@@ -1,5 +1,5 @@
 use crate::models::page::{
-    Page, LK_MY_ALBUMS, LK_NEW_ALBUM, LK_VIEW_ALBUM, LK_MY_SHARINGS, TITLE_MY_ALBUMS, TITLE_NEW_ALBUM, TITLE_MY_SHARINGS,
+    Page, LK_MY_ALBUMS, LK_NEW_ALBUM, LK_VIEW_ALBUM, LK_MY_SHARINGS, TITLE_MY_ALBUMS, TITLE_NEW_ALBUM, TITLE_MY_SHARINGS,LK_SHARE,
 };
 use seed::{self, prelude::*, *};
 
@@ -12,6 +12,7 @@ pub struct Model {
     is_menu_open: bool,
     page: Page,
     is_logged: bool,
+	share_id: Option<String>,
 }
 
 impl Model {
@@ -20,6 +21,7 @@ impl Model {
             is_menu_open: false,
             page,
             is_logged: false,
+			share_id: None,
         }
     }
 }
@@ -34,6 +36,7 @@ pub enum Msg {
     ClickLogInOrOut,
     LogInOrOut,
     Fullscreen,
+	SetShareId(Option<String>),
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -49,6 +52,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::SetIsLogged => {
             model.is_logged = true;
+        }
+		Msg::SetShareId(share_id) => {
+            model.share_id = share_id;
         }
         Msg::ClickLogInOrOut => {
             if model.is_logged {
@@ -70,6 +76,11 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
+	let mut lk_album = format!("/{LK_VIEW_ALBUM}");
+	if let Some(share_id) = &model.share_id {
+		lk_album = format!("/{LK_SHARE}/{share_id}");
+	}
+
     let c_slide = if model.page == Page::Slideshow || model.page == Page::ShareSlide  {
         "navbar-slideshow"
     } else {
@@ -154,7 +165,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                             ],
                             a![
                                 C!["button", "is-primary", "is-link", "is-light", "is-small"],
-                                attrs! { At::Href => format!("/{LK_VIEW_ALBUM}") },
+                                attrs! { At::Href => lk_album },
                                 span![C!("icon"), i![C!("ion-close-circled")]],
                                 span!["Close"],
                             ],

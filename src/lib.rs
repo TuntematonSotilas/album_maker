@@ -131,8 +131,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 _ => models::page::Page::MyAlbums,
             };
 
-			log!(page);
-
             model.page = page.clone();
 
             orders.send_msg(Msg::Header(header::Msg::SetPage(page)));
@@ -141,8 +139,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.send_msg(Msg::InitComp(opt_id));
         }
         Msg::InitComp(opt_id) => {
-			log!("InitComp");
-            if model.is_logged || model.page == Page::Share || model.page == Page::ShareSlide {
+			if model.is_logged || model.page == Page::Share || model.page == Page::ShareSlide {
                 init_comp(&model.page, opt_id, orders);
             }
         }
@@ -195,7 +192,8 @@ fn init_comp(page: &Page, opt_id: Option<String>, orders: &mut impl Orders<Msg>)
             orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(None, opt_id)));
         }
 		models::page::Page::ShareSlide => {
-           orders.send_msg(Msg::Slideshow(slideshow::Msg::InitComp(None, opt_id)));
+           orders.send_msg(Msg::Slideshow(slideshow::Msg::InitComp(None, opt_id.clone())));
+		   orders.send_msg(Msg::Header(header::Msg::SetShareId(opt_id)));
         }
         models::page::Page::Login => (),
     }
