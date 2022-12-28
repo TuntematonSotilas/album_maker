@@ -96,19 +96,19 @@ pub fn view(model: &Model) -> Node<Msg> {
                                     &sharing.nb_view
                                 ],
                                 div![
-                                    C!["tag", "is-primary", "is-light", "ml-1"], 
+                                    C!["tag", "is-danger", "is-light", "ml-2"], 
                                     attrs!{At::Title => "Number of likes"},
                                     span![C!("icon"), i![C!("ion-heart")]],
                                     &sharing.nb_like
                                 ],
                             ],
                             div![
-                                C!["has-text-grey", "is-size-7", "ml-3"],
+                                C!["has-text-grey", "is-size-7", "ml-2"],
                                 format!("{base_url}/share/{}", &sharing.id)],
                             div![
                                 C!["is-align-content-flex-end"],
                                 button![
-                                    C!["button", "is-link", "is-light", "is-small"],
+                                    C!["button", "is-link", "is-light", "is-small", "ml-2"],
                                     span![C!("icon"), i![C!("ion-close-circled")]],
                                     span!["Delete"],
                                     ev(Ev::Click, |_| Msg::Delete(id_del)),

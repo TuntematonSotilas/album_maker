@@ -20,6 +20,7 @@ pub struct Model {
     is_loaded: bool,
 	share_id: Option<String>,
     error: bool,
+    is_liked: bool,
 }
 
 impl Model {
@@ -30,6 +31,7 @@ impl Model {
             is_loaded: false,
 			share_id: None,
             error: false,
+            is_liked: false,
         }
     }
 }
@@ -45,6 +47,7 @@ pub enum Msg {
     Share,
     ShareSuccess(String),
     ShareError,
+    AddViewLike(bool, bool),
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -53,25 +56,15 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::InitComp(id, share_id) => {
             orders.skip(); // No need to rerender
             model.error = false;
+            model.is_liked = false;
             let auth = model.auth_header.clone();
-            let auth_v = auth.clone();
-			model.share_id = share_id.clone();
+            model.share_id = share_id.clone();
             let share_id = share_id.clone();
-            let share_id_v = share_id.clone();
             orders.perform_cmd(async {
                 let opt_album = albumapi::get_album(id, share_id, auth).await;
                 opt_album.map_or(Msg::ErrorGet, Msg::Received)
             });
-            if let Some(share_id) = share_id_v {
-                orders.perform_cmd(async {
-                    let add_view_like = AddViewLike {
-                        view: true,
-                        like: false,
-                        share_id: share_id
-                    };
-                    sharingapi::add_view_like(auth_v, add_view_like).await;
-                });
-            }
+            orders.send_msg(Msg::AddViewLike(true, false));
         }
         Msg::ErrorGet => {
             model.error = true;
@@ -84,7 +77,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip(); // No need to rerender
             let auth = model.auth_header.clone();
             let album = model.album.clone();
-            orders.perform_cmd(async {
+            orders.perform_cmd(async move {
                 let sharing = Sharing {
                     id: String::new(),
                     album_id: album.id,
@@ -109,6 +102,22 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 notif_type: TypeNotifs::Share,
                 message: format!("Share your album with this URL : {base_url}/share/{id}"),
             });
+        }
+        Msg::AddViewLike(is_view, is_like ) => {
+            if is_like {
+                model.is_liked = true;
+            }
+            if let Some(share_id) = model.share_id.clone() {
+                let auth = model.auth_header.clone();
+			    orders.perform_cmd(async move {
+                    let add_view_like = AddViewLike {
+                        view: is_view,
+                        like: is_like,
+                        share_id: share_id
+                    };
+                    sharingapi::add_view_like(auth, add_view_like).await;
+                });
+            }            
         }
     }
 }
@@ -155,6 +164,15 @@ pub fn view(model: &Model) -> Node<Msg> {
                                 span![C!("icon"), i![C!("ion-play")]],
                                 span![TITLE_SLIDESHOW],
                             ],
+                            IF!(model.share_id.is_some() =>
+                                button![
+                                    C!["button", "is-danger", "is-light", "is-small", "ml-2"],
+                                    span![C!("icon"), i![C!("ion-heart")]],
+                                    span!["Like"],
+                                    attrs! { At::Disabled => model.is_liked.as_at_value() },
+                                    ev(Ev::Click, |_| Msg::AddViewLike(false, true)),
+                                ]
+                            )
                         ]
                     ],
                     model
