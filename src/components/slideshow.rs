@@ -196,11 +196,6 @@ pub fn view(model: &Model) -> Node<Msg> {
             St::BackgroundImage => format!("url({VERY_LOW_URI}{}.{})", picture.public_id, picture.format),
         };
     }
-    let caption_anim = if model.caption_animate {
-        "slideshow-caption-anim"
-    } else {
-        "slideshow-caption-hide"
-    };
 
     match model.error {
         false => div![
@@ -215,21 +210,23 @@ pub fn view(model: &Model) -> Node<Msg> {
                         "is-align-items-center",
                         "slideshow-caption-ctn"
                     ],
-                    h2![
-                        C![
-                            "slideshow-caption",
-                            "title",
-                            "is-4",
-                            &model.album.caption_color.to_string(),
-                            &model.album.caption_style.to_string(),
-                            caption_anim
-                        ],
-                        model
-                            .slide
-                            .group_title
-                            .as_ref()
-                            .map_or(&model.album.title, |group_title| group_title)
-                    ],
+                    IF!(model.caption_animate => 
+                        h2![
+                            C![
+                                "slideshow-caption",
+                                "title",
+                                "is-4",
+                                &model.album.caption_color.to_string(),
+                                &model.album.caption_style.to_string(),
+                                "slideshow-caption-anim"
+                            ],
+                            model
+                                .slide
+                                .group_title
+                                .as_ref()
+                                .map_or(&model.album.title, |group_title| group_title)
+                        ]
+                    )
                 ]
             } else if let Some(picture) = &model.slide.picture {
                 let src = match &model.pic_loaded {
