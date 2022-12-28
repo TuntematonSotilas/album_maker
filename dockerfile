@@ -7,7 +7,7 @@ COPY public/ public/
 COPY .env .env
 RUN cargo install cargo-make
 RUN cargo install wasm-pack
-RUN cargo make bcaruild_release
+RUN cargo make build_release
 
 FROM nginx:1.23.1 as runner
 WORKDIR /usr/share/nginx/html
