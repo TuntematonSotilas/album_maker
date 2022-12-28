@@ -1,6 +1,6 @@
 # album_maker
 
-> Album Maker
+![Preview](public/preview.png)
 
 ## Install / check required tools
 
