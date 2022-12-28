@@ -243,14 +243,16 @@ pub fn view(model: &Model) -> Node<Msg> {
                     IF!(picture.caption.is_some() =>
                         div![
                             C!["is-flex", "is-justify-content-center"],
-                            h2![
-                                C!["slideshow-caption", "title", "is-4", "mt-5",
-                                    &model.album.caption_color.to_string(),
-                                    &model.album.caption_style.to_string(),
-                                    caption_anim
-                                ],
-                                &picture.caption
-                            ],
+                            IF!(model.caption_animate => 
+                                h2![
+                                    C!["slideshow-caption", "title", "is-4", "mt-5",
+                                        &model.album.caption_color.to_string(),
+                                        &model.album.caption_style.to_string(),
+                                        "slideshow-caption-anim"
+                                    ],
+                                    &picture.caption
+                                ]
+                            )
                         ]
                     ),
                 ]
