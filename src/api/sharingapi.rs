@@ -1,7 +1,7 @@
 #![allow(clippy::future_not_send)]
 
 use crate::models::{
-    sharing::Sharing,
+    sharing::{Sharing, AddViewLike},
     vars::BASE_URI,
 };
 use seed::prelude::*;
@@ -54,4 +54,16 @@ pub async fn delete_sharing(id: String, auth: String) -> bool {
 
     let delete_response = fetch(delete_request).await.expect("HTTP request failed");
     delete_response.status().code == 204
+}
+
+
+pub async fn add_view_like(auth: String, add_view_like: AddViewLike) {
+    let uri = BASE_URI.to_string() + "addviewlike";
+    let request = Request::new(uri)
+        .method(Method::Post)
+        .header(Header::authorization(auth))
+        .json(&add_view_like)
+        .expect("Serialization failed");
+
+    fetch(request).await.expect("HTTP request failed");
 }

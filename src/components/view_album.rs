@@ -4,7 +4,7 @@ use crate::{
         album::Album,
         notif::{Notif, TypeNotifs},
         page::{LK_EDIT_ALBUM, LK_SLIDESHOW, TITLE_EDIT_ALBUM, TITLE_SLIDESHOW, LK_SHARESLIDE},
-        vars::THUMB_URI, sharing::Sharing,
+        vars::THUMB_URI, sharing::{Sharing, AddViewLike},
     },
 };
 use seed::{self, prelude::*, *};
@@ -54,11 +54,24 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip(); // No need to rerender
             model.error = false;
             let auth = model.auth_header.clone();
+            let auth_v = auth.clone();
 			model.share_id = share_id.clone();
+            let share_id = share_id.clone();
+            let share_id_v = share_id.clone();
             orders.perform_cmd(async {
                 let opt_album = albumapi::get_album(id, share_id, auth).await;
                 opt_album.map_or(Msg::ErrorGet, Msg::Received)
             });
+            if let Some(share_id) = share_id_v {
+                orders.perform_cmd(async {
+                    let add_view_like = AddViewLike {
+                        view: true,
+                        like: false,
+                        share_id: share_id
+                    };
+                    sharingapi::add_view_like(auth_v, add_view_like).await;
+                });
+            }
         }
         Msg::ErrorGet => {
             model.error = true;

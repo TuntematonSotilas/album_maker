@@ -88,17 +88,19 @@ pub fn view(model: &Model) -> Node<Msg> {
                         div![
                             C!["container", "is-flex", "is-justify-content-space-between", "is-align-items-center"],
                             div![&sharing.album_name],
-                            div![
-                                C!["tag", "is-link", "is-light", "ml-2"],
-                                attrs!{At::Title => "Number of views"},
-                                span![C!("icon"), i![C!("ion-eye")]],
-                                &sharing.nb_view
-                            ],
-                            div![
-                                C!["tag", "is-primary", "is-light", "ml-1"], 
-                                attrs!{At::Title => "Number of likes"},
-                                span![C!("icon"), i![C!("ion-heart")]],
-                                &sharing.nb_like
+                            div! [C!("is-flex"),
+                                div![
+                                    C!["tag", "is-link", "is-light", "ml-2"],
+                                    attrs!{At::Title => "Number of views"},
+                                    span![C!("icon"), i![C!("ion-eye")]],
+                                    &sharing.nb_view
+                                ],
+                                div![
+                                    C!["tag", "is-primary", "is-light", "ml-1"], 
+                                    attrs!{At::Title => "Number of likes"},
+                                    span![C!("icon"), i![C!("ion-heart")]],
+                                    &sharing.nb_like
+                                ],
                             ],
                             div![
                                 C!["has-text-grey", "is-size-7", "ml-3"],
