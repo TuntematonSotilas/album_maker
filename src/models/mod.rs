@@ -5,6 +5,6 @@ pub mod group_update;
 pub mod notif;
 pub mod page;
 pub mod picture;
+pub mod sharing;
 pub mod state;
 pub mod vars;
-pub mod sharing;

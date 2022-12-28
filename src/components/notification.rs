@@ -33,7 +33,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.notif = notif;
             let time = match model.notif.notif_type {
                 TypeNotifs::Share => 20000,
-                _ => 3000
+                _ => 3000,
             };
             orders.perform_cmd(cmds::timeout(time, || Msg::Hide));
         }

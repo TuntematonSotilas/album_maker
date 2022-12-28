@@ -197,8 +197,13 @@ pub fn view(model: &Model) -> Node<Msg> {
         };
     }
 
-    match model.error {
-        false => div![
+    if model.error {
+        error::view(
+            "Forbidden".to_string(),
+            "ion-android-remove-circle".to_string(),
+        )
+    } else {
+        div![
             id!("slideshow"),
             C!("slideshow"),
             s_bkg,
@@ -210,7 +215,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                         "is-align-items-center",
                         "slideshow-caption-ctn"
                     ],
-                    IF!(model.caption_animate => 
+                    IF!(model.caption_animate =>
                         h2![
                             C![
                                 "slideshow-caption",
@@ -245,10 +250,10 @@ pub fn view(model: &Model) -> Node<Msg> {
                         div![
                             C![
                                 "is-flex",
-                                "is-justify-content-center", 
+                                "is-justify-content-center",
                                 "is-align-items-end",
                                 "slideshow-caption-ctn"],
-                            IF!(model.caption_animate => 
+                            IF!(model.caption_animate =>
                                 h2![
                                     C!["slideshow-caption", "title", "is-5", "mt-5",
                                         &model.album.caption_color.to_string(),
@@ -265,9 +270,6 @@ pub fn view(model: &Model) -> Node<Msg> {
                 empty!()
             },
             ev(Ev::Click, |_| Msg::Next),
-        ],
-        true => error::view(
-            "Forbidden".to_string(),
-            "ion-android-remove-circle".to_string())
+        ]
     }
 }

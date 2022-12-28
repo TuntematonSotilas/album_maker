@@ -31,7 +31,11 @@ pub async fn get_my_ablums(auth: String) -> Option<Vec<Album>> {
     }
 }
 
-pub async fn get_album(id: Option<String>, share_id: Option<String>, auth: String) -> Option<Album> {
+pub async fn get_album(
+    id: Option<String>,
+    share_id: Option<String>,
+    auth: String,
+) -> Option<Album> {
     let id = id.unwrap_or_default();
     let share_id = share_id.unwrap_or_default();
     let uri = format!("{BASE_URI}getalbum?id={id}&share_id={share_id}");

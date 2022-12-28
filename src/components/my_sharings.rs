@@ -1,5 +1,12 @@
+use crate::{
+    api::sharingapi,
+    models::{
+        notif::{Notif, TypeNotifs},
+        page::TITLE_MY_SHARINGS,
+        sharing::Sharing,
+    },
+};
 use seed::{self, prelude::*, *};
-use crate::{models::{sharing::Sharing, notif::{Notif, TypeNotifs}, page::TITLE_MY_SHARINGS}, api::sharingapi};
 
 // ------ ------
 //     Model
@@ -7,7 +14,7 @@ use crate::{models::{sharing::Sharing, notif::{Notif, TypeNotifs}, page::TITLE_M
 #[derive(Default)]
 pub struct Model {
     auth_header: String,
-    sharings: Option<Vec<Sharing>>
+    sharings: Option<Vec<Sharing>>,
 }
 
 // ------ ------
@@ -20,7 +27,7 @@ pub enum Msg {
     ErrorGet,
     Delete(String),
     SuccessDelete(String),
-    ErrorDelete
+    ErrorDelete,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -64,7 +71,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::ErrorDelete => {
             orders.notify(Notif {
                 notif_type: TypeNotifs::Error,
-                message: "Error getting sharings".to_string(),
+                message: "Error deleting sharing".to_string(),
             });
         }
     }
@@ -86,25 +93,32 @@ pub fn view(model: &Model) -> Node<Msg> {
                     p![
                         C!("panel-block"),
                         div![
-                            C!["container", "is-flex", "is-justify-content-space-between", "is-align-items-center"],
+                            C![
+                                "container",
+                                "is-flex",
+                                "is-justify-content-space-between",
+                                "is-align-items-center"
+                            ],
                             div![&sharing.album_name],
-                            div! [C!("is-flex"),
+                            div![
+                                C!("is-flex"),
                                 div![
                                     C!["tag", "is-link", "is-light", "ml-2"],
-                                    attrs!{At::Title => "Number of views"},
+                                    attrs! {At::Title => "Number of views"},
                                     span![C!("icon"), i![C!("ion-eye")]],
                                     &sharing.nb_view
                                 ],
                                 div![
-                                    C!["tag", "is-danger", "is-light", "ml-2"], 
-                                    attrs!{At::Title => "Number of likes"},
+                                    C!["tag", "is-danger", "is-light", "ml-2"],
+                                    attrs! {At::Title => "Number of likes"},
                                     span![C!("icon"), i![C!("ion-heart")]],
                                     &sharing.nb_like
                                 ],
                             ],
                             div![
                                 C!["has-text-grey", "is-size-7", "ml-2"],
-                                format!("{base_url}/share/{}", &sharing.id)],
+                                format!("{base_url}/share/{}", &sharing.id)
+                            ],
                             div![
                                 C!["is-align-content-flex-end"],
                                 button![

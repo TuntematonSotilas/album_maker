@@ -25,5 +25,5 @@ pub enum Page {
     Login,
     MySharings,
     Share,
-	ShareSlide,
+    ShareSlide,
 }

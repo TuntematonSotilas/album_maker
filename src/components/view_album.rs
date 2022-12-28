@@ -3,8 +3,9 @@ use crate::{
     models::{
         album::Album,
         notif::{Notif, TypeNotifs},
-        page::{LK_EDIT_ALBUM, LK_SLIDESHOW, TITLE_EDIT_ALBUM, TITLE_SLIDESHOW, LK_SHARESLIDE},
-        vars::THUMB_URI, sharing::{Sharing, AddViewLike},
+        page::{LK_EDIT_ALBUM, LK_SHARESLIDE, LK_SLIDESHOW, TITLE_EDIT_ALBUM, TITLE_SLIDESHOW},
+        sharing::{AddViewLike, Sharing},
+        vars::THUMB_URI,
     },
 };
 use seed::{self, prelude::*, *};
@@ -18,7 +19,7 @@ pub struct Model {
     auth_header: String,
     album: Album,
     is_loaded: bool,
-	share_id: Option<String>,
+    share_id: Option<String>,
     error: bool,
     is_liked: bool,
 }
@@ -29,7 +30,7 @@ impl Model {
             auth_header: String::new(),
             album: Album::new(),
             is_loaded: false,
-			share_id: None,
+            share_id: None,
             error: false,
             is_liked: false,
         }
@@ -59,7 +60,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.is_liked = false;
             let auth = model.auth_header.clone();
             model.share_id = share_id.clone();
-            let share_id = share_id.clone();
             orders.perform_cmd(async {
                 let opt_album = albumapi::get_album(id, share_id, auth).await;
                 opt_album.map_or(Msg::ErrorGet, Msg::Received)
@@ -83,7 +83,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     album_id: album.id,
                     album_name: String::new(),
                     nb_like: 0,
-                    nb_view: 0
+                    nb_view: 0,
                 };
                 let opt_id = sharingapi::add_sharing(auth, sharing).await;
                 opt_id.map_or(Msg::ShareError, Msg::ShareSuccess)
@@ -96,28 +96,27 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             });
         }
         Msg::ShareSuccess(id) => {
-            log!("ShareSuccess");
             let base_url = web_sys::window().unwrap().location().origin().unwrap();
             orders.notify(Notif {
                 notif_type: TypeNotifs::Share,
                 message: format!("Share your album with this URL : {base_url}/share/{id}"),
             });
         }
-        Msg::AddViewLike(is_view, is_like ) => {
+        Msg::AddViewLike(is_view, is_like) => {
             if is_like {
                 model.is_liked = true;
             }
             if let Some(share_id) = model.share_id.clone() {
                 let auth = model.auth_header.clone();
-			    orders.perform_cmd(async move {
+                orders.perform_cmd(async move {
                     let add_view_like = AddViewLike {
                         view: is_view,
                         like: is_like,
-                        share_id: share_id
+                        share_id,
                     };
                     sharingapi::add_view_like(auth, add_view_like).await;
                 });
-            }            
+            }
         }
     }
 }
@@ -126,14 +125,18 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
+    let mut lk_slideshow = format!("/{LK_SLIDESHOW}/{}", model.album.id);
+    if let Some(share_id) = &model.share_id {
+        lk_slideshow = format!("/{LK_SHARESLIDE}/{share_id}");
+    }
 
-	let mut lk_slideshow = format!("/{LK_SLIDESHOW}/{}", model.album.id);
-	if let Some(share_id) = &model.share_id {
-		lk_slideshow = format!("/{LK_SHARESLIDE}/{share_id}");
-	}
-
-    match model.error {
-        false => div![
+    if model.error {
+        error::view(
+            "Forbidden".to_string(),
+            "ion-android-remove-circle".to_string(),
+        )
+    } else {
+        div![
             C!["column", "is-two-thirds"],
             if model.is_loaded {
                 div![
@@ -142,7 +145,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                         div![C!["title", "is-5", "has-text-link"], &model.album.title],
                         div![
                             C!["is-flex", "mb-2"],
-                            IF!(!model.share_id.is_some() =>
+                            IF!(model.share_id.is_none() =>
                                 div![
                                     a![
                                         C!["button", "is-link", "is-light", "is-small", "mr-2"],
@@ -200,36 +203,37 @@ pub fn view(model: &Model) -> Node<Msg> {
                         })])
                 ]
             } else {
-                div![
-                    div![
-                        C!["column", "is-two-fifths", "mb-4"],
-                        progress![
-                            C!["progress", "is-small", "table-progress"],
-                            attrs! { At::Max => 100 }
-                        ]
-                    ],
-                    div![
-                        C!("box"),
-                        div![
-                            C!["column", "is-one-third"],
-                            progress![
-                                C!["progress", "is-small", "table-progress"],
-                                attrs! { At::Max => 100 }
-                            ]
-                        ],
-                        figure![
-                            C!["image", "is-128x128", "m-4"],
-                            progress![
-                                C!["progress", "picture-progress"],
-                                attrs! { At::Max => 100 }
-                            ],
-                        ],
-                    ],
-                ]
+                view_progress()
             }
-        ],
-        true => error::view(
-            "Forbidden".to_string(),
-            "ion-android-remove-circle".to_string())
+        ]
     }
+}
+
+fn view_progress() -> Node<Msg> {
+    div![
+        div![
+            C!["column", "is-two-fifths", "mb-4"],
+            progress![
+                C!["progress", "is-small", "table-progress"],
+                attrs! { At::Max => 100 }
+            ]
+        ],
+        div![
+            C!("box"),
+            div![
+                C!["column", "is-one-third"],
+                progress![
+                    C!["progress", "is-small", "table-progress"],
+                    attrs! { At::Max => 100 }
+                ]
+            ],
+            figure![
+                C!["image", "is-128x128", "m-4"],
+                progress![
+                    C!["progress", "picture-progress"],
+                    attrs! { At::Max => 100 }
+                ],
+            ],
+        ],
+    ]
 }
