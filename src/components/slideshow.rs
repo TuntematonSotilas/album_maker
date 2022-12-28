@@ -237,15 +237,20 @@ pub fn view(model: &Model) -> Node<Msg> {
                     C![
                         "is-flex",
                         "is-justify-content-center",
-                        "slideshow-image-container"
+                        "slideshow-image-container",
+                        "is-align-items-center"
                     ],
                     img![C!("slideshow-image"), attrs! { At::Src => src },],
                     IF!(picture.caption.is_some() =>
                         div![
-                            C!["is-flex", "is-justify-content-center"],
+                            C![
+                                "is-flex",
+                                "is-justify-content-center", 
+                                "is-align-items-end",
+                                "slideshow-caption-ctn"],
                             IF!(model.caption_animate => 
                                 h2![
-                                    C!["slideshow-caption", "title", "is-4", "mt-5",
+                                    C!["slideshow-caption", "title", "is-5", "mt-5",
                                         &model.album.caption_color.to_string(),
                                         &model.album.caption_style.to_string(),
                                         "slideshow-caption-anim"

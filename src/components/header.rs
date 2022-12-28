@@ -117,7 +117,7 @@ pub fn view(model: &Model) -> Node<Msg> {
         div![
             C!["navbar-menu", menu_is_active],
             IF!(model.page != Page::Slideshow && model.page != Page::ShareSlide =>
-                div![C!("is-flex"),
+                div![C!("header-flex"),
                     a![
                         C![
                             "navbar-item",

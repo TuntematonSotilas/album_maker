@@ -23,3 +23,9 @@
 .navbar-slideshow:hover .navbar-menu {
 	opacity: 1;
 }
+
+@media (min-width: 600px) {
+	.header-flex {
+	  display: flex;
+	}
+}
