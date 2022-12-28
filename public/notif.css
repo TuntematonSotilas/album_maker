@@ -4,9 +4,9 @@
 	width: 20rem;
 	margin-left: 40%;
 	padding: 0.4rem;
-	visibility: hidden;
 	text-align: center;
 	bottom: 0;
+	opacity: 0;
 }
 
 @media screen and (max-width: 640px) {
@@ -16,18 +16,29 @@
 	}	
 }
 
-.notif-show {
-	visibility: visible;
-	animation: notif-fade-in 0.5s, notif-fade-out 0.5s 2.5s;
+.notif-anim {
+	animation: notif-fade-in 0.5s;
+	opacity: 1;
 }
 
 @keyframes notif-fade-in {
-	from {bottom: -5rem; opacity: 0;}
-	to {bottom: 0; opacity: 1;}
+	from {
+		bottom: -5rem; 
+		opacity: 0;
+	}
+	to {
+		bottom: 0;
+		opacity: 1;
+	}
 }
 
-
 @keyframes notif-fade-out {
-	from {bottom: 0; opacity: 1;}
-	to {bottom: -5rem; opacity: 0;}
+	from {
+		bottom: 0; 
+		opacity: 1;
+	}
+	to {
+		bottom: -5rem; 
+		opacity: 0;
+	}
 }

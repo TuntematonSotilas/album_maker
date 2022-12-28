@@ -43,7 +43,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 
 pub fn view(model: &Model) -> Node<Msg> {
     let c_visible = match &model.is_visible {
-        true => "notif-show",
+        true => "notif-anim",
         _ => "",
     };
     let c_type = match &model.notif.notif_type {

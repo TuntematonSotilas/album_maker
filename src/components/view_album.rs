@@ -90,6 +90,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             });
         }
         Msg::ShareSuccess(id) => {
+            log!("ShareSuccess");
             let base_url = web_sys::window().unwrap().location().origin().unwrap();
             orders.notify(Notif {
                 notif_type: TypeNotifs::Share,
