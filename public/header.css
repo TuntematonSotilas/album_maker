@@ -29,3 +29,20 @@
 	  display: flex;
 	}
 }
+
+.navbar-btn-mobile {
+	display: none;
+}
+
+@media (max-width: 600px) {
+	.navbar-btn-mobile {
+		height: 5em;
+		width: 100vw;
+		display: flex;
+		opacity: 0;	
+	}
+	
+	.navbar-btn-mobile:active {
+		opacity: 1;
+	}	
+}

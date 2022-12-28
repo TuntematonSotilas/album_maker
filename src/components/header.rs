@@ -152,8 +152,9 @@ pub fn view(model: &Model) -> Node<Msg> {
                     ]
                 ]
             ),
-            view_nav_end(model)
-        ]
+            view_nav_end(model),
+        ],
+        view_btn_mobile(model),
     ]
 }
 
@@ -201,4 +202,40 @@ fn view_nav_end(model: &Model) -> Node<Msg> {
             }
         ]
     ]
+}
+
+fn view_btn_mobile(model: &Model) -> Node<Msg> {
+    let mut lk_album = String::new();
+    if let Some(share_id) = &model.share_id {
+        lk_album = format!("/{LK_SHARE}/{share_id}");
+    }
+    if let Some(album_id) = &model.album_id {
+        lk_album = format!("/{LK_VIEW_ALBUM}/{album_id}");
+    }
+    if model.page == Page::Slideshow || model.page == Page::ShareSlide {
+        a![
+            C!["navbar-btn-mobile"],
+            div![
+                C!["container", "is-flex", "is-justify-content-end", "p-5"],
+                div![
+                    a![
+                        C!["button", "is-primary", "is-link", "is-light", "is-small", "mr-2"],
+                        span![C!("icon"), i![C!("ion-arrow-expand")]],
+                        span!["Fullscreen"],
+                        ev(Ev::Click, |_| Msg::Fullscreen),
+                    ]
+                ],
+                div![
+                    a![
+                        C!["button", "is-primary", "is-link", "is-light", "is-small"],
+                        attrs! { At::Href => lk_album },
+                        span![C!("icon"), i![C!("ion-close-circled")]],
+                        span!["Close"],
+                    ]
+                ]
+            ]
+        ]
+    } else {
+        empty!()
+    }
 }
