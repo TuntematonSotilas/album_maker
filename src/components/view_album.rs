@@ -9,6 +9,8 @@ use crate::{
 };
 use seed::{self, prelude::*, *};
 
+use super::error;
+
 // ------ ------
 //     Model
 // ------ -----
@@ -17,6 +19,7 @@ pub struct Model {
     album: Album,
     is_loaded: bool,
 	share_id: Option<String>,
+    error: bool,
 }
 
 impl Model {
@@ -26,6 +29,7 @@ impl Model {
             album: Album::new(),
             is_loaded: false,
 			share_id: None,
+            error: false,
         }
     }
 }
@@ -48,6 +52,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::SetAuth(auth_header) => model.auth_header = auth_header,
         Msg::InitComp(id, share_id) => {
             orders.skip(); // No need to rerender
+            model.error = false;
             let auth = model.auth_header.clone();
 			model.share_id = share_id.clone();
             orders.perform_cmd(async {
@@ -56,10 +61,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             });
         }
         Msg::ErrorGet => {
-            orders.notify(Notif {
-                notif_type: TypeNotifs::Error,
-                message: "Error getting album".to_string(),
-            });
+            model.error = true;
         }
         Msg::Received(album) => {
             model.is_loaded = true;
@@ -107,90 +109,95 @@ pub fn view(model: &Model) -> Node<Msg> {
 		lk_slideshow = format!("/{LK_SHARESLIDE}/{share_id}");
 	}
 
-    div![
-        C!["column", "is-two-thirds"],
-        if model.is_loaded {
-            div![
+    match model.error {
+        false => div![
+            C!["column", "is-two-thirds"],
+            if model.is_loaded {
                 div![
-                    C!["column"],
-                    div![C!["title", "is-5", "has-text-link"], &model.album.title],
                     div![
-                        C!["is-flex", "mb-2"],
-						IF!(!model.share_id.is_some() =>
-							div![
-								a![
-									C!["button", "is-link", "is-light", "is-small", "mr-2"],
-									attrs! { At::Href => format!("/{LK_EDIT_ALBUM}/{}", model.album.id) },
-									span![C!("icon"), i![C!("ion-edit")]],
-									span![TITLE_EDIT_ALBUM],
-								],
-								button![
-									C!["button", "is-link", "is-light", "is-small", "mr-2"],
-									span![C!("icon"), i![C!("ion-android-share-alt")]],
-									span!["Share"],
-									ev(Ev::Click, |_| Msg::Share),
-								]
-							]
-						),
-                        a![
-                            C!["button", "is-primary", "is-light", "is-small"],
-                            attrs! { At::Href => lk_slideshow },
-                            span![C!("icon"), i![C!("ion-play")]],
-                            span![TITLE_SLIDESHOW],
-                        ],
-                    ]
-                ],
-                model
-                    .album
-                    .groups
-                    .as_ref()
-                    .map_or(empty!(), |groups| div![groups.iter().map(|group| {
+                        C!["column"],
+                        div![C!["title", "is-5", "has-text-link"], &model.album.title],
                         div![
-                            C!("box"),
-                            p![C!["title", "is-6", "has-text-link"], &group.title],
-                            div![group.pictures.as_ref().map_or(empty!(), |pictures| div![
-									C!["is-flex", "is-flex-wrap-wrap", "is-justify-content-center"],
-									pictures.iter().map(|picture| {
-										div![
-											C!["mr-1", "album-view-picture"],
-											figure![
-												C!["image", "is-128x128", "m-1"],
-												img![attrs!{ At::Src => format!("{THUMB_URI}{}.{}", picture.public_id, picture.format) }]
-											],
-											span![picture.caption.clone()],
-										]
-									}
-								)])]
+                            C!["is-flex", "mb-2"],
+                            IF!(!model.share_id.is_some() =>
+                                div![
+                                    a![
+                                        C!["button", "is-link", "is-light", "is-small", "mr-2"],
+                                        attrs! { At::Href => format!("/{LK_EDIT_ALBUM}/{}", model.album.id) },
+                                        span![C!("icon"), i![C!("ion-edit")]],
+                                        span![TITLE_EDIT_ALBUM],
+                                    ],
+                                    button![
+                                        C!["button", "is-link", "is-light", "is-small", "mr-2"],
+                                        span![C!("icon"), i![C!("ion-android-share-alt")]],
+                                        span!["Share"],
+                                        ev(Ev::Click, |_| Msg::Share),
+                                    ]
+                                ]
+                            ),
+                            a![
+                                C!["button", "is-primary", "is-light", "is-small"],
+                                attrs! { At::Href => lk_slideshow },
+                                span![C!("icon"), i![C!("ion-play")]],
+                                span![TITLE_SLIDESHOW],
+                            ],
                         ]
-                    })])
-            ]
-        } else {
-            div![
+                    ],
+                    model
+                        .album
+                        .groups
+                        .as_ref()
+                        .map_or(empty!(), |groups| div![groups.iter().map(|group| {
+                            div![
+                                C!("box"),
+                                p![C!["title", "is-6", "has-text-link"], &group.title],
+                                div![group.pictures.as_ref().map_or(empty!(), |pictures| div![
+                                        C!["is-flex", "is-flex-wrap-wrap", "is-justify-content-center"],
+                                        pictures.iter().map(|picture| {
+                                            div![
+                                                C!["mr-1", "album-view-picture"],
+                                                figure![
+                                                    C!["image", "is-128x128", "m-1"],
+                                                    img![attrs!{ At::Src => format!("{THUMB_URI}{}.{}", picture.public_id, picture.format) }]
+                                                ],
+                                                span![picture.caption.clone()],
+                                            ]
+                                        }
+                                    )])]
+                            ]
+                        })])
+                ]
+            } else {
                 div![
-                    C!["column", "is-two-fifths", "mb-4"],
-                    progress![
-                        C!["progress", "is-small", "table-progress"],
-                        attrs! { At::Max => 100 }
-                    ]
-                ],
-                div![
-                    C!("box"),
                     div![
-                        C!["column", "is-one-third"],
+                        C!["column", "is-two-fifths", "mb-4"],
                         progress![
                             C!["progress", "is-small", "table-progress"],
                             attrs! { At::Max => 100 }
                         ]
                     ],
-                    figure![
-                        C!["image", "is-128x128", "m-4"],
-                        progress![
-                            C!["progress", "picture-progress"],
-                            attrs! { At::Max => 100 }
+                    div![
+                        C!("box"),
+                        div![
+                            C!["column", "is-one-third"],
+                            progress![
+                                C!["progress", "is-small", "table-progress"],
+                                attrs! { At::Max => 100 }
+                            ]
+                        ],
+                        figure![
+                            C!["image", "is-128x128", "m-4"],
+                            progress![
+                                C!["progress", "picture-progress"],
+                                attrs! { At::Max => 100 }
+                            ],
                         ],
                     ],
-                ],
-            ]
-        }
-    ]
+                ]
+            }
+        ],
+        true => error::view(
+            "Forbidden".to_string(),
+            "ion-android-remove-circle".to_string())
+    }
 }

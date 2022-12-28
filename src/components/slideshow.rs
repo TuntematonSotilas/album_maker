@@ -9,6 +9,8 @@ use crate::{
 };
 use seed::{self, prelude::*, *};
 
+use super::error;
+
 #[derive(Debug, Clone)]
 struct Slide {
     is_title: bool,
@@ -27,6 +29,7 @@ pub struct Model {
     slide_id: usize,
     caption_animate: bool,
     pic_loaded: bool,
+    error: bool,
 }
 
 impl Model {
@@ -43,6 +46,7 @@ impl Model {
             slide_id: 0,
             caption_animate: false,
             pic_loaded: false,
+            error: false,
         }
     }
 }
@@ -67,6 +71,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::SetAuth(auth_header) => model.auth_header = auth_header,
         Msg::InitComp(id, share_id) => {
             orders.skip(); // No need to rerender
+            model.error = false;
             model.slide_id = 0;
             model.slide = Slide {
                 is_title: false,
@@ -80,10 +85,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             });
         }
         Msg::ErrorGet => {
-            orders.notify(Notif {
-                notif_type: TypeNotifs::Error,
-                message: "Error getting album".to_string(),
-            });
+            model.error = true;
         }
         Msg::Received(album) => {
             model.album = album;
@@ -200,63 +202,68 @@ pub fn view(model: &Model) -> Node<Msg> {
         "slideshow-caption-hide"
     };
 
-    div![
-        id!("slideshow"),
-        C!("slideshow"),
-        s_bkg,
-        if model.slide.is_title || model.slide.group_title.is_some() {
-            div![
-                C![
-                    "is-flex",
-                    "is-justify-content-center",
-                    "is-align-items-center",
-                    "slideshow-caption-ctn"
-                ],
-                h2![
+    match model.error {
+        false => div![
+            id!("slideshow"),
+            C!("slideshow"),
+            s_bkg,
+            if model.slide.is_title || model.slide.group_title.is_some() {
+                div![
                     C![
-                        "slideshow-caption",
-                        "title",
-                        "is-4",
-                        &model.album.caption_color.to_string(),
-                        &model.album.caption_style.to_string(),
-                        caption_anim
+                        "is-flex",
+                        "is-justify-content-center",
+                        "is-align-items-center",
+                        "slideshow-caption-ctn"
                     ],
-                    model
-                        .slide
-                        .group_title
-                        .as_ref()
-                        .map_or(&model.album.title, |group_title| group_title)
-                ],
-            ]
-        } else if let Some(picture) = &model.slide.picture {
-            let src = match &model.pic_loaded {
-                true => format!("{IMG_URI}{}.{}", picture.public_id, picture.format),
-                false => format!("{LOW_URI}{}.{}", picture.public_id, picture.format),
-            };
-            div![
-                C![
-                    "is-flex",
-                    "is-justify-content-center",
-                    "slideshow-image-container"
-                ],
-                img![C!("slideshow-image"), attrs! { At::Src => src },],
-                IF!(picture.caption.is_some() =>
-                    div![
-                        C!["is-flex", "is-justify-content-center"],
-                        h2![
-                            C!["slideshow-caption", "title", "is-4", "mt-5",
-                                &model.album.caption_color.to_string(),
-                                &model.album.caption_style.to_string(),
-                                caption_anim
-                            ],
-                            &picture.caption
+                    h2![
+                        C![
+                            "slideshow-caption",
+                            "title",
+                            "is-4",
+                            &model.album.caption_color.to_string(),
+                            &model.album.caption_style.to_string(),
+                            caption_anim
                         ],
-                    ]
-                ),
-            ]
-        } else {
-            empty!()
-        },
-        ev(Ev::Click, |_| Msg::Next),
-    ]
+                        model
+                            .slide
+                            .group_title
+                            .as_ref()
+                            .map_or(&model.album.title, |group_title| group_title)
+                    ],
+                ]
+            } else if let Some(picture) = &model.slide.picture {
+                let src = match &model.pic_loaded {
+                    true => format!("{IMG_URI}{}.{}", picture.public_id, picture.format),
+                    false => format!("{LOW_URI}{}.{}", picture.public_id, picture.format),
+                };
+                div![
+                    C![
+                        "is-flex",
+                        "is-justify-content-center",
+                        "slideshow-image-container"
+                    ],
+                    img![C!("slideshow-image"), attrs! { At::Src => src },],
+                    IF!(picture.caption.is_some() =>
+                        div![
+                            C!["is-flex", "is-justify-content-center"],
+                            h2![
+                                C!["slideshow-caption", "title", "is-4", "mt-5",
+                                    &model.album.caption_color.to_string(),
+                                    &model.album.caption_style.to_string(),
+                                    caption_anim
+                                ],
+                                &picture.caption
+                            ],
+                        ]
+                    ),
+                ]
+            } else {
+                empty!()
+            },
+            ev(Ev::Click, |_| Msg::Next),
+        ],
+        true => error::view(
+            "Forbidden".to_string(),
+            "ion-android-remove-circle".to_string())
+    }
 }
