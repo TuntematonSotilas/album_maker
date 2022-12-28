@@ -2,9 +2,8 @@ use crate::{
     api::albumapi,
     models::{
         album::Album,
-        notif::{Notif, TypeNotifs},
         picture::Picture,
-        vars::{IMG_URI, LOW_URI, VERY_LOW_URI},
+        vars::{IMG_URI, VERY_LOW_URI},
     },
 };
 use seed::{self, prelude::*, *};
@@ -61,9 +60,8 @@ pub enum Msg {
     ErrorGet,
     Received(Album),
     Next,
-    PicLoadEnd,
-    ErrorGetPic,
     ShowAnim,
+    ShowPic,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -95,40 +93,20 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::InitSlides => init_slides(model),
         Msg::Next => {
             if let Some(slide) = model.slides.get(model.slide_id) {
-                model.slide = slide.clone();
+				model.slide = slide.clone();
                 model.slide_id += 1;
                 model.caption_animate = false;
                 model.pic_loaded = false;
-
-                orders.perform_cmd(cmds::timeout(1000, || Msg::ShowAnim));
-
-                if !model.slide.is_title && model.slide.group_title.is_none() {
-                    if let Some(pic) = slide.picture.clone() {
-                        orders.skip();
-                        orders.perform_cmd(async move {
-                            let url = format!("url({IMG_URI}{}.{})", pic.public_id, pic.format);
-                            let response = fetch(url).await.expect("HTTP request failed");
-                            if response.status().is_ok() {
-                                Msg::PicLoadEnd
-                            } else {
-                                Msg::ErrorGetPic
-                            }
-                        });
-                    }
-                }
+				
+                orders.perform_cmd(cmds::timeout(300, || Msg::ShowAnim));
+                orders.perform_cmd(cmds::timeout(3000, || Msg::ShowPic));
             }
-        }
-        Msg::PicLoadEnd => {
-            model.pic_loaded = true;
-        }
-        Msg::ErrorGetPic => {
-            orders.notify(Notif {
-                notif_type: TypeNotifs::Error,
-                message: "Error getting picture".to_string(),
-            });
         }
         Msg::ShowAnim => {
             model.caption_animate = true;
+        }
+		Msg::ShowPic => {
+			model.pic_loaded = true;
         }
     }
 }
@@ -234,10 +212,6 @@ pub fn view(model: &Model) -> Node<Msg> {
                     )
                 ]
             } else if let Some(picture) = &model.slide.picture {
-                let src = match &model.pic_loaded {
-                    true => format!("{IMG_URI}{}.{}", picture.public_id, picture.format),
-                    false => format!("{LOW_URI}{}.{}", picture.public_id, picture.format),
-                };
                 div![
                     C![
                         "is-flex",
@@ -245,7 +219,11 @@ pub fn view(model: &Model) -> Node<Msg> {
                         "slideshow-image-container",
                         "is-align-items-center"
                     ],
-                    img![C!("slideshow-image"), attrs! { At::Src => src },],
+					IF!(model.pic_loaded => 
+						img![C!("slideshow-image"), 
+							attrs! { At::Src => format!("{IMG_URI}{}.{}", picture.public_id, picture.format) }
+						]
+					),
                     IF!(picture.caption.is_some() =>
                         div![
                             C![
