@@ -100,7 +100,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 model.caption_animate = false;
                 model.pic_loaded = false;
 
-                orders.perform_cmd(cmds::timeout(1, || Msg::ShowAnim));
+                orders.perform_cmd(cmds::timeout(1000, || Msg::ShowAnim));
 
                 if !model.slide.is_title && model.slide.group_title.is_none() {
                     if let Some(pic) = slide.picture.clone() {
