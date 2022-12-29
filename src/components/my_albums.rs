@@ -160,7 +160,11 @@ pub fn view(model: &Model) -> Node<Msg> {
                     p![
                         C!("panel-block"),
                         div![
-                            C!["container", "is-flex", "is-justify-content-space-between"],
+                            C![
+                                "container",
+                                "is-flex", 
+                                "is-justify-content-space-between"
+                            ],
                             div![
 								if state_opt.is_some() {
 									let state = state_opt.unwrap();

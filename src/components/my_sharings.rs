@@ -82,7 +82,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
     div![
-        C!["column", "is-centered", "is-half"],
+        C!["column", "is-centered", "is-three-fifths"],
         div![
             C!("box"),
             p![C!["title", "is-5", "has-text-link"], TITLE_MY_SHARINGS],
@@ -90,33 +90,52 @@ pub fn view(model: &Model) -> Node<Msg> {
                 div![model.sharings.as_ref().unwrap().iter().map(|sharing| {
                     let base_url = web_sys::window().unwrap().location().origin().unwrap();
                     let id_del = sharing.id.clone();
-                    p![
-                        C!("panel-block"),
-                        div![
-                            C![
-                                "container",
-                                "is-flex",
-                                "is-justify-content-space-between",
-                                "is-align-items-center"
-                            ],
-                            div![&sharing.album_name],
+                    let id_del_mob = sharing.id.clone();
+                    div![
+                        p![
+                            C!("panel-block"),
                             div![
-                                C!("is-flex"),
+                                C![
+                                    "container",
+                                    "is-flex",
+                                    "is-justify-content-space-between",
+                                    "is-align-items-center"
+                                ],
+                                div![&sharing.album_name],
                                 div![
-                                    C!["tag", "is-link", "is-light", "ml-2"],
-                                    attrs! {At::Title => "Number of views"},
-                                    span![C!("icon"), i![C!("ion-eye")]],
-                                    &sharing.nb_view
+                                    C!("is-flex"),
+                                    div![
+                                        C!["tag", "is-link", "is-light", "ml-2"],
+                                        attrs! {At::Title => "Number of views"},
+                                        span![C!("icon"), i![C!("ion-eye")]],
+                                        &sharing.nb_view
+                                    ],
+                                    div![
+                                        C!["tag", "is-danger", "is-light", "ml-2"],
+                                        attrs! {At::Title => "Number of likes"},
+                                        span![C!("icon"), i![C!("ion-heart")]],
+                                        &sharing.nb_like
+                                    ],
                                 ],
                                 div![
-                                    C!["tag", "is-danger", "is-light", "ml-2"],
-                                    attrs! {At::Title => "Number of likes"},
-                                    span![C!("icon"), i![C!("ion-heart")]],
-                                    &sharing.nb_like
+                                    C!["has-text-grey", "is-size-7", "ml-2", "is-hidden-mobile"],
+                                    format!("{base_url}/share/{}", &sharing.id)
                                 ],
-                            ],
+                                div![
+                                    C!["is-align-content-flex-end", "is-hidden-mobile"],
+                                    button![
+                                        C!["button", "is-link", "is-light", "is-small", "ml-2"],
+                                        span![C!("icon"), i![C!("ion-close-circled")]],
+                                        span!["Delete"],
+                                        ev(Ev::Click, |_| Msg::Delete(id_del)),
+                                    ]
+                                ]
+                            ]
+                        ],
+                        p![
+                            C!["panel-block", "is-hidden-desktop", "is-hidden-tablet"],
                             div![
-                                C!["has-text-grey", "is-size-7", "ml-2"],
+                                C!["has-text-grey", "is-size-7"],
                                 format!("{base_url}/share/{}", &sharing.id)
                             ],
                             div![
@@ -125,10 +144,10 @@ pub fn view(model: &Model) -> Node<Msg> {
                                     C!["button", "is-link", "is-light", "is-small", "ml-2"],
                                     span![C!("icon"), i![C!("ion-close-circled")]],
                                     span!["Delete"],
-                                    ev(Ev::Click, |_| Msg::Delete(id_del)),
+                                    ev(Ev::Click, |_| Msg::Delete(id_del_mob)),
                                 ]
                             ]
-                        ]
+                        ],
                     ]
                 })]
             } else {
