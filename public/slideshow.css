@@ -25,6 +25,10 @@
     max-height: 100%;
 }
 
+.slideshow-image-hide {
+	opacity: 0;
+}
+
 .slideshow-caption-ctn {
 	height: 80%;
 }

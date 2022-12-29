@@ -1,18 +1,21 @@
 use seed::{prelude::*, *};
 
+use crate::models::page::LK_LOGIN;
+
 pub fn view<Ms>(msg: String, icon: String) -> Node<Ms> {
     div![
-        C!["hero", "is-large"],
+        C!["block", "is-flex", "is-align-items-center", "is-flex-direction-column", "mt-6"],
         div![
-            C!("hero-body"),
-            div![
-                C!["is-flex", "is-justify-content-center", "block"],
-                div![C!["icon", "is-size-1", "has-text-info"], i![C!(icon)]],
-            ],
-            div![
-                C!["is-flex", "is-justify-content-center", "has-text-centered"],
-                h1![C!("title"), msg,],
-            ],
+            C!["icon", "is-size-1", "has-text-info"], 
+            i![C!(icon)]
         ],
+        div![C!("m-2"),
+            h1![C!("title"), msg]
+        ],
+        a![
+            C!["button", "is-light"],
+            attrs!{ At::Href => format!("/{LK_LOGIN}")},
+            "Sign In"
+        ]
     ]
 }

@@ -212,6 +212,12 @@ pub fn view(model: &Model) -> Node<Msg> {
                     )
                 ]
             } else if let Some(picture) = &model.slide.picture {
+
+                let mut hide = "";
+                if !model.pic_loaded {
+                    hide = "slideshow-image-hide";
+                }
+
                 div![
                     C![
                         "is-flex",
@@ -219,12 +225,10 @@ pub fn view(model: &Model) -> Node<Msg> {
                         "slideshow-image-container",
                         "is-align-items-center"
                     ],
-					IF!(model.pic_loaded => 
-						img![C!("slideshow-image"), 
-							attrs! { At::Src => format!("{IMG_URI}{}.{}", picture.public_id, picture.format) }
-						]
-					),
-                    IF!(picture.caption.is_some() =>
+                    img![C!["slideshow-image", hide],
+                        attrs! { At::Src => format!("{IMG_URI}{}.{}", picture.public_id, picture.format) }
+                    ],
+                    IF!(model.pic_loaded => 
                         div![
                             C![
                                 "is-flex",
@@ -242,7 +246,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                                 ]
                             )
                         ]
-                    ),
+                    )
                 ]
             } else {
                 empty!()
