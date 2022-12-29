@@ -15,6 +15,7 @@ pub struct Model {
     is_logged: bool,
     share_id: Option<String>,
     album_id: Option<String>,
+    is_menu_mobile_open: bool,
 }
 
 impl Model {
@@ -25,6 +26,7 @@ impl Model {
             is_logged: false,
             share_id: None,
             album_id: None,
+            is_menu_mobile_open: false,
         }
     }
 }
@@ -41,6 +43,7 @@ pub enum Msg {
     Fullscreen,
     SetShareId(Option<String>),
     SetAlbumId(Option<String>),
+    OpenOrCloseMenuMobile,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -75,6 +78,9 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             if let Some(ele) = ele {
                 let _res = ele.request_fullscreen();
             }
+        }
+        Msg::OpenOrCloseMenuMobile => {
+            model.is_menu_mobile_open = !model.is_menu_mobile_open;
         }
     }
 }
@@ -174,13 +180,13 @@ fn view_nav_end(model: &Model) -> Node<Msg> {
                 div![
                     C!("buttons"),
                     a![
-                        C!["button", "is-primary", "is-link", "is-light", "is-small"],
+                        C!["button", "is-link", "is-light", "is-small"],
                         span![C!("icon"), i![C!("ion-arrow-expand")]],
                         span!["Fullscreen"],
                         ev(Ev::Click, |_| Msg::Fullscreen),
                     ],
                     a![
-                        C!["button", "is-primary", "is-link", "is-light", "is-small"],
+                        C!["button", "is-link", "is-light", "is-small"],
                         attrs! { At::Href => lk_album },
                         span![C!("icon"), i![C!("ion-close-circled")]],
                         span!["Close"],
@@ -213,26 +219,28 @@ fn view_btn_mobile(model: &Model) -> Node<Msg> {
         lk_album = format!("/{LK_VIEW_ALBUM}/{album_id}");
     }
     if model.page == Page::Slideshow || model.page == Page::ShareSlide {
-        a![
+        div![
             C!["navbar-btn-mobile"],
             div![
-                C!["container", "is-flex", "is-justify-content-end", "p-5"],
+                C!["is-flex", "is-flex-direction-column"],
                 div![
-                    a![
-                        C!["button", "is-primary", "is-link", "is-light", "is-small", "mr-2"],
-                        span![C!("icon"), i![C!("ion-arrow-expand")]],
-                        span!["Fullscreen"],
-                        ev(Ev::Click, |_| Msg::Fullscreen),
-                    ]
+                    C!("icon"), i![C!("ion-android-more-vertical")],
+                    ev(Ev::Click, |_| Msg::OpenOrCloseMenuMobile)
                 ],
-                div![
-                    a![
-                        C!["button", "is-primary", "is-link", "is-light", "is-small"],
-                        attrs! { At::Href => lk_album },
-                        span![C!("icon"), i![C!("ion-close-circled")]],
-                        span!["Close"],
+                
+                IF!(model.is_menu_mobile_open => 
+                    div![
+                        C!["is-flex", "is-flex-direction-column"],
+                        a![
+                             span![C!("icon"), i![C!("ion-arrow-expand")]],
+                             ev(Ev::Click, |_| Msg::Fullscreen),
+                        ],
+                        a![
+                            attrs! { At::Href => lk_album },
+                            span![C!("icon"), i![C!("ion-close-circled")]],
+                        ]
                     ]
-                ]
+                )
             ]
         ]
     } else {

@@ -10,7 +10,7 @@ pub fn view<Ms>(msg: String, icon: String) -> Node<Ms> {
             i![C!(icon)]
         ],
         div![C!("m-2"),
-            h1![C!("title"), msg]
+            h1![C!["title", "has-text-centered"], msg]
         ],
         a![
             C!["button", "is-light"],
