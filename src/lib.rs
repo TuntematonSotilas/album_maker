@@ -187,7 +187,10 @@ fn init_comp(page: &Page, opt_id: Option<String>, orders: &mut impl Orders<Msg>)
             orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(opt_id, None)));
         }
         models::page::Page::Slideshow => {
-            orders.send_msg(Msg::Slideshow(slideshow::Msg::InitComp(opt_id.clone(), None)));
+            orders.send_msg(Msg::Slideshow(slideshow::Msg::InitComp(
+                opt_id.clone(),
+                None,
+            )));
             orders.send_msg(Msg::Header(header::Msg::SetAlbumId(opt_id)));
         }
         models::page::Page::MySharings => {
@@ -197,7 +200,10 @@ fn init_comp(page: &Page, opt_id: Option<String>, orders: &mut impl Orders<Msg>)
             orders.send_msg(Msg::ViewAlbum(view_album::Msg::InitComp(None, opt_id)));
         }
         models::page::Page::ShareSlide => {
-            orders.send_msg(Msg::Slideshow(slideshow::Msg::InitComp(None, opt_id.clone())));
+            orders.send_msg(Msg::Slideshow(slideshow::Msg::InitComp(
+                None,
+                opt_id.clone(),
+            )));
             orders.send_msg(Msg::Header(header::Msg::SetShareId(opt_id)));
         }
         models::page::Page::Login => (),

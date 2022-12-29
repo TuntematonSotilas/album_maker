@@ -93,11 +93,11 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::InitSlides => init_slides(model),
         Msg::Next => {
             if let Some(slide) = model.slides.get(model.slide_id) {
-				model.slide = slide.clone();
+                model.slide = slide.clone();
                 model.slide_id += 1;
                 model.caption_animate = false;
                 model.pic_loaded = false;
-				
+
                 orders.perform_cmd(cmds::timeout(300, || Msg::ShowAnim));
                 orders.perform_cmd(cmds::timeout(3000, || Msg::ShowPic));
             }
@@ -105,8 +105,8 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::ShowAnim => {
             model.caption_animate = true;
         }
-		Msg::ShowPic => {
-			model.pic_loaded = true;
+        Msg::ShowPic => {
+            model.pic_loaded = true;
         }
     }
 }
@@ -212,11 +212,11 @@ pub fn view(model: &Model) -> Node<Msg> {
                     )
                 ]
             } else if let Some(picture) = &model.slide.picture {
-
-                let mut hide = "";
-                if !model.pic_loaded {
-                    hide = "slideshow-image-hide";
-                }
+                let hide = if model.pic_loaded {
+                    ""
+                } else {
+                    "slideshow-image-hide"
+                };
 
                 div![
                     C![
@@ -225,10 +225,11 @@ pub fn view(model: &Model) -> Node<Msg> {
                         "slideshow-image-container",
                         "is-align-items-center"
                     ],
-                    img![C!["slideshow-image", hide],
+                    img![
+                        C!["slideshow-image", hide],
                         attrs! { At::Src => format!("{IMG_URI}{}.{}", picture.public_id, picture.format) }
                     ],
-                    IF!(model.pic_loaded => 
+                    IF!(model.pic_loaded =>
                         div![
                             C![
                                 "is-flex",

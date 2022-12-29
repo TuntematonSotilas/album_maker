@@ -224,11 +224,11 @@ fn view_btn_mobile(model: &Model) -> Node<Msg> {
             div![
                 C!["is-flex", "is-flex-direction-column"],
                 div![
-                    C!("icon"), i![C!("ion-android-more-vertical")],
+                    C!("icon"),
+                    i![C!("ion-android-more-vertical")],
                     ev(Ev::Click, |_| Msg::OpenOrCloseMenuMobile)
                 ],
-                
-                IF!(model.is_menu_mobile_open => 
+                IF!(model.is_menu_mobile_open =>
                     div![
                         C!["is-flex", "is-flex-direction-column"],
                         a![
