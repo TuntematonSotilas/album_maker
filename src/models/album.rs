@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{
     caption::{Color, Style},
-    group::Group,
+    group::Group, state::State,
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -14,6 +14,8 @@ pub struct Album {
     pub caption_color: Color,
     pub groups: Option<Vec<Group>>,
     pub cover: String,
+    #[serde(skip_serializing, skip_deserializing)]
+    pub state: Option<State>,
 }
 
 impl Album {
@@ -25,6 +27,7 @@ impl Album {
             caption_color: Color::Black,
             groups: Some(Vec::new()),
             cover: String::new(),
+            state: None,
         }
     }
 }

@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use seed::{self, prelude::*, *};
 
 use crate::{
@@ -7,8 +5,7 @@ use crate::{
     models::{
         album::Album,
         notif::{Notif, TypeNotifs},
-        page::{LK_VIEW_ALBUM, TITLE_MY_ALBUMS},
-        state::{State, TypeDel},
+        page::{LK_VIEW_ALBUM, TITLE_MY_ALBUMS}, state::{State, TypeDel},
     },
 };
 
@@ -19,7 +16,6 @@ use crate::{
 pub struct Model {
     auth_header: String,
     albums: Option<Vec<Album>>,
-    states: HashMap<String, State>,
 }
 
 // ------ ------
@@ -61,25 +57,37 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.albums = Some(albums);
         }
         Msg::AskDelete(id) => {
-            model.states.insert(
-                id,
-                State {
-                    del_state: TypeDel::AskDelete,
-                    total: 0,
-                    current: 0,
-                },
-            );
+            if let Some(albums) = &mut model.albums {
+                if let Some(album) = albums.iter_mut().find(|a| a.id == id) {
+                    album.state = Some(
+                        State {
+                            del_state: TypeDel::AskDelete,
+                            total: 0,
+                            current: 0,
+                        },
+                    );
+                };
+            }
         }
         Msg::CancelDelete(id) => {
-            model.states.remove(&id);
+            if let Some(album) = model.albums.clone()
+                .unwrap_or_default()
+                .iter_mut().find(|a| a.id == id) {
+                    album.state = None;
+            }
         }
         Msg::DeleteAllPics(album_id) => delete_all_pics(model, orders, album_id.as_str()),
         Msg::ErrorDeleteOnePic => {
             error!("Error deleting picture");
         }
         Msg::SuccessDeleteOnePic(id) => {
-            if let Some(delete_state) = model.states.get_mut(&id) {
-                delete_state.current += 1;
+            if let Some(albums) = &mut model.albums.clone() {
+                if let Some(album) = albums.iter_mut().find(|a| a.id == id) {
+                    if let Some(state) = &mut album.state 
+                    {
+                        state.current += 1;
+                    }
+                }
             }
         }
         Msg::DeleteAlbum(id) => {
@@ -95,7 +103,11 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             });
         }
         Msg::ErrorDelete(id) => {
-            model.states.remove(&id);
+            if let Some(album) = model.albums.clone()
+                .unwrap_or_default()
+                .iter_mut().find(|a| a.id == id) {
+                    album.state = None;
+            }
             orders.notify(Notif {
                 notif_type: TypeNotifs::Error,
                 message: "Error deleting album".to_string(),
@@ -111,11 +123,14 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 }
 
 fn delete_all_pics(model: &mut Model, orders: &mut impl Orders<Msg>, album_id: &str) {
-    if let Some(delete_state) = model.states.get_mut(album_id) {
-        delete_state.del_state = TypeDel::Deleting;
-        //Delete all pictures
-        if let Some(albums) = model.albums.clone() {
-            if let Some(album) = albums.iter().find(|a| a.id == album_id) {
+    if let Some(album) = model.albums.clone()
+        .unwrap_or_default()
+        .iter_mut().find(|a| a.id == album_id) {
+
+            if let Some(state) = &mut album.state {
+                state.del_state = TypeDel::Deleting;
+
+                //Delete all pictures
                 if let Some(groups) = album.groups.clone() {
                     let grp_pic_ids = groups.iter().map(|g| {
                         g.pictures.clone().map_or_else(Vec::new, |pictures| {
@@ -123,8 +138,8 @@ fn delete_all_pics(model: &mut Model, orders: &mut impl Orders<Msg>, album_id: &
                         })
                     });
                     let pic_ids: Vec<String> = grp_pic_ids.into_iter().flatten().collect();
-                    delete_state.total = pic_ids.len();
-
+                    state.total = pic_ids.len();
+                    
                     for pic_id in pic_ids {
                         let id_success = album_id.to_string();
                         orders.perform_cmd(async move {
@@ -138,8 +153,8 @@ fn delete_all_pics(model: &mut Model, orders: &mut impl Orders<Msg>, album_id: &
                     }
                 }
             }
-        }
-        orders.send_msg(Msg::DeleteAlbum(album_id.to_string()));
+
+            orders.send_msg(Msg::DeleteAlbum(album_id.to_string()));
     }
 }
 
@@ -156,7 +171,6 @@ pub fn view(model: &Model) -> Node<Msg> {
                 div![model.albums.as_ref().unwrap().iter().map(|album| {
                     let id_del = album.id.clone();
 					let id_can = album.id.clone();
-                    let state_opt = model.states.get(&id_del);
                     p![
                         C!("panel-block"),
                         div![
@@ -166,8 +180,8 @@ pub fn view(model: &Model) -> Node<Msg> {
                                 "is-justify-content-space-between"
                             ],
                             div![
-								if state_opt.is_some() {
-									let state = state_opt.unwrap();
+								if (&album.state).is_some() {
+									let state = album.state.as_ref().unwrap();
 									match state.del_state {
 										TypeDel::AskDelete => {
 											span!["Delete this album ?"]
@@ -192,8 +206,8 @@ pub fn view(model: &Model) -> Node<Msg> {
 							],
                             div![
                                 C!["is-align-content-flex-end"],
-                                if state_opt.is_some() {
-									if state_opt.unwrap().del_state == TypeDel::AskDelete {
+                                if (&album.state).is_some() {
+									if &album.state.as_ref().unwrap().del_state == &TypeDel::AskDelete {
 										div![
 											button![
 												C!["button", "is-link", "is-light", "is-small", "mr-2"],
