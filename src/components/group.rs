@@ -168,12 +168,25 @@ pub fn view(album_id: String, album_cover: &str, group: &Group) -> Node<Msg> {
                     ],
                     attrs! {
                         At::Type => "text",
+                        At::Name => "Group name",
+                        At::Placeholder => "Group name",
+                        At::Value => group.title,
+                    },
+                    input_ev(Ev::Input, move |input| Msg::TitleChanged(input, grp_id)),
+                ],
+                span![C!["label"], "Trip"],
+                view_trip(),
+                span![C!["label"], "Origin"],
+                input![C!["field", "input", "is-small"],
+                    attrs! {
+                        At::Type => "text",
                         At::Name => "title",
                         At::Placeholder => "Group name",
                         At::Value => group.title,
                     },
                     input_ev(Ev::Input, move |input| Msg::TitleChanged(input, grp_id)),
                 ],
+                span![C!["label"], "Destination"],
                 div![
                     group.pictures.as_ref().map_or(empty![], |pictures| {
                         div![pictures.iter().map(|picture| {
@@ -207,5 +220,35 @@ pub fn view(album_id: String, album_cover: &str, group: &Group) -> Node<Msg> {
                 upload::view(album_id, group.id).map_msg(Msg::Upload),
             ]
         }
+    ]
+}
+
+fn view_trip() -> Node<Msg> {
+    div![C!["dropdown"], // TODO => "is-active"
+        div![C!("dropdown-trigger"),
+            button![
+                C!["button", "is-small"], 
+                span!["Mode of transport"],
+                span![
+                    C!["icon", "is-small"],
+                    i![
+                        C!["ion-chevron-down"],
+                        attrs!{ At::AriaHidden => "true" }
+                    ]
+                ]
+            ],
+        ],
+        div![
+            C!("dropdown-menu"),
+            id!("dropdown-menu"),
+            attrs!{ At::Role => "menu" },
+            div![C!("dropdown-content"),
+                a![
+                    attrs! { At::Href => "#" },
+                    C!("dropdown-item"),
+                    "item"
+                ],
+            ]
+        ]
     ]
 }

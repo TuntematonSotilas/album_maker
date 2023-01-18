@@ -93,7 +93,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                             C!("input"),
                             attrs! {
                                 At::Type => "password",
-                                At::Name => "pwd",
+                                At::Name => "password",
                                 At::Value => model.password,
                             },
                             input_ev(Ev::Input, Msg::PwdChanged),

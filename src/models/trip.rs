@@ -5,6 +5,13 @@ pub enum TranspMode {
     #[default]
     Train,
     Plane,
+    Car,
+}
+
+impl std::fmt::Display for TranspMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{self:?}")
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]

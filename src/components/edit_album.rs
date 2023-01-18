@@ -307,7 +307,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                         ],
                         attrs! {
                             At::Type => "text",
-                            At::Name => "title",
+                            At::Name => "Album name",
                             At::Placeholder => "Album name",
                             At::Value => model.album.title,
                         },
@@ -356,7 +356,7 @@ fn caption_view(model: &Model) -> Node<Msg> {
                 C!("mr-1"),
                 attrs! {
                     At::Type => "radio",
-                    At::Name => "caption_style",
+                    At::Name => "Round",
                     At::Checked => (model.album.caption_style == Style::Round).as_at_value(),
                 },
                 ev(Ev::Click, |_| Msg::StyleChanged(Style::Round)),
@@ -369,7 +369,7 @@ fn caption_view(model: &Model) -> Node<Msg> {
                 C!("mr-1"),
                 attrs! {
                     At::Type => "radio",
-                    At::Name => "caption_style",
+                    At::Name => "Square",
                     At::Checked => (model.album.caption_style == Style::Square).as_at_value(),
                 },
                 ev(Ev::Click, |_| Msg::StyleChanged(Style::Square)),
