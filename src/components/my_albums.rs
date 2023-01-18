@@ -6,7 +6,7 @@ use crate::{
         album::Album,
         notif::{Notif, TypeNotifs},
         page::{LK_VIEW_ALBUM, TITLE_MY_ALBUMS},
-        state::{State, TypeDel},
+        state::{DeleteStatus, State},
     },
 };
 
@@ -61,7 +61,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             if let Some(albums) = &mut model.albums {
                 if let Some(album) = albums.iter_mut().find(|a| a.id == id) {
                     album.state = Some(State {
-                        del_state: TypeDel::AskDelete,
+                        delete_status: DeleteStatus::AskDelete,
                         total: 0,
                         current: 0,
                     });
@@ -137,7 +137,7 @@ fn delete_all_pics(model: &mut Model, orders: &mut impl Orders<Msg>, album_id: &
         .find(|a| a.id == album_id)
     {
         if let Some(state) = &mut album.state {
-            state.del_state = TypeDel::Deleting;
+            state.delete_status = DeleteStatus::Deleting;
 
             //Delete all pictures
             if let Some(groups) = album.groups.clone() {
@@ -191,11 +191,11 @@ pub fn view(model: &Model) -> Node<Msg> {
                             div![
 								if (album.state).is_some() {
 									let state = album.state.as_ref().unwrap();
-									match state.del_state {
-										TypeDel::AskDelete => {
+									match state.delete_status {
+										DeleteStatus::AskDelete => {
 											span!["Delete this album ?"]
 										},
-										TypeDel::Deleting => {
+										DeleteStatus::Deleting => {
 											progress![
 												C!["progress", "is-danger"],
 												attrs! { At::Value => state.current, At::Max => state.total }
@@ -216,7 +216,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                             div![
                                 C!["is-align-content-flex-end"],
                                 if (album.state).is_some() {
-									if album.state.as_ref().unwrap().del_state == TypeDel::AskDelete {
+									if album.state.as_ref().unwrap().delete_status == DeleteStatus::AskDelete {
 										div![
 											button![
 												C!["button", "is-link", "is-light", "is-small", "mr-2"],

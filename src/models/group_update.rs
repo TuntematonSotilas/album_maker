@@ -1,4 +1,4 @@
-use super::{picture::Picture, state::TypeDel};
+use super::{picture::Picture, state::DeleteStatus};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Copy)]
@@ -8,7 +8,7 @@ pub enum UpdateType {
     AddPicture,
     DeletePicture,
     Caption,
-    DelState,
+    DeleteState,
     SetGroupCover,
     SetAlbumCover,
 }
@@ -22,5 +22,5 @@ pub struct GroupUpdate {
     pub count_fake_pictures: Option<u32>,
     pub asset_id: Option<String>,
     pub caption: Option<String>,
-    pub del_state: Option<TypeDel>,
+    pub delete_status: Option<DeleteStatus>,
 }

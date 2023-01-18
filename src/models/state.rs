@@ -1,5 +1,5 @@
 #[derive(Eq, PartialEq, Debug, Clone, Default)]
-pub enum TypeDel {
+pub enum DeleteStatus {
     #[default]
     AskDelete,
     Deleting,
@@ -7,7 +7,7 @@ pub enum TypeDel {
 
 #[derive(Debug, Clone, Default)]
 pub struct State {
-    pub del_state: TypeDel,
+    pub delete_status: DeleteStatus,
     pub total: usize,
     pub current: i32,
 }

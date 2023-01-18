@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use super::picture;
 use super::upload;
-use crate::models::state::TypeDel;
+use crate::models::state::DeleteStatus;
 use crate::models::{
     group::Group,
     group_update::{GroupUpdate, UpdateType},
@@ -34,7 +34,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                 count_fake_pictures: None,
                 asset_id: None,
                 caption: None,
-                del_state: None,
+                delete_status: None,
             }));
         }
         Msg::Upload(msg) => {
@@ -48,7 +48,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                         count_fake_pictures: None,
                         asset_id: None,
                         caption: None,
-                        del_state: None,
+                        delete_status: None,
                     }));
                 }
                 upload::Msg::RenderFakePictures(count, group_id) => {
@@ -60,7 +60,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                         count_fake_pictures: Some(count),
                         asset_id: None,
                         caption: None,
-                        del_state: None,
+                        delete_status: None,
                     }));
                 }
                 _ => (),
@@ -70,14 +70,14 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
         Msg::Picture(msg) => update_picture(msg, orders),
         Msg::BeginDeleteGroup(group_id) => {
             orders.send_msg(Msg::UpdateGroup(GroupUpdate {
-                upd_type: UpdateType::DelState,
+                upd_type: UpdateType::DeleteState,
                 id: group_id,
                 picture: None,
                 grp_data: None,
                 count_fake_pictures: None,
                 asset_id: None,
                 caption: None,
-                del_state: Some(TypeDel::Deleting),
+                delete_status: Some(DeleteStatus::Deleting),
             }));
         }
         Msg::UpdateGroup(_) | Msg::Drop(_, _) | Msg::DragEnded(_) | Msg::DragOver => (),
@@ -95,7 +95,7 @@ fn update_picture(msg: picture::Msg, orders: &mut impl Orders<Msg>) {
                 count_fake_pictures: None,
                 asset_id: Some(asset_id.clone()),
                 caption: Some(caption.clone()),
-                del_state: None,
+                delete_status: None,
             }));
         }
         picture::Msg::DeletePictureSuccess(group_id, ref asset_id) => {
@@ -107,7 +107,7 @@ fn update_picture(msg: picture::Msg, orders: &mut impl Orders<Msg>) {
                 count_fake_pictures: None,
                 asset_id: Some(asset_id.clone()),
                 caption: None,
-                del_state: None,
+                delete_status: None,
             }));
         }
         picture::Msg::SetAlbumCover(group_id, ref asset_id) => {
@@ -119,7 +119,7 @@ fn update_picture(msg: picture::Msg, orders: &mut impl Orders<Msg>) {
                 count_fake_pictures: None,
                 asset_id: Some(asset_id.clone()),
                 caption: None,
-                del_state: None,
+                delete_status: None,
             }));
         }
         picture::Msg::SetGroupCover(group_id, ref asset_id) => {
@@ -131,7 +131,7 @@ fn update_picture(msg: picture::Msg, orders: &mut impl Orders<Msg>) {
                 count_fake_pictures: None,
                 asset_id: Some(asset_id.clone()),
                 caption: None,
-                del_state: None,
+                delete_status: None,
             }));
         }
         _ => (),

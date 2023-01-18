@@ -11,7 +11,7 @@ use crate::{
         group_update::{GroupUpdate, UpdateType},
         notif::{Notif, TypeNotifs},
         page::{TITLE_EDIT_ALBUM, TITLE_NEW_ALBUM},
-        state::{State, TypeDel},
+        state::{DeleteStatus, State},
     },
 };
 
@@ -142,14 +142,14 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::DeleteGroup(id) => delete_group(model, orders, id),
         Msg::SuccessDeleteOnePic(group_id) => {
             let group_update = GroupUpdate {
-                upd_type: UpdateType::DelState,
+                upd_type: UpdateType::DeleteState,
                 id: group_id,
                 picture: None,
                 grp_data: None,
                 count_fake_pictures: None,
                 asset_id: None,
                 caption: None,
-                del_state: Some(TypeDel::Deleting),
+                delete_status: Some(DeleteStatus::Deleting),
             };
             update_group(&group_update, &mut model.album, orders);
         }
@@ -249,8 +249,8 @@ fn update_group(group_update: &GroupUpdate, album: &mut Album, orders: &mut impl
                         }
                     }
                 }
-                UpdateType::DelState => {
-                    if let Some(del_state) = &group_update.del_state {
+                UpdateType::DeleteState => {
+                    if let Some(del_state) = &group_update.delete_status {
                         let mut total = 0;
                         if let Some(pictures) = &mut group.pictures {
                             total = pictures.len();
@@ -262,14 +262,14 @@ fn update_group(group_update: &GroupUpdate, album: &mut Album, orders: &mut impl
                             orders.send_msg(Msg::DeleteGroup(group.id));
                         }
                         match del_state {
-                            TypeDel::Deleting => {
+                            DeleteStatus::Deleting => {
                                 group.state = Some(State {
-                                    del_state: TypeDel::Deleting,
+                                    delete_status: DeleteStatus::Deleting,
                                     total,
                                     current,
                                 });
                             }
-                            TypeDel::AskDelete => (),
+                            DeleteStatus::AskDelete => (),
                         }
                     }
                 }
