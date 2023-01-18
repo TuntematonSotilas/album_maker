@@ -13,7 +13,6 @@
 	position: inherit;
 	background-image: inherit;
 	background-size: cover;
-	filter: blur(10px);
 }
 
 .slideshow-image-container {
