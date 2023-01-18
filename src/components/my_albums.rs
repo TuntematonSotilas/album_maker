@@ -5,7 +5,8 @@ use crate::{
     models::{
         album::Album,
         notif::{Notif, TypeNotifs},
-        page::{LK_VIEW_ALBUM, TITLE_MY_ALBUMS}, state::{State, TypeDel},
+        page::{LK_VIEW_ALBUM, TITLE_MY_ALBUMS},
+        state::{State, TypeDel},
     },
 };
 
@@ -59,21 +60,23 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::AskDelete(id) => {
             if let Some(albums) = &mut model.albums {
                 if let Some(album) = albums.iter_mut().find(|a| a.id == id) {
-                    album.state = Some(
-                        State {
-                            del_state: TypeDel::AskDelete,
-                            total: 0,
-                            current: 0,
-                        },
-                    );
+                    album.state = Some(State {
+                        del_state: TypeDel::AskDelete,
+                        total: 0,
+                        current: 0,
+                    });
                 };
             }
         }
         Msg::CancelDelete(id) => {
-            if let Some(album) = model.albums.clone()
+            if let Some(album) = model
+                .albums
+                .clone()
                 .unwrap_or_default()
-                .iter_mut().find(|a| a.id == id) {
-                    album.state = None;
+                .iter_mut()
+                .find(|a| a.id == id)
+            {
+                album.state = None;
             }
         }
         Msg::DeleteAllPics(album_id) => delete_all_pics(model, orders, album_id.as_str()),
@@ -83,8 +86,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::SuccessDeleteOnePic(id) => {
             if let Some(albums) = &mut model.albums.clone() {
                 if let Some(album) = albums.iter_mut().find(|a| a.id == id) {
-                    if let Some(state) = &mut album.state 
-                    {
+                    if let Some(state) = &mut album.state {
                         state.current += 1;
                     }
                 }
@@ -103,10 +105,14 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             });
         }
         Msg::ErrorDelete(id) => {
-            if let Some(album) = model.albums.clone()
+            if let Some(album) = model
+                .albums
+                .clone()
                 .unwrap_or_default()
-                .iter_mut().find(|a| a.id == id) {
-                    album.state = None;
+                .iter_mut()
+                .find(|a| a.id == id)
+            {
+                album.state = None;
             }
             orders.notify(Notif {
                 notif_type: TypeNotifs::Error,
@@ -123,38 +129,41 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 }
 
 fn delete_all_pics(model: &mut Model, orders: &mut impl Orders<Msg>, album_id: &str) {
-    if let Some(album) = model.albums.clone()
+    if let Some(album) = model
+        .albums
+        .clone()
         .unwrap_or_default()
-        .iter_mut().find(|a| a.id == album_id) {
+        .iter_mut()
+        .find(|a| a.id == album_id)
+    {
+        if let Some(state) = &mut album.state {
+            state.del_state = TypeDel::Deleting;
 
-            if let Some(state) = &mut album.state {
-                state.del_state = TypeDel::Deleting;
+            //Delete all pictures
+            if let Some(groups) = album.groups.clone() {
+                let grp_pic_ids = groups.iter().map(|g| {
+                    g.pictures.clone().map_or_else(Vec::new, |pictures| {
+                        pictures.iter().map(|p| p.public_id.clone()).collect()
+                    })
+                });
+                let pic_ids: Vec<String> = grp_pic_ids.into_iter().flatten().collect();
+                state.total = pic_ids.len();
 
-                //Delete all pictures
-                if let Some(groups) = album.groups.clone() {
-                    let grp_pic_ids = groups.iter().map(|g| {
-                        g.pictures.clone().map_or_else(Vec::new, |pictures| {
-                            pictures.iter().map(|p| p.public_id.clone()).collect()
-                        })
+                for pic_id in pic_ids {
+                    let id_success = album_id.to_string();
+                    orders.perform_cmd(async move {
+                        let res = albumapi::delete_picture(pic_id).await;
+                        if res {
+                            Msg::SuccessDeleteOnePic(id_success)
+                        } else {
+                            Msg::ErrorDeleteOnePic
+                        }
                     });
-                    let pic_ids: Vec<String> = grp_pic_ids.into_iter().flatten().collect();
-                    state.total = pic_ids.len();
-                    
-                    for pic_id in pic_ids {
-                        let id_success = album_id.to_string();
-                        orders.perform_cmd(async move {
-                            let res = albumapi::delete_picture(pic_id).await;
-                            if res {
-                                Msg::SuccessDeleteOnePic(id_success)
-                            } else {
-                                Msg::ErrorDeleteOnePic
-                            }
-                        });
-                    }
                 }
             }
+        }
 
-            orders.send_msg(Msg::DeleteAlbum(album_id.to_string()));
+        orders.send_msg(Msg::DeleteAlbum(album_id.to_string()));
     }
 }
 
@@ -180,7 +189,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                                 "is-justify-content-space-between"
                             ],
                             div![
-								if (&album.state).is_some() {
+								if (album.state).is_some() {
 									let state = album.state.as_ref().unwrap();
 									match state.del_state {
 										TypeDel::AskDelete => {
@@ -206,8 +215,8 @@ pub fn view(model: &Model) -> Node<Msg> {
 							],
                             div![
                                 C!["is-align-content-flex-end"],
-                                if (&album.state).is_some() {
-									if &album.state.as_ref().unwrap().del_state == &TypeDel::AskDelete {
+                                if (album.state).is_some() {
+									if album.state.as_ref().unwrap().del_state == TypeDel::AskDelete {
 										div![
 											button![
 												C!["button", "is-link", "is-light", "is-small", "mr-2"],

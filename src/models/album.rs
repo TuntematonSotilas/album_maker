@@ -2,7 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use super::{
     caption::{Color, Style},
-    group::Group, state::State,
+    group::Group,
+    state::State,
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
