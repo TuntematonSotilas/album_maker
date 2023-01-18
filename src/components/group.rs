@@ -152,32 +152,27 @@ pub fn view(album_id: String, album_cover: &str, group: &Group) -> Node<Msg> {
         } else {
             div![
                 div![
-                    C!("field"),
-                    div![
-                        C!("control"),
-                        div![
-                            C!("label"),
-                            "Group name",
-                            button![
-                                C!["delete", "delete-group"],
-                                ev(Ev::Click, move |_| Msg::BeginDeleteGroup(grp_id)),
-                            ],
-                        ],
-                        input![
-                            C![
-                                "input",
-                                "is-small",
-                                IF!(group.title.is_empty() => "is-danger")
-                            ],
-                            attrs! {
-                                At::Type => "text",
-                                At::Name => "title",
-                                At::Placeholder => "Group name",
-                                At::Value => group.title,
-                            },
-                            input_ev(Ev::Input, move |input| Msg::TitleChanged(input, grp_id)),
-                        ],
+                    C!["label", "control", "field"],
+                    "Group name",
+                    button![
+                        C!["delete", "delete-group"],
+                        ev(Ev::Click, move |_| Msg::BeginDeleteGroup(grp_id)),
+                    ]
+                ],
+                input![
+                    C![
+                        "field",
+                        "input",
+                        "is-small",
+                        IF!(group.title.is_empty() => "is-danger")
                     ],
+                    attrs! {
+                        At::Type => "text",
+                        At::Name => "title",
+                        At::Placeholder => "Group name",
+                        At::Value => group.title,
+                    },
+                    input_ev(Ev::Input, move |input| Msg::TitleChanged(input, grp_id)),
                 ],
                 div![
                     group.pictures.as_ref().map_or(empty![], |pictures| {

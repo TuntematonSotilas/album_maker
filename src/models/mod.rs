@@ -8,3 +8,4 @@ pub mod picture;
 pub mod sharing;
 pub mod state;
 pub mod vars;
+pub mod trip;

@@ -351,7 +351,7 @@ fn caption_view(model: &Model) -> Node<Msg> {
     div![
         label![C!("label"), "Caption style"],
         label![
-            C!["radio", "album-edit-radio"],
+            C!["field", "radio", "album-edit-radio"],
             input![
                 C!("mr-1"),
                 attrs! {

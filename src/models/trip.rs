@@ -1,3 +1,5 @@
+use serde::{Serialize, Deserialize};
+
 #[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone, Default)]
 pub enum TranspMode {
     #[default]
