@@ -1,9 +1,11 @@
 use seed::{self, prelude::*, *};
 use uuid::Uuid;
-
 use super::picture;
 use super::upload;
 use crate::models::state::DeleteStatus;
+use crate::models::trip::TRANSP_MODE;
+use crate::models::trip::TranspMode;
+use crate::models::trip::Trip;
 use crate::models::{
     group::Group,
     group_update::{GroupUpdate, UpdateType},
@@ -21,6 +23,7 @@ pub enum Msg {
     Drop(Uuid, String),
     DragEnded(String),
     DragOver,
+    TripChanged(Uuid, TranspMode, String, String),
 }
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
@@ -35,6 +38,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                 asset_id: None,
                 caption: None,
                 delete_status: None,
+                trip: None,
             }));
         }
         Msg::Upload(msg) => {
@@ -49,6 +53,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                         asset_id: None,
                         caption: None,
                         delete_status: None,
+                        trip: None,
                     }));
                 }
                 upload::Msg::RenderFakePictures(count, group_id) => {
@@ -61,6 +66,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                         asset_id: None,
                         caption: None,
                         delete_status: None,
+                        trip: None,
                     }));
                 }
                 _ => (),
@@ -78,6 +84,25 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                 asset_id: None,
                 caption: None,
                 delete_status: Some(DeleteStatus::Deleting),
+                trip: None,
+            }));
+        }
+        Msg::TripChanged(group_id, transp_mode, origin, destination) => {
+            let trip = Trip {
+                transp_mode,
+                origin,
+                destination
+            };
+            orders.send_msg(Msg::UpdateGroup(GroupUpdate {
+                upd_type: UpdateType::TripChanged,
+                id: group_id,
+                picture: None,
+                grp_data: None,
+                count_fake_pictures: None,
+                asset_id: None,
+                caption: None,
+                delete_status: None,
+                trip: Some(trip),
             }));
         }
         Msg::UpdateGroup(_) | Msg::Drop(_, _) | Msg::DragEnded(_) | Msg::DragOver => (),
@@ -96,6 +121,7 @@ fn update_picture(msg: picture::Msg, orders: &mut impl Orders<Msg>) {
                 asset_id: Some(asset_id.clone()),
                 caption: Some(caption.clone()),
                 delete_status: None,
+                trip: None,
             }));
         }
         picture::Msg::DeletePictureSuccess(group_id, ref asset_id) => {
@@ -108,6 +134,7 @@ fn update_picture(msg: picture::Msg, orders: &mut impl Orders<Msg>) {
                 asset_id: Some(asset_id.clone()),
                 caption: None,
                 delete_status: None,
+                trip: None,
             }));
         }
         picture::Msg::SetAlbumCover(group_id, ref asset_id) => {
@@ -120,6 +147,7 @@ fn update_picture(msg: picture::Msg, orders: &mut impl Orders<Msg>) {
                 asset_id: Some(asset_id.clone()),
                 caption: None,
                 delete_status: None,
+                trip: None,
             }));
         }
         picture::Msg::SetGroupCover(group_id, ref asset_id) => {
@@ -132,6 +160,7 @@ fn update_picture(msg: picture::Msg, orders: &mut impl Orders<Msg>) {
                 asset_id: Some(asset_id.clone()),
                 caption: None,
                 delete_status: None,
+                trip: None,
             }));
         }
         _ => (),
@@ -175,18 +204,7 @@ pub fn view(album_id: String, album_cover: &str, group: &Group) -> Node<Msg> {
                     input_ev(Ev::Input, move |input| Msg::TitleChanged(input, grp_id)),
                 ],
                 span![C!["label"], "Trip"],
-                view_trip(),
-                span![C!["label"], "Origin"],
-                input![C!["field", "input", "is-small"],
-                    attrs! {
-                        At::Type => "text",
-                        At::Name => "title",
-                        At::Placeholder => "Group name",
-                        At::Value => group.title,
-                    },
-                    input_ev(Ev::Input, move |input| Msg::TitleChanged(input, grp_id)),
-                ],
-                span![C!["label"], "Destination"],
+                view_trip(group),
                 div![
                     group.pictures.as_ref().map_or(empty![], |pictures| {
                         div![pictures.iter().map(|picture| {
@@ -223,32 +241,61 @@ pub fn view(album_id: String, album_cover: &str, group: &Group) -> Node<Msg> {
     ]
 }
 
-fn view_trip() -> Node<Msg> {
-    div![C!["dropdown"], // TODO => "is-active"
-        div![C!("dropdown-trigger"),
-            button![
-                C!["button", "is-small"], 
-                span!["Mode of transport"],
-                span![
-                    C!["icon", "is-small"],
-                    i![
-                        C!["ion-chevron-down"],
-                        attrs!{ At::AriaHidden => "true" }
-                    ]
-                ]
-            ],
-        ],
+fn view_trip(group: &Group) -> Node<Msg> {
+    let grp_id = group.id;    
+    let inp_ori = group.trip.clone().unwrap_or_default().origin;
+    let inp_dest = group.trip.clone().unwrap_or_default().destination;
+    let inp_mode = group.trip.clone().unwrap_or_default().transp_mode;
+    let inp_mode2 = group.trip.clone().unwrap_or_default().transp_mode;
+    let trip = group.trip.clone().unwrap_or_default();
+    div![
         div![
-            C!("dropdown-menu"),
-            id!("dropdown-menu"),
-            attrs!{ At::Role => "menu" },
-            div![C!("dropdown-content"),
-                a![
-                    attrs! { At::Href => "#" },
-                    C!("dropdown-item"),
-                    "item"
-                ],
+            C!["field", "select", "is-small"],
+            select![
+                TRANSP_MODE.iter().map(|mode| {
+                    let origin = group.trip.clone().unwrap_or_default().origin;
+                    let destination = group.trip.clone().unwrap_or_default().destination;
+                    option![
+                        mode.to_string(),
+                        ev(Ev::Click, move |_| Msg::TripChanged(
+                            grp_id, 
+                            mode.clone(), 
+                            origin,
+                            destination)
+                        ),
+                        attrs!(At::Selected => (mode == &inp_mode).as_at_value() )
+                    ]
+                }),
+               
             ]
-        ]
-    ]
+        ],
+        span![C!["label"], "Origin"],
+        input![C!["field", "input", "is-small"],
+            attrs! {
+                At::Type => "text",
+                At::Name => "origin",
+                At::Placeholder => "Origin",
+                At::Value => trip.origin,
+            },
+            input_ev(Ev::Input, move |input| Msg::TripChanged(
+                grp_id, 
+                inp_mode, 
+                input,
+                inp_dest)),
+       ],
+       span![C!["label"], "Destination"],
+       input![C!["field", "input", "is-small"],
+            attrs! {
+                At::Type => "text",
+                At::Name => "destination",
+                At::Placeholder => "Destination",
+                At::Value => trip.destination,
+            },
+            input_ev(Ev::Input, move |input| Msg::TripChanged(
+                grp_id, 
+                inp_mode2, 
+                inp_ori,
+                input)),
+        ],
+   ]
 }

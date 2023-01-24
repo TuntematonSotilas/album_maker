@@ -8,6 +8,12 @@ pub enum TranspMode {
     Car,
 }
 
+pub const TRANSP_MODE: [TranspMode; 3] = [
+    TranspMode::Train,
+    TranspMode::Plane,
+    TranspMode::Car
+];
+
 impl std::fmt::Display for TranspMode {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{self:?}")
@@ -18,5 +24,5 @@ impl std::fmt::Display for TranspMode {
 pub struct Trip {
     pub transp_mode: TranspMode,
     pub origin: String,
-    pub destination: i32,
+    pub destination: String,
 }

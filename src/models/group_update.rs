@@ -1,4 +1,4 @@
-use super::{picture::Picture, state::DeleteStatus};
+use super::{picture::Picture, state::DeleteStatus, trip::Trip};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Copy)]
@@ -11,6 +11,7 @@ pub enum UpdateType {
     DeleteState,
     SetGroupCover,
     SetAlbumCover,
+    TripChanged,
 }
 
 #[derive(Debug, Clone)]
@@ -23,4 +24,5 @@ pub struct GroupUpdate {
     pub asset_id: Option<String>,
     pub caption: Option<String>,
     pub delete_status: Option<DeleteStatus>,
+    pub trip: Option<Trip>,
 }

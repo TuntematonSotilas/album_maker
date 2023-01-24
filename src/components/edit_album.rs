@@ -150,6 +150,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 asset_id: None,
                 caption: None,
                 delete_status: Some(DeleteStatus::Deleting),
+                trip: None,
             };
             update_group(&group_update, &mut model.album, orders);
         }
@@ -203,6 +204,9 @@ fn update_group(group_update: &GroupUpdate, album: &mut Album, orders: &mut impl
         if let Some(group) = groups.iter_mut().find(|g| g.id == group_update.id) {
             let grp_upd = group_update.clone();
             match group_update.upd_type {
+                UpdateType::TripChanged => {
+                    group.trip = grp_upd.trip;
+                }
                 UpdateType::CountFakePictures => {
                     group.count_fake_pictures = grp_upd.count_fake_pictures.unwrap_or_default();
                 }
