@@ -3,7 +3,7 @@ use crate::{
     models::{
         album::Album,
         picture::Picture,
-        vars::{IMG_URI, VERY_LOW_URI},
+        vars::{IMG_URI, VERY_LOW_URI}, trip::Trip,
     },
 };
 use seed::{self, prelude::*, *};
@@ -14,6 +14,7 @@ use super::error;
 struct Slide {
     is_title: bool,
     group_title: Option<String>,
+	trip: Option<Trip>,
     picture: Option<Picture>,
 }
 
@@ -41,6 +42,7 @@ impl Model {
                 is_title: false,
                 group_title: None,
                 picture: None,
+				trip: None,
             },
             slide_id: 0,
             caption_animate: false,
@@ -75,6 +77,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 is_title: false,
                 group_title: None,
                 picture: None,
+				trip: None,
             };
             let auth = model.auth_header.clone();
             orders.perform_cmd(async {
@@ -128,10 +131,12 @@ fn init_slides(model: &mut Model) {
         }
     }
 
+	// Slide for album title
     model.slides.push(Slide {
         is_title: true,
         group_title: None,
         picture: cover,
+		trip: None,
     });
 
     let groups = model.album.groups.clone().unwrap_or_default();
@@ -151,6 +156,7 @@ fn init_slides(model: &mut Model) {
             is_title: false,
             group_title: Some(group.title.clone()),
             picture: grp_cover,
+			trip: group.trip.clone(),
         });
         if let Some(pictures) = group.pictures.clone() {
             for picture in pictures {
@@ -158,6 +164,7 @@ fn init_slides(model: &mut Model) {
                     is_title: false,
                     group_title: None,
                     picture: Some(picture),
+					trip: None,
                 });
             }
         }
