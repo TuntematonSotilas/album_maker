@@ -23,7 +23,7 @@ pub enum Msg {
     Drop(Uuid, String),
     DragEnded(String),
     DragOver,
-    TripChanged(Uuid, TranspMode, String, String),
+    TripChanged(Uuid, Option<TranspMode>, String, String),
 }
 
 pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
@@ -88,11 +88,14 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             }));
         }
         Msg::TripChanged(group_id, transp_mode, origin, destination) => {
-            let trip = Trip {
-                transp_mode,
-                origin,
-                destination
-            };
+			let mut trip: Option<Trip> = None; 
+			if let Some(transp_mode) = transp_mode {
+				trip = Some(Trip {
+					transp_mode,
+					origin,
+					destination
+				});
+			}
             orders.send_msg(Msg::UpdateGroup(GroupUpdate {
                 upd_type: UpdateType::TripChanged,
                 id: group_id,
@@ -102,7 +105,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                 asset_id: None,
                 caption: None,
                 delete_status: None,
-                trip: Some(trip),
+                trip: trip,
             }));
         }
         Msg::UpdateGroup(_) | Msg::Drop(_, _) | Msg::DragEnded(_) | Msg::DragOver => (),
@@ -252,6 +255,16 @@ fn view_trip(group: &Group) -> Node<Msg> {
         div![
             C!["field", "select", "is-small"],
             select![
+				option![
+					"None",
+					ev(Ev::Click, move |_| Msg::TripChanged(
+						grp_id, 
+						None, 
+						String::new(),
+						String::new())
+					),
+					attrs!(At::Selected => (group.trip.is_none()).as_at_value() )
+				],
                 TRANSP_MODE.iter().map(|mode| {
                     let origin = group.trip.clone().unwrap_or_default().origin;
                     let destination = group.trip.clone().unwrap_or_default().destination;
@@ -259,11 +272,11 @@ fn view_trip(group: &Group) -> Node<Msg> {
                         mode.to_string(),
                         ev(Ev::Click, move |_| Msg::TripChanged(
                             grp_id, 
-                            mode.clone(), 
+                            Some(mode.clone()), 
                             origin,
                             destination)
                         ),
-                        attrs!(At::Selected => (mode == &inp_mode).as_at_value() )
+                        attrs!(At::Selected => (mode == &inp_mode && group.trip.is_some()).as_at_value() )
                     ]
                 }),
                
@@ -279,7 +292,7 @@ fn view_trip(group: &Group) -> Node<Msg> {
             },
             input_ev(Ev::Input, move |input| Msg::TripChanged(
                 grp_id, 
-                inp_mode, 
+                Some(inp_mode), 
                 input,
                 inp_dest)),
        ],
@@ -293,7 +306,7 @@ fn view_trip(group: &Group) -> Node<Msg> {
             },
             input_ev(Ev::Input, move |input| Msg::TripChanged(
                 grp_id, 
-                inp_mode2, 
+                Some(inp_mode2), 
                 inp_ori,
                 input)),
         ],
