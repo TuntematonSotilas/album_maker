@@ -200,6 +200,15 @@ pub fn view(model: &Model) -> Node<Msg> {
                         "is-align-items-center",
                         "slideshow-caption-ctn"
                     ],
+                    if let Some(trip) = &model.slide.trip {
+                        div![
+                            C!("trip"),
+                            span![&trip.origin],
+                            span![&trip.destination],
+                        ]
+                    } else {
+                        empty!()
+                    },
                     IF!(model.caption_animate =>
                         h2![
                             C![
