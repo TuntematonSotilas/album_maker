@@ -194,20 +194,9 @@ pub fn view(model: &Model) -> Node<Msg> {
             s_bkg,
             if model.slide.is_title || model.slide.group_title.is_some() {
                 div![
-                    C!("slideshow-caption-ctn"),
-                    div![
-                        C!("slideshow-grp-ctn"),
-                        
-                        if let Some(trip) = &model.slide.trip {
-                            div![
-                                C!("trip"),
-                                span![&trip.origin],
-                                span![&trip.destination],
-                            ]
-                        } else {
-                            empty!()
-                        },
-                        IF!(model.caption_animate =>
+                    IF!(model.caption_animate =>
+                        div![
+                            C!("slideshow-caption-ctn"),
                             h2![
                                 C![
                                     "slideshow-caption",
@@ -222,9 +211,31 @@ pub fn view(model: &Model) -> Node<Msg> {
                                     .group_title
                                     .as_ref()
                                     .map_or(&model.album.title, |group_title| group_title)
-                            ]
-                        )
-                    ]
+                            ],
+                            if let Some(trip) = &model.slide.trip {
+                                div![
+                                    C!("slideshow-trip"),
+                                    div![
+                                        C!("slideshow-trip-line-ctn"),
+                                        div![C!("slideshow-trip-line")],
+                                    ],
+                                    div![
+                                        C!("slideshow-trip-pins"),
+                                        span![C!("icon"), i![C!("ion-android-pin")]],
+                                        span![C!("slideshow-trip-sep")],
+                                        span![C!("icon"), i![C!("ion-android-pin")]],
+                                    ],
+                                    div![
+                                        span![&trip.origin],
+                                        span![C!("slideshow-trip-sep")],
+                                        span![&trip.destination],
+                                    ]
+                                ]
+                            } else {
+                                empty!()
+                            },
+                        ]
+                    )
                 ]
             } else if let Some(picture) = &model.slide.picture {
                 let hide = if model.pic_loaded {
@@ -246,7 +257,10 @@ pub fn view(model: &Model) -> Node<Msg> {
                     ],
                     IF!(model.pic_loaded =>
                         div![
-                            C!("slideshow-caption-ctn"),
+                            C![
+                                "slideshow-caption-ctn",
+                                "slideshow-caption-pic"
+                            ],
                             IF!(model.caption_animate =>
                                 h2![
                                     C!["slideshow-caption", "title", "is-5", "mt-5",

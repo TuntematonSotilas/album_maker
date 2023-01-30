@@ -30,21 +30,22 @@
 
 .slideshow-caption-ctn {
 	height: 80%;
+	width: 100%;
 	position: fixed;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	align-items: center;
 }
 
-.slideshow-grp-ctn {
-	display: flex;
-	flex-direction: column;
+.slideshow-caption-pic {
+	justify-content: end;
 }
 
 .slideshow-caption {
 	padding: 0.2em 0.8em;
 	text-transform: uppercase;
-	
+	text-align: center;
 	opacity: 0;
 	word-break: normal;
 }
@@ -64,4 +65,35 @@
 		transform: scale(1); 
 		opacity: 1;
 	}
+}
+
+.slideshow-trip {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-top: 2rem;
+}
+
+.slideshow-trip-line-ctn {
+	height: 4rem;
+}
+
+.slideshow-trip-line {
+	width: 30rem; 
+	height: 20rem;  
+	border: dashed 4px #000;
+	border-color: #000 transparent transparent transparent;
+	border-radius: 30rem/20rem 20rem 0 0;
+}
+
+.slideshow-trip-pins {
+	margin-top: -2rem;
+}
+
+.slideshow-trip-sep {
+	margin-right: 20rem;
+}
+
+.slideshow-trip .icon {
+	font-size: 2rem;
 }
