@@ -30,12 +30,21 @@
 
 .slideshow-caption-ctn {
 	height: 80%;
+	position: fixed;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.slideshow-grp-ctn {
+	display: flex;
+	flex-direction: column;
 }
 
 .slideshow-caption {
 	padding: 0.2em 0.8em;
 	text-transform: uppercase;
-	position: fixed;
+	
 	opacity: 0;
 	word-break: normal;
 }

@@ -194,38 +194,37 @@ pub fn view(model: &Model) -> Node<Msg> {
             s_bkg,
             if model.slide.is_title || model.slide.group_title.is_some() {
                 div![
-                    C![
-                        "is-flex",
-                        "is-justify-content-center",
-                        "is-align-items-center",
-                        "slideshow-caption-ctn"
-                    ],
-                    if let Some(trip) = &model.slide.trip {
-                        div![
-                            C!("trip"),
-                            span![&trip.origin],
-                            span![&trip.destination],
-                        ]
-                    } else {
-                        empty!()
-                    },
-                    IF!(model.caption_animate =>
-                        h2![
-                            C![
-                                "slideshow-caption",
-                                "title",
-                                "is-4",
-                                &model.album.caption_color.to_string(),
-                                &model.album.caption_style.to_string(),
-                                "slideshow-caption-anim"
-                            ],
-                            model
-                                .slide
-                                .group_title
-                                .as_ref()
-                                .map_or(&model.album.title, |group_title| group_title)
-                        ]
-                    )
+                    C!("slideshow-caption-ctn"),
+                    div![
+                        C!("slideshow-grp-ctn"),
+                        
+                        if let Some(trip) = &model.slide.trip {
+                            div![
+                                C!("trip"),
+                                span![&trip.origin],
+                                span![&trip.destination],
+                            ]
+                        } else {
+                            empty!()
+                        },
+                        IF!(model.caption_animate =>
+                            h2![
+                                C![
+                                    "slideshow-caption",
+                                    "title",
+                                    "is-4",
+                                    &model.album.caption_color.to_string(),
+                                    &model.album.caption_style.to_string(),
+                                    "slideshow-caption-anim"
+                                ],
+                                model
+                                    .slide
+                                    .group_title
+                                    .as_ref()
+                                    .map_or(&model.album.title, |group_title| group_title)
+                            ]
+                        )
+                    ]
                 ]
             } else if let Some(picture) = &model.slide.picture {
                 let hide = if model.pic_loaded {
@@ -247,11 +246,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                     ],
                     IF!(model.pic_loaded =>
                         div![
-                            C![
-                                "is-flex",
-                                "is-justify-content-center",
-                                "is-align-items-end",
-                                "slideshow-caption-ctn"],
+                            C!("slideshow-caption-ctn"),
                             IF!(model.caption_animate =>
                                 h2![
                                     C!["slideshow-caption", "title", "is-5", "mt-5",
