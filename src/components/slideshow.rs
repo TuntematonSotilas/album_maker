@@ -3,7 +3,7 @@ use crate::{
     models::{
         album::Album,
         picture::Picture,
-        vars::{IMG_URI, VERY_LOW_URI}, trip::Trip,
+        vars::{IMG_URI, VERY_LOW_URI}, trip::{Trip, TranspMode},
     },
 };
 use seed::{self, prelude::*, *};
@@ -223,27 +223,41 @@ pub fn view(model: &Model) -> Node<Msg> {
 					if let Some(trip) = &model.slide.trip {
 						let mut show_trip = "";
 						if model.show_trip {
-							show_trip = "slideshow-trip-show";
+							show_trip = "trip-show";
 						}
+						let veh_icon = match trip.transp_mode {
+							TranspMode::Plane => "ion-android-plane",
+							TranspMode::Train => "ion-android-train",
+							TranspMode::Car => "ion-android-car",
+						};
 						div![
 							C![
-								"slideshow-trip", 
+								"trip", 
 								show_trip,
 								&model.album.caption_color.to_string()
 							],
 							div![
-								C!("slideshow-trip-line-ctn"),
-								div![C!("slideshow-trip-line")],
+								C!("trip-veh-ctn"), 
+								div![C!("trip-veh"), 
+									div![
+										C!("trip-veh-icon"),
+										span![C!("icon"), i![C!(veh_icon)]]
+									]
+								],
 							],
 							div![
-								C!("slideshow-trip-pins"),
+								C!("trip-line-ctn"),
+								div![C!("trip-line")],
+							],
+							div![
+								C!("trip-pins"),
 								span![C!("icon"), i![C!("ion-android-pin")]],
-								span![C!("slideshow-trip-sep")],
+								span![C!("trip-sep")],
 								span![C!("icon"), i![C!("ion-android-pin")]],
 							],
 							div![
 								span![&trip.origin],
-								span![C!("slideshow-trip-sep")],
+								span![C!("trip-sep")],
 								span![&trip.destination],
 							]
 						]							

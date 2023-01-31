@@ -1,0 +1,85 @@
+.trip {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-top: 2rem;
+	background-color: black;
+	border-radius: 0.5em;
+	padding-top: 3rem;
+	padding-bottom: 3rem;
+	color: white;
+	opacity: 0;
+}
+
+.trip-show {
+	animation: slideshow-fade-in 0.3s;
+	animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+	opacity: 1;
+}
+
+.trip-line-ctn {
+	height: 4rem;
+}
+
+.trip-line {
+	width: 30rem; 
+	height: 20rem;  
+	border: dashed 4px white;
+	border-color: white transparent transparent transparent;
+	border-radius: 30rem/20rem 20rem 0 0;
+}
+
+
+.Yellow, .White, .Lime, .Amber, * > .trip-line {
+	border-color: black transparent transparent transparent;
+}
+
+.trip-pins {
+	margin-top: -2rem;
+}
+
+.trip-sep {
+	margin-right: 20rem;
+}
+
+.trip .icon {
+	font-size: 2rem;
+}
+
+.trip-veh-ctn {
+	position: relative;
+	height: 100%;
+	width: 100%;
+}
+
+.trip-veh {
+	position: absolute;
+	width: 30px;
+	height: 4rem;
+	animation: x-motion 3s ease-in-out 0s infinite alternate;
+}
+
+.trip-veh-icon {
+	position: absolute;
+	top: 100%;
+	animation: y-motion 3s ease-in-out 0s infinite alternate;
+}
+
+@keyframes x-motion {
+	0% {
+		left: 0;
+	}
+	100% {
+		left: calc(100% - 30px);
+	}
+}
+  
+@keyframes y-motion {
+	0%, 100% {
+		top: 100%;
+	}
+
+	50% {
+		top: 0%;
+	}
+}
