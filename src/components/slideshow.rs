@@ -27,9 +27,10 @@ pub struct Model {
     slides: Vec<Slide>,
     slide: Slide,
     slide_id: usize,
-    caption_animate: bool,
-    pic_loaded: bool,
-    error: bool,
+    show_caption: bool,
+    show_trip: bool,
+    show_pic: bool,
+	error: bool,
 }
 
 impl Model {
@@ -45,8 +46,9 @@ impl Model {
 				trip: None,
             },
             slide_id: 0,
-            caption_animate: false,
-            pic_loaded: false,
+            show_caption: false,
+            show_trip: false,
+			show_pic: false,
             error: false,
         }
     }
@@ -62,8 +64,9 @@ pub enum Msg {
     ErrorGet,
     Received(Album),
     Next,
-    ShowAnim,
+    ShowCaption,
     ShowPic,
+	ShowTrip,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -98,18 +101,23 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             if let Some(slide) = model.slides.get(model.slide_id) {
                 model.slide = slide.clone();
                 model.slide_id += 1;
-                model.caption_animate = false;
-                model.pic_loaded = false;
-
-                orders.perform_cmd(cmds::timeout(300, || Msg::ShowAnim));
+                model.show_caption = false;
+                model.show_trip = false;
+				model.show_pic = false;
+				
+                orders.perform_cmd(cmds::timeout(300, || Msg::ShowCaption));
+				orders.perform_cmd(cmds::timeout(600, || Msg::ShowTrip));
                 orders.perform_cmd(cmds::timeout(3000, || Msg::ShowPic));
             }
         }
-        Msg::ShowAnim => {
-            model.caption_animate = true;
+        Msg::ShowCaption => {
+            model.show_caption = true;
+        }
+		Msg::ShowTrip => {
+            model.show_trip = true;
         }
         Msg::ShowPic => {
-            model.pic_loaded = true;
+            model.show_pic = true;
         }
     }
 }
@@ -194,51 +202,57 @@ pub fn view(model: &Model) -> Node<Msg> {
             s_bkg,
             if model.slide.is_title || model.slide.group_title.is_some() {
                 div![
-                    IF!(model.caption_animate =>
-                        div![
-                            C!("slideshow-caption-ctn"),
-                            h2![
-                                C![
-                                    "slideshow-caption",
-                                    "title",
-                                    "is-4",
-                                    &model.album.caption_color.to_string(),
-                                    &model.album.caption_style.to_string(),
-                                    "slideshow-caption-anim"
-                                ],
-                                model
-                                    .slide
-                                    .group_title
-                                    .as_ref()
-                                    .map_or(&model.album.title, |group_title| group_title)
-                            ],
-                            if let Some(trip) = &model.slide.trip {
-                                div![
-                                    C!("slideshow-trip"),
-                                    div![
-                                        C!("slideshow-trip-line-ctn"),
-                                        div![C!("slideshow-trip-line")],
-                                    ],
-                                    div![
-                                        C!("slideshow-trip-pins"),
-                                        span![C!("icon"), i![C!("ion-android-pin")]],
-                                        span![C!("slideshow-trip-sep")],
-                                        span![C!("icon"), i![C!("ion-android-pin")]],
-                                    ],
-                                    div![
-                                        span![&trip.origin],
-                                        span![C!("slideshow-trip-sep")],
-                                        span![&trip.destination],
-                                    ]
-                                ]
-                            } else {
-                                empty!()
-                            },
-                        ]
-                    )
-                ]
+					C!("slideshow-caption-ctn"),
+                    IF!(model.show_caption =>
+						h2![
+							C![
+								"slideshow-caption",
+								"title",
+								"is-4",
+								&model.album.caption_color.to_string(),
+								&model.album.caption_style.to_string(),
+								"slideshow-caption-anim"
+							],
+							model
+								.slide
+								.group_title
+								.as_ref()
+								.map_or(&model.album.title, |group_title| group_title)
+						]
+					),
+					if let Some(trip) = &model.slide.trip {
+						let mut show_trip = "";
+						if model.show_trip {
+							show_trip = "slideshow-trip-show";
+						}
+						div![
+							C![
+								"slideshow-trip", 
+								show_trip,
+								&model.album.caption_color.to_string()
+							],
+							div![
+								C!("slideshow-trip-line-ctn"),
+								div![C!("slideshow-trip-line")],
+							],
+							div![
+								C!("slideshow-trip-pins"),
+								span![C!("icon"), i![C!("ion-android-pin")]],
+								span![C!("slideshow-trip-sep")],
+								span![C!("icon"), i![C!("ion-android-pin")]],
+							],
+							div![
+								span![&trip.origin],
+								span![C!("slideshow-trip-sep")],
+								span![&trip.destination],
+							]
+						]							
+					} else {
+						empty!()
+					}
+				]
             } else if let Some(picture) = &model.slide.picture {
-                let hide = if model.pic_loaded {
+                let hide = if model.show_pic {
                     ""
                 } else {
                     "slideshow-image-hide"
@@ -255,13 +269,13 @@ pub fn view(model: &Model) -> Node<Msg> {
                         C!["slideshow-image", hide],
                         attrs! { At::Src => format!("{IMG_URI}{}.{}", picture.public_id, picture.format) }
                     ],
-                    IF!(model.pic_loaded =>
+                    IF!(model.show_pic =>
                         div![
                             C![
                                 "slideshow-caption-ctn",
                                 "slideshow-caption-pic"
                             ],
-                            IF!(model.caption_animate =>
+                            IF!(model.show_caption =>
                                 h2![
                                     C!["slideshow-caption", "title", "is-5", "mt-5",
                                         &model.album.caption_color.to_string(),
