@@ -115,14 +115,17 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 model
                     .show_elem
                     .entry(Element::Caption.to_string())
+                    .and_modify(|e| *e = false)
                     .or_insert(false);
                 model
                     .show_elem
                     .entry(Element::Trip.to_string())
+                    .and_modify(|e| *e = false)
                     .or_insert(false);
                 model
                     .show_elem
                     .entry(Element::Picture.to_string())
+                    .and_modify(|e| *e = false)
                     .or_insert(false);
 
                 orders.perform_cmd(cmds::timeout(300, || Msg::ShowCaption));
@@ -134,19 +137,19 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model
                 .show_elem
                 .entry(Element::Caption.to_string())
-                .or_insert(true);
+                .and_modify(|e| *e = true);
         }
         Msg::ShowTrip => {
             model
                 .show_elem
                 .entry(Element::Trip.to_string())
-                .or_insert(true);
+                .and_modify(|e| *e = true);
         }
         Msg::ShowPic => {
             model
                 .show_elem
                 .entry(Element::Picture.to_string())
-                .or_insert(true);
+                .and_modify(|e| *e = true);
         }
     }
 }
@@ -219,8 +222,8 @@ pub fn view(model: &Model) -> Node<Msg> {
         };
     }
 
-    let show_cap = model.show_elem.get(&Element::Caption.to_string()).unwrap();
-    let show_pic = model.show_elem.get(&Element::Picture.to_string()).unwrap();
+    let show_cap = model.show_elem.get(&Element::Caption.to_string()).unwrap_or(&false);
+    let show_pic = model.show_elem.get(&Element::Picture.to_string()).unwrap_or(&false);
 
     if model.error {
         error::view(
@@ -300,7 +303,7 @@ pub fn view(model: &Model) -> Node<Msg> {
 }
 
 fn trip_view(model: &Model) -> Node<Msg> {
-    let show_trip = model.show_elem.get(&Element::Trip.to_string()).unwrap();
+    let show_trip = model.show_elem.get(&Element::Trip.to_string()).unwrap_or(&false);
 
     model.slide.trip.as_ref().map_or_else(
         || empty!(),
