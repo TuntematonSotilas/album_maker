@@ -9,6 +9,8 @@
 	padding-bottom: 3rem;
 	color: white;
 	opacity: 0;
+	padding-left: 1rem;
+	padding-right: 1rem;
 }
 
 .trip-show {
@@ -22,13 +24,12 @@
 }
 
 .trip-line {
-	width: 30rem; 
-	height: 20rem;  
+	width: 18rem; 
+	height: 14rem;  
 	border: dashed 4px white;
 	border-color: white transparent transparent transparent;
 	border-radius: 30rem/20rem 20rem 0 0;
 }
-
 
 .Yellow .trip-line {
 	border-color: black transparent transparent transparent;
@@ -48,7 +49,7 @@
 }
 
 .trip-sep {
-	margin-right: 20rem;
+	margin-right: 14rem;
 }
 
 .trip .icon {
@@ -65,7 +66,7 @@
 
 .trip-veh {
 	position: absolute;
-	width: 22rem;
+	width: 18rem;
 	height: 4rem;
 	margin-left: 4rem;
 	margin-right: 4rem;
