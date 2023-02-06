@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone, Default)]
 pub enum TranspMode {
@@ -8,11 +8,7 @@ pub enum TranspMode {
     Car,
 }
 
-pub const TRANSP_MODE: [TranspMode; 3] = [
-    TranspMode::Train,
-    TranspMode::Plane,
-    TranspMode::Car
-];
+pub const TRANSP_MODE: [TranspMode; 3] = [TranspMode::Train, TranspMode::Plane, TranspMode::Car];
 
 impl std::fmt::Display for TranspMode {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {

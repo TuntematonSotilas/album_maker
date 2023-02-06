@@ -78,7 +78,7 @@ enum Msg {
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::Header(msg) => {
-            if let header::Msg::LogInOrOut = msg {
+            if matches!(msg, header::Msg::LogInOrOut) {
                 if model.is_logged {
                     orders.send_msg(Msg::SetAuth(String::new()));
                     model.is_logged = false;

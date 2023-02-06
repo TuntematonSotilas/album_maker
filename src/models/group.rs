@@ -9,7 +9,7 @@ pub struct Group {
     pub title: String,
     pub pictures: Option<Vec<Picture>>,
     pub cover: String,
-    pub trip : Option<Trip>,
+    pub trip: Option<Trip>,
     #[serde(skip_serializing, skip_deserializing)]
     pub count_fake_pictures: u32,
     #[serde(skip_serializing, skip_deserializing)]

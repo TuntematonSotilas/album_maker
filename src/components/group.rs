@@ -1,15 +1,15 @@
-use seed::{self, prelude::*, *};
-use uuid::Uuid;
 use super::picture;
 use super::upload;
 use crate::models::state::DeleteStatus;
-use crate::models::trip::TRANSP_MODE;
 use crate::models::trip::TranspMode;
 use crate::models::trip::Trip;
+use crate::models::trip::TRANSP_MODE;
 use crate::models::{
     group::Group,
     group_update::{GroupUpdate, UpdateType},
 };
+use seed::{self, prelude::*, *};
+use uuid::Uuid;
 
 // ------ ------
 //    Update
@@ -88,14 +88,14 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
             }));
         }
         Msg::TripChanged(group_id, transp_mode, origin, destination) => {
-			let mut trip: Option<Trip> = None; 
-			if let Some(transp_mode) = transp_mode {
-				trip = Some(Trip {
-					transp_mode,
-					origin,
-					destination
-				});
-			}
+            let mut trip: Option<Trip> = None;
+            if let Some(transp_mode) = transp_mode {
+                trip = Some(Trip {
+                    transp_mode,
+                    origin,
+                    destination,
+                });
+            }
             orders.send_msg(Msg::UpdateGroup(GroupUpdate {
                 upd_type: UpdateType::TripChanged,
                 id: group_id,
@@ -105,7 +105,7 @@ pub fn update(msg: Msg, orders: &mut impl Orders<Msg>) {
                 asset_id: None,
                 caption: None,
                 delete_status: None,
-                trip: trip,
+                trip,
             }));
         }
         Msg::UpdateGroup(_) | Msg::Drop(_, _) | Msg::DragEnded(_) | Msg::DragOver => (),
@@ -245,7 +245,7 @@ pub fn view(album_id: String, album_cover: &str, group: &Group) -> Node<Msg> {
 }
 
 fn view_trip(group: &Group) -> Node<Msg> {
-    let grp_id = group.id;    
+    let grp_id = group.id;
     let inp_ori = group.trip.clone().unwrap_or_default().origin;
     let inp_dest = group.trip.clone().unwrap_or_default().destination;
     let inp_mode = group.trip.clone().unwrap_or_default().transp_mode;
@@ -258,8 +258,8 @@ fn view_trip(group: &Group) -> Node<Msg> {
 				option![
 					"None",
 					ev(Ev::Click, move |_| Msg::TripChanged(
-						grp_id, 
-						None, 
+						grp_id,
+						None,
 						String::new(),
 						String::new())
 					),
@@ -271,15 +271,14 @@ fn view_trip(group: &Group) -> Node<Msg> {
                     option![
                         mode.to_string(),
                         ev(Ev::Click, move |_| Msg::TripChanged(
-                            grp_id, 
-                            Some(mode.clone()), 
+                            grp_id,
+                            Some(mode.clone()),
                             origin,
                             destination)
                         ),
                         attrs!(At::Selected => (mode == &inp_mode && group.trip.is_some()).as_at_value() )
                     ]
                 }),
-               
             ]
         ],
         span![C!["label"], "Origin"],
@@ -291,8 +290,8 @@ fn view_trip(group: &Group) -> Node<Msg> {
                 At::Value => trip.origin,
             },
             input_ev(Ev::Input, move |input| Msg::TripChanged(
-                grp_id, 
-                Some(inp_mode), 
+                grp_id,
+                Some(inp_mode),
                 input,
                 inp_dest)),
        ],
@@ -305,8 +304,8 @@ fn view_trip(group: &Group) -> Node<Msg> {
                 At::Value => trip.destination,
             },
             input_ev(Ev::Input, move |input| Msg::TripChanged(
-                grp_id, 
-                Some(inp_mode2), 
+                grp_id,
+                Some(inp_mode2),
                 inp_ori,
                 input)),
         ],
