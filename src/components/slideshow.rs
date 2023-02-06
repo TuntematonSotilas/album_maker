@@ -314,13 +314,22 @@ fn trip_view(model: &Model) -> Node<Msg> {
                 TranspMode::Train => "ion-android-train",
                 TranspMode::Car => "ion-android-car",
             };
+            let c_rotate = if trip.transp_mode == TranspMode::Plane {
+                "trip-veh-rotate"
+            } else {
+                ""
+            };
+
             div![
                 C!["trip", c_show_trip, &model.album.caption_color.to_string()],
                 div![
                     C!("trip-veh-ctn"),
                     div![
                         C!("trip-veh"),
-                        div![C!("trip-veh-icon"), span![C!("icon"), i![C!(veh_icon)]]]
+                        div![
+                            C!["trip-veh-icon", c_rotate], 
+                            span![C!("icon"), i![C!(veh_icon)]]
+                        ]
                     ],
                 ],
                 div![C!("trip-line-ctn"), div![C!("trip-line")],],
