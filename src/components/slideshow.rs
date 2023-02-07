@@ -222,8 +222,14 @@ pub fn view(model: &Model) -> Node<Msg> {
         };
     }
 
-    let show_cap = model.show_elem.get(&Element::Caption.to_string()).unwrap_or(&false);
-    let show_pic = model.show_elem.get(&Element::Picture.to_string()).unwrap_or(&false);
+    let show_cap = model
+        .show_elem
+        .get(&Element::Caption.to_string())
+        .unwrap_or(&false);
+    let show_pic = model
+        .show_elem
+        .get(&Element::Picture.to_string())
+        .unwrap_or(&false);
 
     if model.error {
         error::view(
@@ -303,7 +309,10 @@ pub fn view(model: &Model) -> Node<Msg> {
 }
 
 fn trip_view(model: &Model) -> Node<Msg> {
-    let show_trip = model.show_elem.get(&Element::Trip.to_string()).unwrap_or(&false);
+    let show_trip = model
+        .show_elem
+        .get(&Element::Trip.to_string())
+        .unwrap_or(&false);
 
     model.slide.trip.as_ref().map_or_else(
         || empty!(),
@@ -327,7 +336,7 @@ fn trip_view(model: &Model) -> Node<Msg> {
                     div![
                         C!("trip-veh"),
                         div![
-                            C!["trip-veh-icon", c_rotate], 
+                            C!["trip-veh-icon", c_rotate],
                             span![C!("icon"), i![C!(veh_icon)]]
                         ]
                     ],
