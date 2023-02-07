@@ -87,6 +87,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip(); // No need to rerender
             model.error = false;
             model.slide_id = 0;
+            model.slides = Vec::new();
             model.slide = Slide {
                 is_title: false,
                 group_title: None,
