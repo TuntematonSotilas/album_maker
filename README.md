@@ -9,6 +9,13 @@ Make sure you have basic tools installed:
 - [Rust](https://www.rust-lang.org)
 - [cargo-make](https://sagiegurari.github.io/cargo-make/)
 
+## Configure
+
+Configure environment variables :
+
+Copy the file `.env.example` to a new file named `.env` 
+And set your variables in this file
+
 ## Run
 
 1. Open a new terminal and run: `cargo make serve`
