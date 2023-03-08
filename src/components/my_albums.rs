@@ -1,3 +1,4 @@
+use gloo_console::*;
 use seed::{self, prelude::*, *};
 
 use crate::{

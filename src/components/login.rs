@@ -1,8 +1,9 @@
 use crate::models::{
     notif::{Notif, TypeNotifs},
     page::TITLE_LOGIN,
-    vars::BASE_URI,
+    vars::{AUTH_HEAD, BASE_URI},
 };
+use gloo_net::http::{Method, Request};
 use seed::{self, prelude::*, *};
 
 // ------ ------
@@ -33,13 +34,15 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             let b64 = base64::encode(format!("{}:{}", model.username, model.password));
             let auth = format!("Basic {b64}");
 
-            let request = Request::new(uri)
-                .method(Method::Post)
-                .header(Header::authorization(auth.clone()));
-
             orders.perform_cmd(async move {
-                let response = fetch(request).await.expect("HTTP request failed");
-                if response.status().is_ok() {
+                let response = Request::new(&uri)
+                    .method(Method::POST)
+                    .header(AUTH_HEAD, &auth)
+                    .send()
+                    .await
+                    .expect("HTTP request failed");
+
+                if response.status() == 200 {
                     Msg::SetAuth(auth.clone())
                 } else {
                     Msg::NotifyError

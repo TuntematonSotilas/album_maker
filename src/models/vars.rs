@@ -5,3 +5,4 @@ pub const THUMB_URI: &str = "https://res.cloudinary.com/gatoorg/image/upload/w_1
 pub const IMG_URI: &str = "https://res.cloudinary.com/gatoorg/image/upload/";
 pub const VERY_LOW_URI: &str =
     "https://res.cloudinary.com/gatoorg/image/upload/q_auto:low,w_5,h_1/";
+pub const AUTH_HEAD: &str = "Authorization";

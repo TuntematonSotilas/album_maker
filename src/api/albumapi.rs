@@ -3,8 +3,9 @@
 use crate::models::{
     album::Album,
     picture::Picture,
-    vars::{BASE_URI, DESTROY_URI, UPLOAD_URI},
+    vars::{AUTH_HEAD, BASE_URI, DESTROY_URI, UPLOAD_URI},
 };
+use gloo_net::http::{Method, Request};
 use hex::ToHex;
 use load_dotenv::load_dotenv;
 use ring::digest;
@@ -13,13 +14,13 @@ use web_sys::FormData;
 
 pub async fn get_my_ablums(auth: String) -> Option<Vec<Album>> {
     let uri = BASE_URI.to_string() + "myalbums";
-    let response = Request::new(uri)
-        .header(Header::authorization(auth))
-        .fetch()
+    let response = Request::get(&uri)
+        .header(AUTH_HEAD, &auth)
+        .send()
         .await
         .expect("HTTP request failed");
 
-    match response.status().code {
+    match response.status() {
         200 => {
             let albums = response
                 .json::<Vec<Album>>()
@@ -39,13 +40,13 @@ pub async fn get_album(
     let id = id.unwrap_or_default();
     let share_id = share_id.unwrap_or_default();
     let uri = format!("{BASE_URI}getalbum?id={id}&share_id={share_id}");
-    let response = Request::new(uri)
-        .header(Header::authorization(auth))
-        .fetch()
+    let response = Request::get(&uri)
+        .header(AUTH_HEAD, &auth)
+        .send()
         .await
         .expect("HTTP request failed");
 
-    match response.status().code {
+    match response.status() {
         200 => {
             let album = response
                 .json::<Album>()
@@ -60,15 +61,16 @@ pub async fn get_album(
 pub async fn update_album(album: Album, auth: String) -> Option<String> {
     let mut res = None;
     let uri = BASE_URI.to_string() + "editalbum";
-    let request = Request::new(uri)
-        .method(Method::Put)
-        .header(Header::authorization(auth))
+    let response = Request::new(&uri)
+        .method(Method::PUT)
+        .header(AUTH_HEAD, &auth)
         .json(&album)
-        .expect("Serialization failed");
+        .expect("Serialization failed")
+        .send()
+        .await
+        .expect("HTTP request failed");
 
-    let response = fetch(request).await.expect("HTTP request failed");
-
-    if response.status().is_ok() {
+    if response.status() == 200 {
         let res_id = response.json::<String>().await;
         if let Ok(id) = res_id {
             res = Some(id);
@@ -79,23 +81,26 @@ pub async fn update_album(album: Album, auth: String) -> Option<String> {
 
 pub async fn delete_ablum(id: String, auth: String) -> bool {
     let delete_uri = format!("{BASE_URI}deletealbum?id={id}");
-    let delete_request = Request::new(delete_uri)
-        .header(Header::authorization(auth))
-        .method(Method::Delete);
-
-    let delete_response = fetch(delete_request).await.expect("HTTP request failed");
-    delete_response.status().code == 204
+    let delete_response = Request::new(&delete_uri)
+        .header(AUTH_HEAD, &auth)
+        .method(Method::DELETE)
+        .send()
+        .await
+        .expect("HTTP request failed");
+    delete_response.status() == 204
 }
 
 pub async fn upload_picture(form_data: FormData) -> Option<Picture> {
     let mut res = None;
     let uri = UPLOAD_URI.to_string();
-    let request = Request::new(uri)
-        .method(Method::Post)
-        .body(JsValue::from(form_data));
+    let response = Request::new(&uri)
+        .method(Method::POST)
+        .body(JsValue::from(form_data))
+        .send()
+        .await
+        .expect("HTTP request failed");
 
-    let response = fetch(request).await.expect("HTTP request failed");
-    if response.status().is_ok() {
+    if response.status() == 200 {
         let res_pic = response.json::<Picture>().await;
         if let Ok(picture) = res_pic {
             res = Some(picture);
@@ -131,12 +136,13 @@ pub async fn delete_picture(public_id: String) -> bool {
             && ts_res.is_ok()
             && sign_res.is_ok()
         {
-            let request = Request::new(uri)
-                .method(Method::Post)
-                .body(JsValue::from(form_data));
-
-            let response = fetch(request).await.expect("HTTP request failed");
-            if response.status().is_ok() {
+            let response = Request::new(&uri)
+                .method(Method::POST)
+                .body(JsValue::from(form_data))
+                .send()
+                .await
+                .expect("HTTP request failed");
+            if response.status() == 200 {
                 res = true;
             }
         }
