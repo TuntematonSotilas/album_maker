@@ -9,6 +9,8 @@ Make sure you have basic tools installed:
 - [Rust](https://www.rust-lang.org)
 - [cargo-make](https://sagiegurari.github.io/cargo-make/)
 
+Add WASM Target : `rustup target add wasm32-unknown-unknown`
+
 ## Configure
 
 Configure environment variables :
