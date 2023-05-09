@@ -14,7 +14,6 @@ pub struct Album {
     pub caption_style: Style,
     pub caption_color: Color,
     pub groups: Option<Vec<Group>>,
-    pub cover: String,
     #[serde(skip_serializing, skip_deserializing)]
     pub state: Option<State>,
 }
@@ -27,7 +26,6 @@ impl Album {
             caption_style: Style::Round,
             caption_color: Color::Black,
             groups: Some(Vec::new()),
-            cover: String::new(),
             state: None,
         }
     }

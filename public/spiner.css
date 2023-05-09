@@ -3,8 +3,14 @@
 	margin-top: 50vh;
 	margin-left: 50vw;	
 	animation: spiner-rotate 3s linear infinite;
-	
 }
+
+.spiner-pic {
+	font-size: 5em;
+	animation: spiner-rotate 3s linear infinite;
+}
+
+
 @keyframes spiner-rotate {
 	0% { 
 	  transform: rotate(0); 

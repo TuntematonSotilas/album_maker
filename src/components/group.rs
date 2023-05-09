@@ -140,38 +140,12 @@ fn update_picture(msg: picture::Msg, orders: &mut impl Orders<Msg>) {
                 trip: None,
             }));
         }
-        picture::Msg::SetAlbumCover(group_id, ref asset_id) => {
-            orders.send_msg(Msg::UpdateGroup(GroupUpdate {
-                upd_type: UpdateType::SetAlbumCover,
-                id: group_id,
-                picture: None,
-                grp_data: None,
-                count_fake_pictures: None,
-                asset_id: Some(asset_id.clone()),
-                caption: None,
-                delete_status: None,
-                trip: None,
-            }));
-        }
-        picture::Msg::SetGroupCover(group_id, ref asset_id) => {
-            orders.send_msg(Msg::UpdateGroup(GroupUpdate {
-                upd_type: UpdateType::SetGroupCover,
-                id: group_id,
-                picture: None,
-                grp_data: None,
-                count_fake_pictures: None,
-                asset_id: Some(asset_id.clone()),
-                caption: None,
-                delete_status: None,
-                trip: None,
-            }));
-        }
         _ => (),
     }
     picture::update(msg, &mut orders.proxy(Msg::Picture));
 }
 
-pub fn view(album_id: String, album_cover: &str, group: &Group) -> Node<Msg> {
+pub fn view(album_id: String, group: &Group) -> Node<Msg> {
     let grp_id = group.id;
     div![
         C!["box group"],
@@ -223,8 +197,7 @@ pub fn view(album_id: String, album_cover: &str, group: &Group) -> Node<Msg> {
                                     event.data_transfer().unwrap().set_drop_effect("move");
                                     Msg::DragOver
                                 }),
-                                picture::view(group.id, picture, album_cover, group.cover.as_str())
-                                    .map_msg(Msg::Picture),
+                                picture::view(group.id, picture).map_msg(Msg::Picture),
                             ]
                         })]
                     }),

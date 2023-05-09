@@ -8,7 +8,6 @@ pub struct Group {
     pub id: Uuid,
     pub title: String,
     pub pictures: Option<Vec<Picture>>,
-    pub cover: String,
     pub trip: Option<Trip>,
     #[serde(skip_serializing, skip_deserializing)]
     pub count_fake_pictures: u32,
@@ -22,7 +21,6 @@ impl Group {
             id: Uuid::new_v4(),
             title: String::new(),
             pictures: Some(Vec::new()),
-            cover: String::new(),
             trip: None,
             count_fake_pictures: 0,
             state: None,

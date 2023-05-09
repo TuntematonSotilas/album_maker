@@ -90,6 +90,21 @@ pub async fn delete_ablum(id: String, auth: String) -> bool {
     delete_response.status() == 204
 }
 
+pub async fn preload_picture(uri: String) -> bool {
+    gloo_console::warn!("preload_picture");
+    let response = Request::new(&uri)
+        .method(Method::GET)
+        .send()
+        .await
+        .expect("HTTP request failed");
+
+    if response.status() == 200 {
+        gloo_console::info!("preload_picture");
+        return true;
+    }
+    false
+}
+
 pub async fn upload_picture(form_data: FormData) -> Option<Picture> {
     let mut res = None;
     let uri = UPLOAD_URI.to_string();

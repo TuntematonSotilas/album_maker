@@ -9,8 +9,6 @@ pub enum UpdateType {
     DeletePicture,
     Caption,
     DeleteState,
-    SetGroupCover,
-    SetAlbumCover,
     TripChanged,
 }
 

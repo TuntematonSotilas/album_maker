@@ -4,5 +4,5 @@ pub const DESTROY_URI: &str = "https://api.cloudinary.com/v1_1/gatoorg/image/des
 pub const THUMB_URI: &str = "https://res.cloudinary.com/gatoorg/image/upload/w_128,h_128,c_fill/";
 pub const IMG_URI: &str = "https://res.cloudinary.com/gatoorg/image/upload/";
 pub const VERY_LOW_URI: &str =
-    "https://res.cloudinary.com/gatoorg/image/upload/q_auto:low,w_5,h_1/";
+    "https://res.cloudinary.com/gatoorg/image/upload/q_auto:low,w_5,h_5/";
 pub const AUTH_HEAD: &str = "Authorization";

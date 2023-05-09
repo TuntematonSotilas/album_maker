@@ -44,6 +44,7 @@ pub struct Model {
     slide_id: usize,
     show_elem: HashMap<String, bool>,
     error: bool,
+    cover: String,
 }
 
 impl Model {
@@ -61,6 +62,7 @@ impl Model {
             slide_id: 0,
             error: false,
             show_elem: HashMap::new(),
+            cover: String::new(),
         }
     }
 }
@@ -76,6 +78,7 @@ pub enum Msg {
     Received(Album),
     Next,
     ShowCaption,
+    PreLoadPic,
     ShowPic,
     ShowTrip,
 }
@@ -129,9 +132,10 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     .and_modify(|e| *e = false)
                     .or_insert(false);
 
+                orders.send_msg(Msg::PreLoadPic);
+
                 orders.perform_cmd(cmds::timeout(300, || Msg::ShowCaption));
                 orders.perform_cmd(cmds::timeout(600, || Msg::ShowTrip));
-                orders.perform_cmd(cmds::timeout(3000, || Msg::ShowPic));
             }
         }
         Msg::ShowCaption => {
@@ -146,6 +150,18 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 .entry(Element::Trip.to_string())
                 .and_modify(|e| *e = true);
         }
+        Msg::PreLoadPic => {
+            web_sys::console::log_1(&"PreLoadPic".into());
+
+            //orders.skip(); // No need to rerender
+            if let Some(pic) = &model.slide.picture {
+                let uri = format!("{IMG_URI}{}.{}", pic.public_id, pic.format);
+                orders.perform_cmd(async {
+                    let _ok = albumapi::preload_picture(uri).await;
+                    Msg::ShowPic
+                });
+            }
+        }
         Msg::ShowPic => {
             model
                 .show_elem
@@ -157,17 +173,10 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 
 fn init_slides(model: &mut Model) {
     // Cover
-    let mut cover: Option<Picture> = None;
     let grps = model.album.groups.clone().unwrap_or_default();
     for grp in &grps {
-        if let Some(pic) = grp
-            .pictures
-            .clone()
-            .unwrap_or_default()
-            .iter()
-            .find(|p| p.asset_id == model.album.cover)
-        {
-            cover = Some(pic.clone());
+        if let Some(pic) = grp.pictures.clone().unwrap_or_default().first() {
+            model.cover = format!("url({VERY_LOW_URI}{}.{})", pic.public_id, pic.format);
             break;
         }
     }
@@ -176,27 +185,17 @@ fn init_slides(model: &mut Model) {
     model.slides.push(Slide {
         is_title: true,
         group_title: None,
-        picture: cover,
+        picture: None,
         trip: None,
     });
 
     let groups = model.album.groups.clone().unwrap_or_default();
     for group in &groups {
         // Cover
-        let mut grp_cover: Option<Picture> = None;
-        if let Some(pic) = group
-            .pictures
-            .clone()
-            .unwrap_or_default()
-            .iter()
-            .find(|p| p.asset_id == group.cover)
-        {
-            grp_cover = Some(pic.clone());
-        }
         model.slides.push(Slide {
             is_title: false,
             group_title: Some(group.title.clone()),
-            picture: grp_cover,
+            picture: None,
             trip: group.trip.clone(),
         });
         if let Some(pictures) = group.pictures.clone() {
@@ -216,12 +215,9 @@ fn init_slides(model: &mut Model) {
 //     View
 // ------ ------
 pub fn view(model: &Model) -> Node<Msg> {
-    let mut s_bkg = style! {};
-    if let Some(picture) = &model.slide.picture {
-        s_bkg = style! {
-            St::BackgroundImage => format!("url({VERY_LOW_URI}{}.{})", picture.public_id, picture.format),
-        };
-    }
+    let s_bkg = style! {
+        St::BackgroundImage => model.cover
+    };
 
     let show_cap = model
         .show_elem
@@ -265,12 +261,6 @@ pub fn view(model: &Model) -> Node<Msg> {
                     trip_view(model),
                 ]
             } else if let Some(picture) = &model.slide.picture {
-                let hide = if *show_pic {
-                    ""
-                } else {
-                    "slideshow-image-hide"
-                };
-
                 div![
                     C![
                         "is-flex",
@@ -278,10 +268,18 @@ pub fn view(model: &Model) -> Node<Msg> {
                         "slideshow-image-container",
                         "is-align-items-center"
                     ],
-                    img![
-                        C!["slideshow-image", hide],
-                        attrs! { At::Src => format!("{IMG_URI}{}.{}", picture.public_id, picture.format) }
-                    ],
+                    IF!(!show_pic =>
+                        div![
+                            C!("spiner-pic"),
+                            i![C!("ion-load-c")]
+                        ]
+                    ),
+                    IF!(*show_pic =>
+                        img![
+                            C!["slideshow-image"],
+                            attrs! { At::Src => format!("{IMG_URI}{}.{}", picture.public_id, picture.format) }
+                        ]
+                    ),
                     IF!(*show_pic =>
                         div![
                             C![

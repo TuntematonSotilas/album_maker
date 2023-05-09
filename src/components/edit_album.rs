@@ -214,20 +214,6 @@ fn update_group(group_update: &GroupUpdate, album: &mut Album, orders: &mut impl
                 UpdateType::Title => {
                     group.title = grp_upd.grp_data.unwrap_or_default();
                 }
-                UpdateType::SetAlbumCover => {
-                    if album.cover == grp_upd.asset_id.unwrap_or_default() {
-                        album.cover = String::new();
-                    } else {
-                        album.cover = group_update.clone().asset_id.unwrap_or_default();
-                    }
-                }
-                UpdateType::SetGroupCover => {
-                    if group.cover == grp_upd.asset_id.unwrap_or_default() {
-                        group.cover = String::new();
-                    } else {
-                        group.cover = group_update.clone().asset_id.unwrap_or_default();
-                    }
-                }
                 UpdateType::AddPicture => {
                     let picture = grp_upd.picture.unwrap_or_default();
                     if let Some(pictures) = &mut group.pictures {
@@ -336,8 +322,7 @@ pub fn view(model: &Model) -> Node<Msg> {
             .groups
             .as_ref()
             .map_or(empty!(), |groups| div![groups.iter().map(|group| {
-                group::view(model.album.id.clone(), model.album.cover.as_str(), group)
-                    .map_msg(Msg::Group)
+                group::view(model.album.id.clone(), group).map_msg(Msg::Group)
             })],),
         div![
             C!["mt-5"],
