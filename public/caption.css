@@ -20,6 +20,7 @@
 .White {
 	background-color: #fff;
 	color: black;
+	box-shadow: -0.12em -0.1em black;
 }
 
 .Red {
@@ -69,16 +70,19 @@
 .Lime {
 	background-color: #CDDC39;
 	color: black;
+	box-shadow: -0.12em -0.1em black;
 }
 
 .Yellow {
 	background-color: #FFEB3B;
 	color: black;
+	box-shadow: -0.12em -0.1em black;
 }
 
 .Amber {
 	background-color: #FFC107;
 	color: black;
+	box-shadow: -0.12em -0.1em black;
 }
 
 .Orange {
