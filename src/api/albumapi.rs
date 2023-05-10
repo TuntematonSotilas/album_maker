@@ -91,7 +91,6 @@ pub async fn delete_ablum(id: String, auth: String) -> bool {
 }
 
 pub async fn preload_picture(uri: String) -> bool {
-    gloo_console::warn!("preload_picture");
     let response = Request::new(&uri)
         .method(Method::GET)
         .send()
@@ -99,7 +98,6 @@ pub async fn preload_picture(uri: String) -> bool {
         .expect("HTTP request failed");
 
     if response.status() == 200 {
-        gloo_console::info!("preload_picture");
         return true;
     }
     false

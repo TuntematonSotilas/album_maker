@@ -151,9 +151,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 .and_modify(|e| *e = true);
         }
         Msg::PreLoadPic => {
-            web_sys::console::log_1(&"PreLoadPic".into());
-
-            //orders.skip(); // No need to rerender
             if let Some(pic) = &model.slide.picture {
                 let uri = format!("{IMG_URI}{}.{}", pic.public_id, pic.format);
                 orders.perform_cmd(async {

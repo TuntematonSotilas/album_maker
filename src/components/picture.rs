@@ -48,7 +48,7 @@ pub fn view(group_id: Uuid, picture: &Picture) -> Node<Msg> {
     let asset_id2 = picture.asset_id.clone();
     let public_id = picture.clone().public_id;
     div![
-        C!["container", "columns", "is-vcentered", "is-mobile"],
+        C!["container", "columns", "is-vcentered", "is-mobile", "mt-3"],
         div![
             attrs! { At::Draggable => true },
             C!["column", "is-flex-grow-0"],
@@ -83,18 +83,18 @@ pub fn view(group_id: Uuid, picture: &Picture) -> Node<Msg> {
                         )),
                     ]
                 ],
-                div![
-                    C!("control"),
-                    button![
-                        C!["button", "is-link", "is-light", "is-small"],
-                        span![C!("icon"), i![C!("ion-close-circled")]],
-                        span!["Delete"],
-                        ev(Ev::Click, move |_| Msg::DeletePicture(
-                            group_id, public_id, asset_id2
-                        ))
-                    ]
-                ]
-            ]
+			],
+            div![
+				C!("control"),
+				button![
+					C!["button", "is-link", "is-light", "is-small"],
+					span![C!("icon"), i![C!("ion-close-circled")]],
+					span!["Delete"],
+					ev(Ev::Click, move |_| Msg::DeletePicture(
+						group_id, public_id, asset_id2
+					))
+				]
+			]
         ]
     ]
 }
