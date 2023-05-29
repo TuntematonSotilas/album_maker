@@ -11,6 +11,7 @@
 	opacity: 0;
 	padding-left: 1rem;
 	padding-right: 1rem;
+	box-shadow: none !important;
 }
 
 .trip-show {
@@ -24,12 +25,19 @@
 }
 
 .trip-line {
-	width: 18rem; 
-	height: 14rem;  
+	margin-top: 1rem;
+	width: 13rem; 
 	border: dashed 4px white;
 	border-color: white transparent transparent transparent;
+}
+
+.trip-line-plane {
+	margin-top: none;
+	width: 18rem;
+	height: 14rem;  
 	border-radius: 30rem/20rem 20rem 0 0;
 }
+
 
 .Yellow .trip-line {
 	border-color: black transparent transparent transparent;
@@ -66,7 +74,7 @@
 
 .trip-veh {
 	position: absolute;
-	width: 18rem;
+	width: 10rem;
 	height: 4rem;
 	margin-left: 4rem;
 	margin-right: 4rem;
@@ -77,11 +85,11 @@
 .trip-veh-icon {
 	position: absolute;
 	top: 100%;
-	animation: y-motion 6s ease-in-out;
 }
 
-.trip-veh-rotate {
-	rotate: 90deg;
+.trip-veh-icon-plane {
+	animation: y-motion 6s ease-in-out;
+	rotate: 45deg;
 }
 
 @keyframes opac {
@@ -101,7 +109,7 @@
 		left: 0;
 	}
 	100% {
-		left: 70%;
+		left: 60%;
 	}
 }
   

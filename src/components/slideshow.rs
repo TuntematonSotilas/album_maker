@@ -313,14 +313,21 @@ fn trip_view(model: &Model) -> Node<Msg> {
     model.slide.trip.as_ref().map_or_else(
         || empty!(),
         |trip| {
-            let c_show_trip = if *show_trip { "trip-show" } else { "" };
+            let c_show_trip = if *show_trip { "trip-show".to_string() } else { "".to_string() };
+
             let veh_icon = match trip.transp_mode {
-                TranspMode::Plane => "ion-android-plane",
+                TranspMode::Plane => "ion-android-plane trip-veh-icon-plane",
                 TranspMode::Train => "ion-android-train",
                 TranspMode::Car => "ion-android-car",
             };
-            let c_rotate = if trip.transp_mode == TranspMode::Plane {
-                "trip-veh-rotate"
+            
+            let c_veh_icon_plane = if trip.transp_mode == TranspMode::Plane {
+                "trip-veh-icon-plane"
+            } else {
+                ""
+            };
+            let c_line = if trip.transp_mode == TranspMode::Plane {
+                "trip-line-plane"
             } else {
                 ""
             };
@@ -330,14 +337,14 @@ fn trip_view(model: &Model) -> Node<Msg> {
                 div![
                     C!("trip-veh-ctn"),
                     div![
-                        C!("trip-veh"),
+                        C!["trip-veh"],
                         div![
-                            C!["trip-veh-icon", c_rotate],
+                            C!["trip-veh-icon", c_veh_icon_plane],
                             span![C!("icon"), i![C!(veh_icon)]]
                         ]
                     ],
                 ],
-                div![C!("trip-line-ctn"), div![C!("trip-line")],],
+                div![C!("trip-line-ctn"), div![C!["trip-line", c_line]],],
                 div![
                     C!("trip-pins"),
                     span![C!("icon"), i![C!("ion-android-pin")]],
