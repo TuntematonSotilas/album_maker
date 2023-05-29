@@ -313,14 +313,14 @@ fn trip_view(model: &Model) -> Node<Msg> {
     model.slide.trip.as_ref().map_or_else(
         || empty!(),
         |trip| {
-            let c_show_trip = if *show_trip { "trip-show".to_string() } else { "".to_string() };
+            let c_show_trip = if *show_trip { "trip-show" } else { "" };
 
             let veh_icon = match trip.transp_mode {
                 TranspMode::Plane => "ion-android-plane trip-veh-icon-plane",
                 TranspMode::Train => "ion-android-train",
                 TranspMode::Car => "ion-android-car",
             };
-            
+
             let c_veh_icon_plane = if trip.transp_mode == TranspMode::Plane {
                 "trip-veh-icon-plane"
             } else {

@@ -83,18 +83,18 @@ pub fn view(group_id: Uuid, picture: &Picture) -> Node<Msg> {
                         )),
                     ]
                 ],
-			],
+            ],
             div![
-				C!("control"),
-				button![
-					C!["button", "is-link", "is-light", "is-small"],
-					span![C!("icon"), i![C!("ion-close-circled")]],
-					span!["Delete"],
-					ev(Ev::Click, move |_| Msg::DeletePicture(
-						group_id, public_id, asset_id2
-					))
-				]
-			]
+                C!("control"),
+                button![
+                    C!["button", "is-link", "is-light", "is-small"],
+                    span![C!("icon"), i![C!("ion-close-circled")]],
+                    span!["Delete"],
+                    ev(Ev::Click, move |_| Msg::DeletePicture(
+                        group_id, public_id, asset_id2
+                    ))
+                ]
+            ]
         ]
     ]
 }
