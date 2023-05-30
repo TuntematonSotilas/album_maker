@@ -372,15 +372,11 @@ fn caption_view(model: &Model) -> Node<Msg> {
         div![
             div![
                 C!["is-flex", "mb-2"],
-                colors_1.iter().map(|color| {
-                    color_view(color, model)
-                })
+                colors_1.iter().map(|color| { color_view(color, model) })
             ],
             div![
                 C!("is-flex"),
-                colors_2.iter().map(|color| {
-                    color_view(color, model)
-                })
+                colors_2.iter().map(|color| { color_view(color, model) })
             ]
         ]
     ]
