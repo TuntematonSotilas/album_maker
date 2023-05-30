@@ -338,6 +338,8 @@ pub fn view(model: &Model) -> Node<Msg> {
 }
 
 fn caption_view(model: &Model) -> Node<Msg> {
+    let (colors_1, colors_2) = COLORS.split_at(10);
+
     div![
         label![C!("label"), "Caption style"],
         label![
@@ -368,19 +370,36 @@ fn caption_view(model: &Model) -> Node<Msg> {
         ],
         label![C!("label"), "Caption color"],
         div![
-            C!("is-flex"),
-            COLORS.iter().map(|color| {
-                let c_selected = if &model.album.caption_color == color {
-                    "album-edit-color-selected"
-                } else {
-                    ""
-                };
-                let color = color.clone();
-                span![
-                    C!["album-edit-color", "mr-1", color.to_string(), c_selected],
-                    ev(Ev::Click, |_| Msg::ColorChanged(color)),
-                ]
-            })
+            div![
+                C!["is-flex", "mb-2"],
+                colors_1.iter().map(|color| {
+                    let c_selected = if &model.album.caption_color == color {
+                        "album-edit-color-selected"
+                    } else {
+                        ""
+                    };
+                    let color = color.clone();
+                    span![
+                        C!["album-edit-color", "mr-1", color.to_string(), c_selected],
+                        ev(Ev::Click, |_| Msg::ColorChanged(color)),
+                    ]
+                })
+            ],
+            div![
+                C!("is-flex"),
+                colors_2.iter().map(|color| {
+                    let c_selected = if &model.album.caption_color == color {
+                        "album-edit-color-selected"
+                    } else {
+                        ""
+                    };
+                    let color = color.clone();
+                    span![
+                        C!["album-edit-color", "mr-1", color.to_string(), c_selected],
+                        ev(Ev::Click, |_| Msg::ColorChanged(color)),
+                    ]
+                })
+            ]
         ]
     ]
 }
