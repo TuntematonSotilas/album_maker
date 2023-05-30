@@ -315,10 +315,10 @@ fn trip_view(model: &Model) -> Node<Msg> {
         |trip| {
             let c_show_trip = if *show_trip { "trip-show" } else { "" };
 
-            let veh_icon = match trip.transp_mode {
-                TranspMode::Plane => "ion-android-plane trip-veh-icon-plane",
-                TranspMode::Train => "ion-android-train",
-                TranspMode::Car => "ion-android-car",
+            let veh_icon = "/public/veh/".to_string() + match trip.transp_mode {
+                TranspMode::Plane => "plane.svg",
+                TranspMode::Train => "train.svg",
+                TranspMode::Car => "car.svg",
             };
 
             let c_veh_icon_plane = if trip.transp_mode == TranspMode::Plane {
@@ -331,8 +331,10 @@ fn trip_view(model: &Model) -> Node<Msg> {
             } else {
                 ""
             };
-
+           
             div![
+                
+
                 C!["trip", c_show_trip, &model.album.caption_color.to_string()],
                 div![
                     C!("trip-veh-ctn"),
@@ -340,7 +342,10 @@ fn trip_view(model: &Model) -> Node<Msg> {
                         C!["trip-veh"],
                         div![
                             C!["trip-veh-icon", c_veh_icon_plane],
-                            span![C!("icon"), i![C!(veh_icon)]]
+                            img![
+                                C!("trip-veh-img"),
+                                attrs!{At::Src => veh_icon } 
+                            ],
                         ]
                     ],
                 ],

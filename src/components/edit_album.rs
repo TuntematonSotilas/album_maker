@@ -373,33 +373,28 @@ fn caption_view(model: &Model) -> Node<Msg> {
             div![
                 C!["is-flex", "mb-2"],
                 colors_1.iter().map(|color| {
-                    let c_selected = if &model.album.caption_color == color {
-                        "album-edit-color-selected"
-                    } else {
-                        ""
-                    };
-                    let color = color.clone();
-                    span![
-                        C!["album-edit-color", "mr-1", color.to_string(), c_selected],
-                        ev(Ev::Click, |_| Msg::ColorChanged(color)),
-                    ]
+                    color_view(color, model)
                 })
             ],
             div![
                 C!("is-flex"),
                 colors_2.iter().map(|color| {
-                    let c_selected = if &model.album.caption_color == color {
-                        "album-edit-color-selected"
-                    } else {
-                        ""
-                    };
-                    let color = color.clone();
-                    span![
-                        C!["album-edit-color", "mr-1", color.to_string(), c_selected],
-                        ev(Ev::Click, |_| Msg::ColorChanged(color)),
-                    ]
+                    color_view(color, model)
                 })
             ]
         ]
+    ]
+}
+
+fn color_view(color: &Color, model: &Model) -> Node<Msg> {
+    let c_selected = if &model.album.caption_color == color {
+        "album-edit-color-selected"
+    } else {
+        ""
+    };
+    let color = color.clone();
+    span![
+        C!["album-edit-color", "mr-1", color.to_string(), c_selected],
+        ev(Ev::Click, |_| Msg::ColorChanged(color)),
     ]
 }

@@ -89,7 +89,23 @@
 
 .trip-veh-icon-plane {
 	animation: y-motion 6s ease-in-out;
-	rotate: 45deg;
+}
+
+.trip-veh-img {
+	max-width: 3rem;
+}
+
+.Yellow .trip-veh-img {
+	filter: grayscale(100%) brightness(0%);
+}
+.White .trip-veh-img {
+	filter: grayscale(100%) brightness(0%);
+}
+.Lime .trip-veh-img {
+	filter: grayscale(100%) brightness(0%);
+}
+.Amber .trip-veh-img {
+	filter: grayscale(100%) brightness(0%);
 }
 
 @keyframes opac {
@@ -109,7 +125,7 @@
 		left: 0;
 	}
 	100% {
-		left: 60%;
+		left: 50%;
 	}
 }
   
