@@ -37,7 +37,7 @@ Run `cargo make verify` in your terminal to format and lint the code.
 ## Deploy to Koyeb 
 Initialize the App
 ```sh
-koyeb app init amaker --docker "tuntematonsotilas/gbt:amaker" --ports 80:http --routes /:80 --docker-private-registry-secret docker-hub-credentials
+koyeb app init amaker --git-docker-dockerfile "https://github.com/TuntematonSotilas/album_maker/blob/master/dockerfile"
 ```
 Get Services
 ```sh
@@ -45,7 +45,5 @@ koyeb services list
 ```
 Update Service
 ```sh
-koyeb services update 1b68cac4 --docker "tuntematonsotilas/gbt:amaker" --docker-private-registry-secret docker-hub-credentials
+koyeb services update 1b68cac4 --git-docker-dockerfile "https://github.com/TuntematonSotilas/album_maker/blob/master/dockerfile"
 ```
-
-Koyeb CLI needs an authentication for pivate DockerHub : [koyeb doc](https://www.koyeb.com/docs/apps/private-container-registry-secrets#dockerhub)
