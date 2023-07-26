@@ -4,7 +4,7 @@ COPY Cargo.toml ./
 COPY Makefile.toml ./ 
 COPY src/ src/
 COPY public/ public/
-COPY .env .env
+#COPY .env .env
 RUN cargo install cargo-make
 RUN cargo install wasm-pack
 RUN cargo make build_release
