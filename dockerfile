@@ -4,7 +4,7 @@ COPY Cargo.toml ./
 COPY Makefile.toml ./ 
 COPY src/ src/
 COPY public/ public/
-RUN echo -e "CLD_UPLOAD_PRESET=$CLD_UPLOAD_PRESET \n CLD_API_KEY=$CLD_API_KEY \n CLD_API_SECRET=$CLD_API_SECRET" > .env
+RUN echo "CLD_UPLOAD_PRESET=$CLD_UPLOAD_PRESET \n CLD_API_KEY=$CLD_API_KEY \n CLD_API_SECRET=$CLD_API_SECRET" > .env
 RUN cargo install cargo-make
 RUN cargo install wasm-pack
 RUN cargo make build_release
