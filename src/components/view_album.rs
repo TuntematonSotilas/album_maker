@@ -4,8 +4,9 @@ use crate::{
         album::Album,
         notif::{Notif, TypeNotifs},
         page::{LK_EDIT_ALBUM, LK_SHARESLIDE, LK_SLIDESHOW, TITLE_EDIT_ALBUM, TITLE_SLIDESHOW},
+        picture::Picture,
         sharing::{AddViewLike, Sharing},
-        vars::THUMB_URI,
+        vars::{IMG_URI, THUMB_URI},
     },
 };
 use seed::{self, prelude::*, *};
@@ -22,6 +23,7 @@ pub struct Model {
     share_id: Option<String>,
     error: bool,
     is_liked: bool,
+    picture: Option<Picture>,
 }
 
 impl Model {
@@ -33,6 +35,7 @@ impl Model {
             share_id: None,
             error: false,
             is_liked: false,
+            picture: None,
         }
     }
 }
@@ -49,6 +52,8 @@ pub enum Msg {
     ShareSuccess(String),
     ShareError,
     AddViewLike(bool, bool),
+    ShowPicture(Picture),
+    HidePicture,
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -58,6 +63,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip(); // No need to rerender
             model.error = false;
             model.is_liked = false;
+            model.picture = None;
             let auth = model.auth_header.clone();
             model.share_id = share_id.clone();
             orders.perform_cmd(async {
@@ -118,6 +124,12 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 });
             }
         }
+        Msg::ShowPicture(picture) => {
+            model.picture = Some(picture);
+        }
+        Msg::HidePicture => {
+            model.picture = None;
+        }
     }
 }
 
@@ -135,77 +147,79 @@ pub fn view(model: &Model) -> Node<Msg> {
             "Forbidden".to_string(),
             "ion-android-remove-circle".to_string(),
         )
-    } else {
-        div![
+    } else if model.is_loaded {
+        model.picture.as_ref().map_or_else(|| div![
             C!["column", "is-two-thirds"],
-            if model.is_loaded {
                 div![
+                    C!["column"],
+                    div![C!["title", "is-5", "has-text-link"], &model.album.title],
                     div![
-                        C!["column"],
-                        div![C!["title", "is-5", "has-text-link"], &model.album.title],
-                        div![
-                            C!["is-flex", "mb-2"],
-                            IF!(model.share_id.is_none() =>
-                                div![
-                                    a![
-                                        C!["button", "is-link", "is-light", "is-small", "mr-2"],
-                                        attrs! { At::Href => format!("/{LK_EDIT_ALBUM}/{}", model.album.id) },
-                                        span![C!("icon"), i![C!("ion-edit")]],
-                                        span![TITLE_EDIT_ALBUM],
-                                    ],
-                                    button![
-                                        C!["button", "is-link", "is-light", "is-small", "mr-2"],
-                                        span![C!("icon"), i![C!("ion-android-share-alt")]],
-                                        span!["Share"],
-                                        ev(Ev::Click, |_| Msg::Share),
-                                    ]
-                                ]
-                            ),
-                            a![
-                                C!["button", "is-primary", "is-light", "is-small"],
-                                attrs! { At::Href => lk_slideshow },
-                                span![C!("icon"), i![C!("ion-play")]],
-                                span![TITLE_SLIDESHOW],
-                            ],
-                            IF!(model.share_id.is_some() =>
-                                button![
-                                    C!["button", "is-danger", "is-light", "is-small", "ml-2"],
-                                    span![C!("icon"), i![C!("ion-heart")]],
-                                    span!["Like"],
-                                    attrs! { At::Disabled => model.is_liked.as_at_value() },
-                                    ev(Ev::Click, |_| Msg::AddViewLike(false, true)),
-                                ]
-                            )
-                        ]
-                    ],
-                    model
-                        .album
-                        .groups
-                        .as_ref()
-                        .map_or(empty!(), |groups| div![groups.iter().map(|group| {
+                        C!["is-flex", "mb-2"],
+                        IF!(model.share_id.is_none() =>
                             div![
-                                C!("box"),
-                                p![C!["title", "is-6", "has-text-link"], &group.title],
-                                div![group.pictures.as_ref().map_or(empty!(), |pictures| div![
-                                        C!["is-flex", "is-flex-wrap-wrap", "is-justify-content-center"],
-                                        pictures.iter().map(|picture| {
-                                            div![
-                                                C!["mr-1", "album-view-picture"],
-                                                figure![
-                                                    C!["image", "is-128x128", "m-1"],
-                                                    img![attrs!{ At::Src => format!("{THUMB_URI}{}.{}", picture.public_id, picture.format) }]
-                                                ],
-                                                span![picture.caption.clone()],
-                                            ]
-                                        }
-                                    )])]
+                                a![
+                                    C!["button", "is-link", "is-light", "is-small", "mr-2"],
+                                    attrs! { At::Href => format!("/{LK_EDIT_ALBUM}/{}", model.album.id) },
+                                    span![C!("icon"), i![C!("ion-edit")]],
+                                    span![TITLE_EDIT_ALBUM],
+                                ],
+                                button![
+                                    C!["button", "is-link", "is-light", "is-small", "mr-2"],
+                                    span![C!("icon"), i![C!("ion-android-share-alt")]],
+                                    span!["Share"],
+                                    ev(Ev::Click, |_| Msg::Share),
+                                ]
                             ]
-                        })])
-                ]
-            } else {
-                view_progress()
-            }
-        ]
+                        ),
+                        a![
+                            C!["button", "is-primary", "is-light", "is-small"],
+                            attrs! { At::Href => lk_slideshow },
+                            span![C!("icon"), i![C!("ion-play")]],
+                            span![TITLE_SLIDESHOW],
+                        ],
+                        IF!(model.share_id.is_some() =>
+                            button![
+                                C!["button", "is-danger", "is-light", "is-small", "ml-2"],
+                                span![C!("icon"), i![C!("ion-heart")]],
+                                span!["Like"],
+                                attrs! { At::Disabled => model.is_liked.as_at_value() },
+                                ev(Ev::Click, |_| Msg::AddViewLike(false, true)),
+                            ]
+                        )
+                    ]
+                ],
+                model
+                    .album
+                    .groups
+                    .as_ref()
+                    .map_or(empty!(), |groups| div![groups.iter().map(|group| {
+                        div![
+                            C!("box"),
+                            p![C!["title", "is-6", "has-text-link"], &group.title],
+                            div![group.pictures.as_ref().map_or(empty!(), |pictures| div![
+                                    C!["is-flex", "is-flex-wrap-wrap", "is-justify-content-center"],
+                                    pictures.iter().map(|picture| {
+                                        let pic = picture.clone();
+                                        div![
+                                            C!["mr-1", "album-view-pic"],
+                                            figure![
+                                                C!["image", "is-128x128", "m-1"],
+                                                img![attrs!{ At::Src => format!("{THUMB_URI}{}.{}", picture.public_id, picture.format) }],
+                                                ev(Ev::Click, |_| Msg::ShowPicture(pic)),
+                                            ],
+                                            span![picture.caption.clone()],
+                                        ]
+                                    }
+                                )])]
+                        ]
+                    })])
+        ], |picture| img![
+            C!["album-view-fullpic"],
+                attrs! { At::Src => format!("{IMG_URI}{}.{}", picture.public_id, picture.format) },
+                ev(Ev::Click, |_| Msg::HidePicture),
+        ])
+    } else {
+        view_progress()
     }
 }
 
