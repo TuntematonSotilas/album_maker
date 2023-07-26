@@ -13,5 +13,5 @@ FROM nginx:1.23.1 as runner
 WORKDIR /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY index.html ./
-COPY pkg/ ./pkg/ 
-COPY public/ ./public/ 
+COPY ./pkg/ ./pkg/ 
+COPY ./public/ ./public/ 
