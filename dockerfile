@@ -1,4 +1,4 @@
-FROM rust:1.69.0 as builder
+FROM rust:1.71.0 as builder
 WORKDIR /app
 COPY Cargo.toml ./
 COPY Makefile.toml ./ 

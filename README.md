@@ -32,7 +32,6 @@ Run `cargo make verify` in your terminal to format and lint the code.
 1. Build : `docker build . -t tuntematonsotilas/gbt:amaker`
 1. Run : `docker run -p 8080:80 tuntematonsotilas/gbt:amaker`
 1. Test : http://localhost:8080
-1. Push `docker push tuntematonsotilas/gbt:amaker`
 
 ## Deploy to Koyeb 
 Initialize the App
