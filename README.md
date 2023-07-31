@@ -29,20 +29,6 @@ Run `cargo make verify` in your terminal to format and lint the code.
 
 ## Docker
 
-1. Build : `docker build . -t tuntematonsotilas/gbt:amaker`
-1. Run : `docker run -p 8080:80 tuntematonsotilas/gbt:amaker`
+1. Build : `docker build . -t amaker` 
+1. Run : `docker run -p 8080:80 amaker`
 1. Test : http://localhost:8080
-
-## Deploy to Koyeb 
-Initialize the App
-```sh
-koyeb app init amaker --git-docker-dockerfile "https://github.com/TuntematonSotilas/album_maker/blob/master/dockerfile"
-```
-Get Services
-```sh
-koyeb services list
-```
-Update Service
-```sh
-koyeb services update 1b68cac4 --git-docker-dockerfile "https://github.com/TuntematonSotilas/album_maker/blob/master/dockerfile"
-```
